@@ -185,7 +185,7 @@ export function LivingWorld({ universe }: { universe: NodeUniverse }) {
         ) : null}
 
         {tab === "studio" ? (
-          <StudioPanel slug={node.slug} tabs={dockTabs} staff={staff} files={files} />
+          <StudioPanel slug={node.slug} tabs={dockTabs} staff={staff} files={files} cck={cck} />
         ) : null}
       </div>
 

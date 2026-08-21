@@ -199,6 +199,27 @@ export type Playlist = {
   items: { id: string; title: string; kind: string; duration: string }[];
 };
 
+/** Quête Vera : une situation, deux choix — pas un champ CV. */
+export type Quest = {
+  id: string;
+  title: string;
+  skill: string;
+  prompt: string;
+  optionA: string;
+  optionB: string;
+  body: string;
+};
+
+/** Case du salon 2D (Gather-like). kind = lobby | stand | terminal | puzzle */
+export type SalonRoom = {
+  id: string;
+  title: string;
+  kind: string;
+  body: string;
+  x: number;
+  y: number;
+};
+
 export type NodeUniverse = NodeBundle & {
   folders: DriveFolder[];
   files: DriveFile[];
@@ -214,6 +235,8 @@ export type NodeUniverse = NodeBundle & {
   products: ShopProduct[];
   playlists: Playlist[];
   heroUrl: string;
+  quests: Quest[];
+  rooms: SalonRoom[];
 };
 
 

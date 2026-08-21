@@ -3,6 +3,7 @@ import { LivingWorld } from "@/components/living-world";
 import { NodeJsonLd } from "@/components/json-ld";
 import { VeraHouse } from "@/components/vera-house";
 import { getNodeUniverse } from "@/lib/graph-api";
+import { seoForNode } from "@/lib/seo";
 import { skinOf } from "@/lib/skins";
 
 export const Route = createFileRoute("/n/$slug")({
@@ -14,6 +15,24 @@ export const Route = createFileRoute("/n/$slug")({
     if (!universe) throw notFound();
     return universe;
   },
+  head: ({ loaderData }) => {
+    if (!loaderData) return {};
+    const s = seoForNode(loaderData.node);
+    return {
+      meta: [
+        { title: s.title },
+        { name: "description", content: s.description },
+        { name: "keywords", content: s.keywords },
+        { name: "robots", content: "index,follow,max-image-preview:large" },
+        { property: "og:title", content: s.title },
+        { property: "og:description", content: s.description },
+        { property: "og:type", content: s.ogType },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:title", content: s.title },
+      ],
+      links: [{ rel: "canonical", href: s.canonical }],
+    };
+  },
   component: NodePage,
 });
 
@@ -22,7 +41,7 @@ function NodePage() {
   const skin = skinOf(universe.node);
   return (
     <>
-      <NodeJsonLd node={universe.node} childNodes={universe.children} media={universe.media} />
+      <NodeJsonLd universe={universe} />
       {skin === "vera" ? <VeraHouse universe={universe} /> : <LivingWorld universe={universe} />}
     </>
   );

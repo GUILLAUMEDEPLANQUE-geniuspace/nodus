@@ -30,6 +30,8 @@ import {
   type NodeKind,
   type NodeUniverse,
   type Playlist,
+  type Quest,
+  type SalonRoom,
   type ShopProduct,
   type StaffMember,
   type Thread,
@@ -403,6 +405,26 @@ export const getNodeUniverse = createServerFn({ method: "GET" })
       `select hero_url from node_theme where node_id = $1`,
       [bundle.node.id],
     );
+    const quests = await sql.query<{
+      id: string;
+      title: string;
+      skill: string;
+      prompt: string;
+      option_a: string;
+      option_b: string;
+      body: string;
+    }>(
+      `select id, title, skill, prompt, option_a, option_b, body from quests where node_id = $1 order by sort_order`,
+      [bundle.node.id],
+    );
+    const rooms = await sql.query<{
+      id: string;
+      title: string;
+      kind: string;
+      body: string;
+      grid_x: number;
+      grid_y: number;
+    }>(`select id, title, kind, body, grid_x, grid_y from salon_rooms where node_id = $1`, [bundle.node.id]);
     return {
       ...bundle,
       folders: folders.map(
@@ -486,6 +508,27 @@ export const getNodeUniverse = createServerFn({ method: "GET" })
         }),
       ),
       heroUrl: theme[0]?.hero_url ?? "",
+      quests: quests.map(
+        (q): Quest => ({
+          id: q.id,
+          title: q.title,
+          skill: q.skill,
+          prompt: q.prompt,
+          optionA: q.option_a,
+          optionB: q.option_b,
+          body: q.body,
+        }),
+      ),
+      rooms: rooms.map(
+        (r): SalonRoom => ({
+          id: r.id,
+          title: r.title,
+          kind: r.kind,
+          body: r.body,
+          x: Number(r.grid_x),
+          y: Number(r.grid_y),
+        }),
+      ),
     };
   });
 
@@ -677,5 +720,40 @@ export const addPlaylist = createServerFn({ method: "POST" })
     ]);
     return { id };
   });
+
+/** Builder CCK : pose un champ typé sur node / thread / product / media. */
+export const addCckField = createServerFn({ method: "POST" })
+  .middleware([authMiddleware])
+  .validator(
+    z.object({
+      slug: z.string().min(1),
+      label: z.string().trim().min(2).max(40),
+      key: z.string().trim().min(2).max(40),
+      fieldType: z.enum(["text", "html", "choice", "media", "relation", "scale"]),
+      targetKind: z.enum(["node", "thread", "product", "media"]),
+      targetId: z.string().trim().max(80).optional().default(""),
+      value: z.string().trim().max(400).optional().default(""),
+    }),
+  )
+  .handler(async ({ data }) => {
+    const sql = await getSql();
+    const found = await sql.query<DbNode>(`select ${nodeSelect} from nodes where slug = $1`, [data.slug]);
+    const node = found[0];
+    if (!node) throw new Error("Univers introuvable");
+    const id = crypto.randomUUID();
+    await sql.query(
+      `insert into cck_fields (id, node_id, field_key, label, value, sort_order, field_type, target_kind, target_id)
+       values ($1, $2, $3, $4, $5, 50, $6, $7, $8)`,
+      [id, node.id, data.key, data.label, data.value ?? "", data.fieldType, data.targetKind, data.targetId ?? ""],
+    );
+    return { id };
+  });
+
+export const listNodeSlugs = createServerFn({ method: "GET" }).handler(async () => {
+  const sql = await getSql();
+  return sql.query<{ slug: string; kind: string; title: string }>(
+    `select slug, kind, title from nodes order by featured desc, title`,
+  );
+});
 
 

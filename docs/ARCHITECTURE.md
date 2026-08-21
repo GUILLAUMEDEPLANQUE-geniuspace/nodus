@@ -26,7 +26,11 @@ maison-orion           --parent_of-->  lead-game-designer
 | `src/lib/skins.ts` | Quelle peau (living / vera / cinema) selon le kind |
 | `src/components/living-world.tsx` | Lieu de vie fans |
 | `src/components/vera-house.tsx` | Job board recruteur |
-| `src/components/universe-dock.tsx` | Dock bas, onglets **data-driven** |
+| `src/components/cck-builder.tsx` | Builder visuel de champs |
+| `src/components/salon-map.tsx` | Salon 2D recruteur (Gather-like) |
+| `src/components/quest-path.tsx` | Quêtes à la place du CV |
+| `src/components/skill-tree.tsx` | Arbre de talents / offres |
+| `src/lib/seo.ts` | Title, description, JSON-LD par Node |
 | `migrations/*.sql` | Schéma + seed. Ne jamais editer une migration déjà appliquée : en ajouter une. |
 
 ## Peaux

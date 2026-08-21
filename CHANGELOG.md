@@ -2,6 +2,25 @@
 
 Format : ce qui est **dans le code**, pas la vision PDF.
 
+## 0.5.0 — 2026-08-21
+
+### Builder CCK visuel
+- Palette de types (`text`, `html`, `choice`, `media`, `relation`, `scale`)
+- Cible `node | thread | product | media`
+- Preview live (`CckBuilder` dans le Studio)
+- API `addCckField`
+
+### Vera expérientiel (pas un job board)
+- **Salon spatial 2D** (Gather/Topia) : avatar, stands, visio de proximité
+- **Terminal Foo** : tapez `hire` pour déverrouiller
+- **Arbre de talents** : offres en constellation RPG
+- **Quêtes** à la place du CV (situation + 2 choix)
+
+### SEO masterclass par Node
+- Title / description / canonical / OG uniques (`src/lib/seo.ts`)
+- JSON-LD `@graph` : JobPosting, Product, Article, TVSeries, Person, Breadcrumb
+- `/sitemap.xml` + `robots.txt`
+
 ## 0.4.0 — 2026-08-21
 
 ### CCK étendu (blogs, boutique, vidéo, jobs)

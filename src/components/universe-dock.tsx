@@ -10,7 +10,9 @@ import {
   Clapperboard,
   Compass,
   FolderOpen,
+  GitBranch,
   ListChecks,
+  Map,
   MessagesSquare,
   Newspaper,
   Plus,
@@ -36,6 +38,8 @@ const ICONS: Record<string, typeof Compass> = {
   list: ListChecks,
   folder: FolderOpen,
   sparkles: Sparkles,
+  map: Map,
+  tree: GitBranch,
 };
 
 export function UniverseDock({

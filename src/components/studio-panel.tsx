@@ -3,7 +3,8 @@
  * Chaque univers (manga, recruteur, série, business) se configure ici — pas un thème figé.
  */
 import { useState } from "react";
-import type { DriveFile, StaffMember, UniverseTab } from "@/lib/graph";
+import { CckBuilder } from "@/components/cck-builder";
+import type { CckField, DriveFile, StaffMember, UniverseTab } from "@/lib/graph";
 import { addStaffMember, addUniverseTab } from "@/lib/graph-api";
 
 export function StudioPanel({
@@ -11,11 +12,13 @@ export function StudioPanel({
   tabs,
   staff,
   files,
+  cck = [],
 }: {
   slug: string;
   tabs: UniverseTab[];
   staff: StaffMember[];
   files: DriveFile[];
+  cck?: CckField[];
 }) {
   const [label, setLabel] = useState("");
   const [name, setName] = useState("");
@@ -137,6 +140,7 @@ export function StudioPanel({
           ) : null}
         </ul>
       </section>
+      <CckBuilder slug={slug} fields={cck} />
     </div>
   );
 }

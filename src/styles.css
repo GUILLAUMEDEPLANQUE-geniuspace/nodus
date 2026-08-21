@@ -148,3 +148,12 @@
   --realm-glow: rgba(160, 120, 80, 0.28);
   --realm-deep: #0c0a0c;
 }
+
+.salon-grid {
+  background-image:
+    linear-gradient(to right, rgba(201, 163, 106, 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(201, 163, 106, 0.08) 1px, transparent 1px);
+  background-size: 6.25% 10%;
+  min-height: 280px;
+  background-color: var(--color-surface);
+}

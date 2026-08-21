@@ -4,8 +4,12 @@
  */
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { CckPanel } from "@/components/cck-panel";
 import { DriveBrowser } from "@/components/drive-browser";
 import { ForumBoard } from "@/components/forum-board";
+import { QuestPath } from "@/components/quest-path";
+import { SalonMap } from "@/components/salon-map";
+import { SkillTree } from "@/components/skill-tree";
 import { StudioPanel } from "@/components/studio-panel";
 import { UniverseDock } from "@/components/universe-dock";
 import { KIND_LABEL, type NodeUniverse, type UniverseTab } from "@/lib/graph";
@@ -13,15 +17,17 @@ import { heroOf } from "@/lib/skins";
 
 const VERA_TABS: UniverseTab[] = [
   { id: "maison", key: "maison", label: "Maison", icon: "building" },
+  { id: "salon", key: "salon", label: "Salon", icon: "map" },
+  { id: "arbre", key: "arbre", label: "Arbre", icon: "tree" },
   { id: "offres", key: "offres", label: "Offres", icon: "briefcase" },
-  { id: "epreuve", key: "epreuve", label: "Épreuve", icon: "list" },
+  { id: "epreuve", key: "epreuve", label: "Quêtes", icon: "list" },
   { id: "drive", key: "drive", label: "Drive", icon: "folder" },
   { id: "academie", key: "academie", label: "Académie", icon: "book" },
   { id: "forum", key: "forum", label: "Forum", icon: "messages" },
 ];
 
 export function VeraHouse({ universe }: { universe: NodeUniverse }) {
-  const { node, children, threads, messages, files, folders, cck, wiki, tabs, staff, categories, replies } =
+  const { node, children, threads, messages, files, folders, cck, wiki, tabs, staff, categories, replies, quests, rooms } =
     universe;
   const dockTabs = tabs.length ? tabs : VERA_TABS;
   const [tab, setTab] = useState(node.kind === "job" ? "offres" : "maison");
@@ -73,25 +79,21 @@ export function VeraHouse({ universe }: { universe: NodeUniverse }) {
           </div>
         ) : null}
 
+        {tab === "salon" ? <SalonMap rooms={rooms} /> : null}
+
+        {tab === "arbre" ? <SkillTree jobs={jobs} root={node} /> : null}
+
         {tab === "offres" ? (
-          <div className="space-y-4">
-            <h2 className="font-display text-3xl">Offres</h2>
-            <p className="text-sm text-muted">
-              CCK JoomCCK : rémunération, remote, stack, épreuve. Pas une annonce LinkedIn.
-            </p>
+          <div className="space-y-8">
+            <SkillTree jobs={jobs} root={node} />
             {(jobs.length ? jobs : [node]).map((j) => (
               <article key={j.id} className="rounded-3xl bg-surface p-6 shadow-[var(--shadow-border)]">
                 <p className="text-[11px] tracking-[0.16em] text-primary uppercase">{KIND_LABEL[j.kind]}</p>
                 <h3 className="font-display text-3xl">{j.title}</h3>
                 <p className="mt-2 text-sm text-muted">{j.summary}</p>
-                <dl className="mt-4 grid gap-3 sm:grid-cols-2">
-                  {(j.id === node.id ? cck : cck.filter((f) => f.id.includes("job"))).map((f) => (
-                    <div key={f.id} className="rounded-xl bg-surface-2 p-3">
-                      <dt className="text-[11px] tracking-[0.14em] text-primary uppercase">{f.label}</dt>
-                      <dd className="mt-1 text-sm">{f.value}</dd>
-                    </div>
-                  ))}
-                </dl>
+                <div className="mt-4">
+                  <CckPanel fields={j.id === node.id ? cck : cck.filter((f) => f.targetKind === "node")} />
+                </div>
                 {j.slug !== node.slug ? (
                   <Link
                     to="/n/$slug"
@@ -99,7 +101,7 @@ export function VeraHouse({ universe }: { universe: NodeUniverse }) {
                     search={{ view: "fiche" }}
                     className="mt-4 inline-flex h-11 items-center rounded-full bg-primary px-4 text-sm font-medium text-primary-fg"
                   >
-                    Ouvrir l'offre
+                    Ouvrir l'épreuve
                   </Link>
                 ) : null}
               </article>
@@ -107,27 +109,7 @@ export function VeraHouse({ universe }: { universe: NodeUniverse }) {
           </div>
         ) : null}
 
-        {tab === "epreuve" ? (
-          <div>
-            <h2 className="font-display text-3xl">Épreuve guidée · 7 étapes</h2>
-            <p className="mt-2 max-w-xl text-sm text-muted">
-              Comme Vera : le recruteur pose un parcours, le CCK se remplit, le Drive porte les briefs.
-            </p>
-            <ol className="mt-6 space-y-3">
-              {["Brief", "GDD", "Économie", "Live-ops", "Pitch", "Jury", "Offre"].map((step, i) => (
-                <li key={step} className="flex gap-4 rounded-2xl bg-surface p-4 shadow-[var(--shadow-border)]">
-                  <span className="grid size-10 place-items-center rounded-full bg-primary text-sm font-medium text-primary-fg">
-                    {i + 1}
-                  </span>
-                  <div>
-                    <p className="font-display text-xl">{step}</p>
-                    <p className="text-sm text-muted">Étape écrite dans le CCK · livrable dans le Drive.</p>
-                  </div>
-                </li>
-              ))}
-            </ol>
-          </div>
-        ) : null}
+        {tab === "epreuve" ? <QuestPath quests={quests} /> : null}
 
         {tab === "drive" ? <DriveBrowser folders={folders} files={files} slug={node.slug} /> : null}
 
@@ -157,7 +139,7 @@ export function VeraHouse({ universe }: { universe: NodeUniverse }) {
         ) : null}
 
         {tab === "studio" ? (
-          <StudioPanel slug={node.slug} tabs={dockTabs} staff={staff} files={files} />
+          <StudioPanel slug={node.slug} tabs={dockTabs} staff={staff} files={files} cck={cck} />
         ) : null}
       </div>
 

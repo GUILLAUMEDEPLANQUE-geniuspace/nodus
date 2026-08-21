@@ -12,3 +12,6 @@ Tu travailles sur NODUS. Avant de coder :
 8. Auth : lectures publiques, écritures `authMiddleware`. En prod, `node_staff`.
 9. Parent/enfant est le cœur. Ne pas aplatir le graphe en tags.
 10. Le dock reste **en bas** et suit le scroll. Pas de mega-menu haut.
+11. SEO : chaque Node passe par `seoForNode` + `jsonLdGraph`. Ne pas laisser le title global "NODUS" sur une fiche.
+12. Recrutement : quêtes + salon + skill tree. Ne jamais revenir à une liste d'annonces LinkedIn.
+13. CCK builder : `CckBuilder` dans le Studio. Pas de colonne SQL métier.

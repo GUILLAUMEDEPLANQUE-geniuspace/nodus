@@ -2,6 +2,16 @@
 
 Inspiré de JoomCCK et de Vera (`GUILLAUMEDEPLANQUE-geniuspace/vera`).
 
+## Builder visuel
+
+`src/components/cck-builder.tsx` — dans le **Studio** de chaque univers.
+
+1. Cliquer un type de champ
+2. Nommer, poser une valeur, choisir la cible (node / thread / product / media)
+3. Preview live via `CckPanel`
+
+Ce n’est **pas** encore un drag-and-drop pixel-perfect type Joomla admin, mais c’est un builder fonctionnel : les champs créés sont persistés (`addCckField`) et rendus partout.
+
 ## Est-ce implanté ?
 
 **Oui, en couche données + rendu**, sur plusieurs métiers :
