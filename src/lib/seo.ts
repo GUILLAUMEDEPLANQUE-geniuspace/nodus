@@ -137,6 +137,16 @@ export function jsonLdGraph(universe: NodeUniverse) {
 
   for (const p of products) graph.push(productLd(p, node));
   for (const w of wiki) graph.push(articleLd(w, node));
+  for (const t of threads.filter((x) => x.kind === "forum")) {
+    graph.push({
+      "@type": "DiscussionForumPosting",
+      headline: t.title,
+      articleBody: t.body,
+      author: { "@type": "Person", name: t.author },
+      url: `/n/${node.slug}/t/${t.id}`,
+      isPartOf: url,
+    });
+  }
   for (const t of threads.filter((x) => x.kind === "blog")) {
     graph.push({
       "@type": "BlogPosting",

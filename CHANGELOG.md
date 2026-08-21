@@ -2,6 +2,19 @@
 
 Format : ce qui est **dans le code**, pas la vision PDF.
 
+## 0.6.0 — 2026-08-21
+
+### Holo-Forum (Scroll & Dive)
+- Cartes pleine hauteur, snap vertical (pas une liste de textes)
+- Dive : panneau Legacy **SEO** vs **Live** (Telegram)
+- Tags produits / reliques dans la saisie
+- Éclatement sémantique : « Détacher en nouveau sujet » → URL unique
+- Route `/n/:slug/t/:tid` + JSON-LD `DiscussionForumPosting` + sitemap
+
+### Thème dark / light
+- `data-theme` + tokens or/encre (pas de 3e couleur)
+- Toggle dans le shell, persisté `localStorage`
+
 ## 0.5.0 — 2026-08-21
 
 ### Builder CCK visuel

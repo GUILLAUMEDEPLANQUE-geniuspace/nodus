@@ -35,7 +35,7 @@ export function ForumBoard({
     try {
       const res = await postThread({ data: { slug, title: title.trim(), body: body.trim() } });
       setLocal((cur) => [
-        { id: res.id, kind: "forum", title: title.trim(), author: res.author, body: body.trim(), replies: 0 },
+        { id: res.id, kind: "forum", title: title.trim(), author: res.author, body: body.trim(), replies: 0, cover: "", views: 1, fires: 0 },
         ...cur,
       ]);
       setOpenId(res.id);

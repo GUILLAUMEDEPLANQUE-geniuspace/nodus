@@ -25,6 +25,7 @@ import {
   type GraphMedia,
   type GraphNode,
   type GuildMessage,
+  type LiveLine,
   type Neighbor,
   type NodeBundle,
   type NodeKind,
@@ -351,7 +352,17 @@ export const getNodeUniverse = createServerFn({ method: "GET" })
       author: string;
       body: string;
       replies: number;
-    }>(`select id, kind, title, author, body, replies from threads where node_id = $1`, [bundle.node.id]);
+      cover: string;
+      views: number;
+      fires: number;
+    }>(
+      `select id, kind, title, author, body, replies,
+              coalesce(cover, '') as cover,
+              coalesce(views, 0) as views,
+              coalesce(fires, 0) as fires
+       from threads where node_id = $1`,
+      [bundle.node.id],
+    );
     const messages = await sql.query<{ id: string; author: string; body: string }>(
       `select id, author, body from guild_messages where node_id = $1`,
       [bundle.node.id],
@@ -386,6 +397,11 @@ export const getNodeUniverse = createServerFn({ method: "GET" })
     );
     const replies = await sql.query<{ id: string; thread_id: string; author: string; body: string }>(
       `select id, thread_id, author, body from forum_replies where thread_id in (select id from threads where node_id = $1)`,
+      [bundle.node.id],
+    );
+    const live = await sql.query<{ id: string; thread_id: string; author: string; body: string; kind: string }>(
+      `select id, thread_id, author, body, kind from forum_live
+       where thread_id in (select id from threads where node_id = $1)`,
       [bundle.node.id],
     );
     const products = await sql.query<{ id: string; title: string; price: string; summary: string; kind: string }>(
@@ -466,6 +482,9 @@ export const getNodeUniverse = createServerFn({ method: "GET" })
           author: t.author,
           body: t.body,
           replies: Number(t.replies),
+          cover: t.cover,
+          views: Number(t.views),
+          fires: Number(t.fires),
         }),
       ),
       messages: messages.map((m): GuildMessage => ({ id: m.id, author: m.author, body: m.body })),
@@ -487,6 +506,15 @@ export const getNodeUniverse = createServerFn({ method: "GET" })
       categories: categories.map((c): ForumCategory => ({ id: c.id, title: c.title, body: c.body })),
       replies: replies.map(
         (r): ForumReply => ({ id: r.id, threadId: r.thread_id, author: r.author, body: r.body }),
+      ),
+      live: live.map(
+        (l): LiveLine => ({
+          id: l.id,
+          threadId: l.thread_id,
+          author: l.author,
+          body: l.body,
+          kind: l.kind,
+        }),
       ),
       products: products.map(
         (p): ShopProduct => ({
@@ -755,5 +783,59 @@ export const listNodeSlugs = createServerFn({ method: "GET" }).handler(async () 
     `select slug, kind, title from nodes order by featured desc, title`,
   );
 });
+
+export const listForumTopics = createServerFn({ method: "GET" }).handler(async () => {
+  const sql = await getSql();
+  return sql.query<{ slug: string; id: string; title: string }>(
+    `select n.slug, t.id, t.title from threads t join nodes n on n.id = t.node_id where t.kind = 'forum'`,
+  );
+});
+
+export const postLive = createServerFn({ method: "POST" })
+  .middleware([authMiddleware])
+  .validator(
+    z.object({
+      threadId: z.string().min(1),
+      body: z.string().trim().min(1).max(400),
+      kind: z.enum(["text", "video", "product", "node"]).optional().default("text"),
+    }),
+  )
+  .handler(async ({ data, context }) => {
+    const sql = await getSql();
+    const id = crypto.randomUUID();
+    const author = context.userId.slice(0, 8);
+    await sql.query(`insert into forum_live (id, thread_id, author, body, kind) values ($1, $2, $3, $4, $5)`, [
+      id,
+      data.threadId,
+      author,
+      data.body,
+      data.kind ?? "text",
+    ]);
+    return { id, author };
+  });
+
+/** Éclatement sémantique : une réponse Legacy devient un nouveau sujet parent (URL SEO). */
+export const promoteReply = createServerFn({ method: "POST" })
+  .middleware([authMiddleware])
+  .validator(
+    z.object({
+      slug: z.string().min(1),
+      title: z.string().trim().min(3).max(140),
+      body: z.string().trim().min(2).max(2000),
+    }),
+  )
+  .handler(async ({ data, context }) => {
+    const sql = await getSql();
+    const found = await sql.query<DbNode>(`select ${nodeSelect} from nodes where slug = $1`, [data.slug]);
+    const node = found[0];
+    if (!node) throw new Error("Univers introuvable");
+    const id = crypto.randomUUID();
+    await sql.query(
+      `insert into threads (id, node_id, kind, title, author, body, replies, cover, views, fires)
+       values ($1, $2, 'forum', $3, $4, $5, 0, '', 1, 0)`,
+      [id, node.id, data.title, context.userId.slice(0, 8), data.body],
+    );
+    return { id };
+  });
 
 

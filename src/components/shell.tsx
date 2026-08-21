@@ -3,6 +3,7 @@ import { Compass, Plus, Search } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { SignedIn, SignedOut, UserButton } from "@/lib/auth/gates";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
+import { ThemeToggle } from "@/lib/theme";
 
 export function Shell({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
@@ -75,6 +76,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
               <Plus className="size-4" />
               <span className="hidden sm:inline">Créer</span>
             </Link>
+            <ThemeToggle />
             <div className="ml-1 flex h-11 min-w-11 items-center justify-center">
               {isPending ? (
                 <div className="size-8 animate-pulse rounded-full bg-surface-2" />

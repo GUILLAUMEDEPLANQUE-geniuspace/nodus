@@ -7,7 +7,7 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CckPanel } from "@/components/cck-panel";
 import { DriveBrowser } from "@/components/drive-browser";
-import { ForumBoard } from "@/components/forum-board";
+import { HoloForum } from "@/components/holo-forum";
 import { PlaylistDeck } from "@/components/playlist-deck";
 import { RealmCanvas } from "@/components/realm-canvas";
 import { ShopFloor } from "@/components/shop-floor";
@@ -47,6 +47,7 @@ export function LivingWorld({ universe }: { universe: NodeUniverse }) {
     staff,
     categories,
     replies,
+    live,
     products,
     playlists,
     heroUrl,
@@ -82,6 +83,17 @@ export function LivingWorld({ universe }: { universe: NodeUniverse }) {
 
   return (
     <div className="pb-28">
+      {tab === "forum" ? (
+        <HoloForum
+          slug={node.slug}
+          threads={threads}
+          replies={replies}
+          live={live}
+          products={products}
+          onPosted={ping}
+        />
+      ) : (
+        <>
       <section className="relative h-[78dvh] min-h-[480px] overflow-hidden">
         <img src={hero} alt="" className="absolute inset-0 size-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-bg via-bg/40 to-bg/15" />
@@ -145,16 +157,6 @@ export function LivingWorld({ universe }: { universe: NodeUniverse }) {
 
         {tab === "personnages" ? <Roster souls={souls.length ? souls : children} /> : null}
 
-        {tab === "forum" ? (
-          <ForumBoard
-            slug={node.slug}
-            threads={forum}
-            categories={categories}
-            replies={replies}
-            onPosted={ping}
-          />
-        ) : null}
-
         {tab === "journal" ? (
           <Feed
             title="Journal"
@@ -188,6 +190,8 @@ export function LivingWorld({ universe }: { universe: NodeUniverse }) {
           <StudioPanel slug={node.slug} tabs={dockTabs} staff={staff} files={files} cck={cck} />
         ) : null}
       </div>
+        </>
+      )}
 
       <UniverseDock
         tabs={dockTabs}

@@ -18,6 +18,7 @@ import { Route as SearchRouteImport } from './routes/search'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as NSlugRouteImport } from './routes/n.$slug'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as NSlugTTidRouteImport } from './routes/n.$slug.t.$tid'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -64,6 +65,11 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const NSlugTTidRoute = NSlugTTidRouteImport.update({
+  id: '/t/$tid',
+  path: '/t/$tid',
+  getParentRoute: () => NSlugRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -73,8 +79,9 @@ export interface FileRoutesByFullPath {
   '/profil': typeof ProfilRoute
   '/search': typeof SearchRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/n/$slug': typeof NSlugRoute
+  '/n/$slug': typeof NSlugRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/n/$slug/t/$tid': typeof NSlugTTidRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -84,8 +91,9 @@ export interface FileRoutesByTo {
   '/profil': typeof ProfilRoute
   '/search': typeof SearchRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/n/$slug': typeof NSlugRoute
+  '/n/$slug': typeof NSlugRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/n/$slug/t/$tid': typeof NSlugTTidRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -96,8 +104,9 @@ export interface FileRoutesById {
   '/profil': typeof ProfilRoute
   '/search': typeof SearchRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/n/$slug': typeof NSlugRoute
+  '/n/$slug': typeof NSlugRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/n/$slug/t/$tid': typeof NSlugTTidRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -111,6 +120,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/n/$slug'
     | '/api/auth/$'
+    | '/n/$slug/t/$tid'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -122,6 +132,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/n/$slug'
     | '/api/auth/$'
+    | '/n/$slug/t/$tid'
   id:
     | '__root__'
     | '/'
@@ -133,6 +144,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/n/$slug'
     | '/api/auth/$'
+    | '/n/$slug/t/$tid'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -143,7 +155,7 @@ export interface RootRouteChildren {
   ProfilRoute: typeof ProfilRoute
   SearchRoute: typeof SearchRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
-  NSlugRoute: typeof NSlugRoute
+  NSlugRoute: typeof NSlugRouteWithChildren
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
@@ -212,8 +224,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/n/$slug/t/$tid': {
+      id: '/n/$slug/t/$tid'
+      path: '/t/$tid'
+      fullPath: '/n/$slug/t/$tid'
+      preLoaderRoute: typeof NSlugTTidRouteImport
+      parentRoute: typeof NSlugRoute
+    }
   }
 }
+
+interface NSlugRouteChildren {
+  NSlugTTidRoute: typeof NSlugTTidRoute
+}
+
+const NSlugRouteChildren: NSlugRouteChildren = {
+  NSlugTTidRoute: NSlugTTidRoute,
+}
+
+const NSlugRouteWithChildren = NSlugRoute._addFileChildren(NSlugRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -223,7 +252,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProfilRoute: ProfilRoute,
   SearchRoute: SearchRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
-  NSlugRoute: NSlugRoute,
+  NSlugRoute: NSlugRouteWithChildren,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport

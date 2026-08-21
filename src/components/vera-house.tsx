@@ -6,7 +6,7 @@ import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { CckPanel } from "@/components/cck-panel";
 import { DriveBrowser } from "@/components/drive-browser";
-import { ForumBoard } from "@/components/forum-board";
+import { HoloForum } from "@/components/holo-forum";
 import { QuestPath } from "@/components/quest-path";
 import { SalonMap } from "@/components/salon-map";
 import { SkillTree } from "@/components/skill-tree";
@@ -27,7 +27,7 @@ const VERA_TABS: UniverseTab[] = [
 ];
 
 export function VeraHouse({ universe }: { universe: NodeUniverse }) {
-  const { node, children, threads, messages, files, folders, cck, wiki, tabs, staff, categories, replies, quests, rooms } =
+  const { node, children, threads, messages, files, folders, cck, wiki, tabs, staff, categories, replies, live, quests, rooms, products } =
     universe;
   const dockTabs = tabs.length ? tabs : VERA_TABS;
   const [tab, setTab] = useState(node.kind === "job" ? "offres" : "maison");
@@ -44,6 +44,17 @@ export function VeraHouse({ universe }: { universe: NodeUniverse }) {
 
   return (
     <div className="pb-28">
+      {tab === "forum" ? (
+        <HoloForum
+          slug={node.slug}
+          threads={threads}
+          replies={replies}
+          live={live}
+          products={products}
+          onPosted={ping}
+        />
+      ) : (
+        <>
       <section className="relative h-[52dvh] min-h-[360px] overflow-hidden">
         <img src={hero} alt="" className="absolute inset-0 size-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-bg via-bg/50 to-transparent" />
@@ -128,20 +139,12 @@ export function VeraHouse({ universe }: { universe: NodeUniverse }) {
           </div>
         ) : null}
 
-        {tab === "forum" ? (
-          <ForumBoard
-            slug={node.slug}
-            threads={forum}
-            categories={categories}
-            replies={replies}
-            onPosted={ping}
-          />
-        ) : null}
-
         {tab === "studio" ? (
           <StudioPanel slug={node.slug} tabs={dockTabs} staff={staff} files={files} cck={cck} />
         ) : null}
       </div>
+        </>
+      )}
 
       <UniverseDock
         tabs={dockTabs}

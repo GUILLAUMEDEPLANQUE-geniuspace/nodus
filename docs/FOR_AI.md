@@ -15,3 +15,5 @@ Tu travailles sur NODUS. Avant de coder :
 11. SEO : chaque Node passe par `seoForNode` + `jsonLdGraph`. Ne pas laisser le title global "NODUS" sur une fiche.
 12. Recrutement : quêtes + salon + skill tree. Ne jamais revenir à une liste d'annonces LinkedIn.
 13. CCK builder : `CckBuilder` dans le Studio. Pas de colonne SQL métier.
+14. Forum = `HoloForum` (cartes + Legacy/Live). Pas de liste wpForo. Chaque sujet a `/n/:slug/t/:id`.
+15. Toujours dark **et** light (`ThemeToggle`). Tokens uniquement.

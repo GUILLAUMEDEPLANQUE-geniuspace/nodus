@@ -30,6 +30,11 @@ function Root() {
     <html lang="fr" className="antialiased" suppressHydrationWarning>
       <head>
         <HeadContent />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{var t=localStorage.getItem('nodus-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}`,
+          }}
+        />
       </head>
       <body className="bg-bg text-fg">
         <PreviewHostBridge />

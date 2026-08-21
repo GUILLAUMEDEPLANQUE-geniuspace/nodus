@@ -139,6 +139,17 @@ export type Thread = {
   author: string;
   body: string;
   replies: number;
+  cover: string;
+  views: number;
+  fires: number;
+};
+
+export type LiveLine = {
+  id: string;
+  threadId: string;
+  author: string;
+  body: string;
+  kind: string;
 };
 
 export type GuildMessage = {
@@ -232,6 +243,7 @@ export type NodeUniverse = NodeBundle & {
   staff: StaffMember[];
   categories: ForumCategory[];
   replies: ForumReply[];
+  live: LiveLine[];
   products: ShopProduct[];
   playlists: Playlist[];
   heroUrl: string;
