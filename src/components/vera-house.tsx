@@ -1,0 +1,173 @@
+/**
+ * VeraHouse — peau recruteur (Vera / CCK / épreuve 7 étapes / Drive).
+ * Ne pas réutiliser LivingWorld ici : un ATS n'est pas une guilde manga.
+ */
+import { Link } from "@tanstack/react-router";
+import { useState } from "react";
+import { DriveBrowser } from "@/components/drive-browser";
+import { ForumBoard } from "@/components/forum-board";
+import { StudioPanel } from "@/components/studio-panel";
+import { UniverseDock } from "@/components/universe-dock";
+import { KIND_LABEL, type NodeUniverse, type UniverseTab } from "@/lib/graph";
+import { heroOf } from "@/lib/skins";
+
+const VERA_TABS: UniverseTab[] = [
+  { id: "maison", key: "maison", label: "Maison", icon: "building" },
+  { id: "offres", key: "offres", label: "Offres", icon: "briefcase" },
+  { id: "epreuve", key: "epreuve", label: "Épreuve", icon: "list" },
+  { id: "drive", key: "drive", label: "Drive", icon: "folder" },
+  { id: "academie", key: "academie", label: "Académie", icon: "book" },
+  { id: "forum", key: "forum", label: "Forum", icon: "messages" },
+];
+
+export function VeraHouse({ universe }: { universe: NodeUniverse }) {
+  const { node, children, threads, messages, files, folders, cck, wiki, tabs, staff, categories, replies } =
+    universe;
+  const dockTabs = tabs.length ? tabs : VERA_TABS;
+  const [tab, setTab] = useState(node.kind === "job" ? "offres" : "maison");
+  const [bubbles, setBubbles] = useState<{ id: string; author: string }[]>([]);
+  const jobs = children.filter((c) => c.kind === "job");
+  const hero = heroOf(node);
+  const forum = threads.filter((t) => t.kind === "forum");
+
+  function ping(author: string) {
+    const id = crypto.randomUUID();
+    setBubbles((cur) => [...cur, { id, author }]);
+    window.setTimeout(() => setBubbles((cur) => cur.filter((b) => b.id !== id)), 3200);
+  }
+
+  return (
+    <div className="pb-28">
+      <section className="relative h-[52dvh] min-h-[360px] overflow-hidden">
+        <img src={hero} alt="" className="absolute inset-0 size-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-t from-bg via-bg/50 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 mx-auto max-w-6xl px-4 pb-8 sm:px-6">
+          <p className="text-xs tracking-[0.2em] text-primary uppercase">Maison de recrutement</p>
+          <h1 className="mt-2 font-display text-5xl sm:text-6xl">{node.title}</h1>
+          <p className="mt-2 max-w-xl text-sm text-fg/90">{node.subtitle}</p>
+        </div>
+      </section>
+
+      <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+        {tab === "maison" ? (
+          <div className="grid gap-8 lg:grid-cols-[1fr_280px]">
+            <div>
+              <p className="max-w-2xl text-lg leading-relaxed">{node.summary}</p>
+              <p className="mt-4 max-w-2xl text-sm text-muted">{node.body}</p>
+              {wiki.map((w) => (
+                <article key={w.id} className="mt-6 rounded-2xl bg-surface p-5 shadow-[var(--shadow-border)]">
+                  <h3 className="font-display text-2xl">{w.title}</h3>
+                  <p className="mt-2 text-sm text-muted">{w.body}</p>
+                </article>
+              ))}
+            </div>
+            <aside className="space-y-3">
+              <p className="text-[11px] tracking-[0.16em] text-primary uppercase">Canal maison</p>
+              {messages.map((m) => (
+                <p key={m.id} className="rounded-xl bg-surface p-3 text-sm">
+                  <span className="text-primary">{m.author} · </span>
+                  {m.body}
+                </p>
+              ))}
+            </aside>
+          </div>
+        ) : null}
+
+        {tab === "offres" ? (
+          <div className="space-y-4">
+            <h2 className="font-display text-3xl">Offres</h2>
+            <p className="text-sm text-muted">
+              CCK JoomCCK : rémunération, remote, stack, épreuve. Pas une annonce LinkedIn.
+            </p>
+            {(jobs.length ? jobs : [node]).map((j) => (
+              <article key={j.id} className="rounded-3xl bg-surface p-6 shadow-[var(--shadow-border)]">
+                <p className="text-[11px] tracking-[0.16em] text-primary uppercase">{KIND_LABEL[j.kind]}</p>
+                <h3 className="font-display text-3xl">{j.title}</h3>
+                <p className="mt-2 text-sm text-muted">{j.summary}</p>
+                <dl className="mt-4 grid gap-3 sm:grid-cols-2">
+                  {(j.id === node.id ? cck : cck.filter((f) => f.id.includes("job"))).map((f) => (
+                    <div key={f.id} className="rounded-xl bg-surface-2 p-3">
+                      <dt className="text-[11px] tracking-[0.14em] text-primary uppercase">{f.label}</dt>
+                      <dd className="mt-1 text-sm">{f.value}</dd>
+                    </div>
+                  ))}
+                </dl>
+                {j.slug !== node.slug ? (
+                  <Link
+                    to="/n/$slug"
+                    params={{ slug: j.slug }}
+                    search={{ view: "fiche" }}
+                    className="mt-4 inline-flex h-11 items-center rounded-full bg-primary px-4 text-sm font-medium text-primary-fg"
+                  >
+                    Ouvrir l'offre
+                  </Link>
+                ) : null}
+              </article>
+            ))}
+          </div>
+        ) : null}
+
+        {tab === "epreuve" ? (
+          <div>
+            <h2 className="font-display text-3xl">Épreuve guidée · 7 étapes</h2>
+            <p className="mt-2 max-w-xl text-sm text-muted">
+              Comme Vera : le recruteur pose un parcours, le CCK se remplit, le Drive porte les briefs.
+            </p>
+            <ol className="mt-6 space-y-3">
+              {["Brief", "GDD", "Économie", "Live-ops", "Pitch", "Jury", "Offre"].map((step, i) => (
+                <li key={step} className="flex gap-4 rounded-2xl bg-surface p-4 shadow-[var(--shadow-border)]">
+                  <span className="grid size-10 place-items-center rounded-full bg-primary text-sm font-medium text-primary-fg">
+                    {i + 1}
+                  </span>
+                  <div>
+                    <p className="font-display text-xl">{step}</p>
+                    <p className="text-sm text-muted">Étape écrite dans le CCK · livrable dans le Drive.</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
+        ) : null}
+
+        {tab === "drive" ? <DriveBrowser folders={folders} files={files} slug={node.slug} /> : null}
+
+        {tab === "academie" ? (
+          <div>
+            <h2 className="font-display text-3xl">Académie</h2>
+            <p className="mt-2 text-sm text-muted">Parcours salariés, inscriptions, même Node que le vivier.</p>
+            <div className="mt-4 space-y-3">
+              {forum.map((t) => (
+                <article key={t.id} className="rounded-2xl bg-surface p-5">
+                  <h3 className="font-display text-2xl">{t.title}</h3>
+                  <p className="mt-2 text-sm text-muted">{t.body}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        {tab === "forum" ? (
+          <ForumBoard
+            slug={node.slug}
+            threads={forum}
+            categories={categories}
+            replies={replies}
+            onPosted={ping}
+          />
+        ) : null}
+
+        {tab === "studio" ? (
+          <StudioPanel slug={node.slug} tabs={dockTabs} staff={staff} files={files} />
+        ) : null}
+      </div>
+
+      <UniverseDock
+        tabs={dockTabs}
+        active={tab}
+        onSelect={setTab}
+        onStudio={() => setTab("studio")}
+        bubbles={bubbles}
+      />
+    </div>
+  );
+}
