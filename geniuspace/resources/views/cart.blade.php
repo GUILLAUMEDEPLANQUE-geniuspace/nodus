@@ -9,7 +9,7 @@
     <p class="card" style="padding:1rem;margin:.4rem 0"><strong>{{ $row['title'] }}</strong> <span class="primary">{{ $row['price'] }}</span></p>
   @empty
     <p class="muted">Vide. Une pièce du Club 205 ?</p>
-    <p><a class="btn" href="/n/club-205/classifieds">Voir les pièces</a></p>
+    <p><a class="btn" href="/n/lumen/boutique_expert">Voir la vitrine Lumen</a></p>
   @endforelse
   @if($cart)
     <form method="post" action="/cart/checkout">@csrf<button class="btn" type="submit">Payer (ledger)</button></form>

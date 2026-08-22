@@ -67,7 +67,7 @@
 @endif
 @yield('content')
 <footer class="wrap muted" style="padding:2rem 1.25rem 6rem;font-size:.8rem">
-  <a href="/n/club-205">Club 205</a> · <a href="/bounties">Quêtes</a> · <a href="/llms.txt">llms.txt</a> · <a href="/n/club-205/sitemap.xml">Sitemap</a> · <a href="/api/v1/g/club-205">Graphe</a>
+  <a href="/n/vera">Vera</a> · <a href="/n/lumen">Lumen</a> · <a href="/create">Créer</a> · <a href="/llms.txt">llms.txt</a>
 </footer>
 </body>
 </html>

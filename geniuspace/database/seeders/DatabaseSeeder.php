@@ -15,5 +15,6 @@ class DatabaseSeeder extends Seeder
         $this->call(MoatSeeder::class);
         $this->call(PilotSeeder::class);
         $this->call(ShowcaseSeeder::class);
+        $this->call(DualWorldsSeeder::class);
     }
 }

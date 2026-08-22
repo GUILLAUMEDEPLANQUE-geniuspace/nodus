@@ -231,5 +231,9 @@ textarea { height: auto; border-radius: 1rem; padding: 0.75rem 1rem; }
 .tpl strong { font-family:var(--display); font-size:1.15rem; }
 .tpl em { font-style:normal; font-size:.78rem; color:var(--muted); }
 .tpl small { font-size:.68rem; letter-spacing:.08em; text-transform:uppercase; color:var(--tpl,#c9a36a); margin-top:auto; }
-.tpl.on { border-color:var(--tpl); box-shadow:0 0 0 1px var(--tpl); }
+.tpl.on { border-color:var(--tpl); box-shadow:0 0 0 2px var(--tpl); transform:translateY(-2px); }
+.pick-bar { position:fixed; left:0; right:0; bottom:0; z-index:70; display:flex; gap:.8rem; align-items:center; padding:.7rem 1rem; background:var(--surface); border-top:1px solid var(--border); }
+.pick-bar img { width:4.5rem; height:2.5rem; object-fit:cover; border-radius:.4rem; }
+.pick-bar p { margin:0; font-size:.8rem; }
+.composer:target { outline:2px solid var(--primary); }
 @media (max-width:700px){ .pulse { grid-template-columns:1fr 1fr; } .tpl-grid { grid-template-columns:1fr 1fr; } }

@@ -2,10 +2,21 @@
 @section('title', $count.' templates d’univers — Geniuspace')
 @section('description', 'Cinquante univers uniques : manga, Vera, jeux, pays, formation, annonces. SEO d’entité, tout customisable.')
 @section('content')
-<main class="wrap" style="padding:2rem 1.25rem 6rem" x-data="{ g: 'Tous', id: '' }">
+<main class="wrap" style="padding:2rem 1.25rem 8rem" x-data="{
+  g: 'Tous',
+  pick: null,
+  choose(t) {
+    this.pick = t;
+    this.$nextTick(() => {
+      const el = document.getElementById('composer');
+      el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      this.$refs.title?.focus();
+    });
+  }
+}">
   <p class="kicker">Création de monde</p>
-  <h1 class="font-display" style="font-size:clamp(2rem,6vw,3.4rem);line-height:.95">{{ $count }} templates.<br>Aucun n’existe ailleurs.</h1>
-  <p class="lede">Pas un thème WordPress. Chaque carte = schéma Google + salles + curseur + magazine. Le contenu, c’est toi.</p>
+  <h1 class="font-display" style="font-size:clamp(2rem,6vw,3.4rem);line-height:.95">Clique un template.<br>Le formulaire s’ouvre.</h1>
+  <p class="lede">Une carte = un moteur (schema + salles + curseur). Tu nommes, tu habilles.</p>
 
   <div class="rel" style="margin:1rem 0;flex-wrap:wrap">
     <button type="button" class="chip" @click="g='Tous'" :class="g==='Tous' && 'primary'">Tous</button>
@@ -19,7 +30,9 @@
       <p class="kicker">{{ $name }}</p>
       <div class="tpl-grid">
         @foreach($list as $t)
-          <button type="button" class="tpl" style="--tpl:{{ $t['primary'] }}" @click="id=@js($t['id'])" :class="id===@js($t['id']) && 'on'">
+          <button type="button" class="tpl" style="--tpl:{{ $t['primary'] }}"
+            @click="choose({id:@js($t['id']), label:@js($t['label']), pitch:@js($t['innovation']), schema:@js($t['schema'])})"
+            :class="pick && pick.id===@js($t['id']) && 'on'">
             <img src="/tpl/{{ $t['id'] }}.svg" alt="{{ $t['label'] }}" width="320" height="180">
             <strong>{{ $t['label'] }}</strong>
             <em>{{ $t['innovation'] }}</em>
@@ -30,14 +43,25 @@
     </section>
   @endforeach
 
-  <form method="post" action="/create" class="mag-box" style="max-width:36rem;margin-top:2rem">
+  <form id="composer" method="post" action="/create" class="mag-box composer" style="max-width:36rem;margin-top:2rem"
+        :style="pick && 'border-color:var(--primary)'">
     @csrf
-    <input type="hidden" name="template" :value="id">
-    <p class="kicker">Tu as choisi : <span x-text="id || 'aucun — club simple'"></span></p>
+    <input type="hidden" name="template" :value="pick ? pick.id : ''">
+    <p class="kicker" x-show="!pick">Clique un template au-dessus — puis nomme ton monde ici.</p>
+    <p class="kicker" x-show="pick" x-cloak>Template · <span x-text="pick && pick.label"></span> · <span x-text="pick && pick.schema"></span></p>
     <label class="muted">Nom du monde</label>
-    <input name="title" required placeholder="Club 205, Maison Orion, Hub One Piece…" style="width:100%;margin:.4rem 0">
-    <textarea name="summary" placeholder="Une phrase. Google la lira." style="width:100%;min-height:4.5rem"></textarea>
-    <button class="btn" type="submit" style="margin-top:.7rem">Créer — puis on habille</button>
+    <input name="title" x-ref="title" required placeholder="Vera Paris, Lumen Atelier…" style="width:100%;margin:.4rem 0">
+    <textarea name="summary" placeholder="Une phrase. Google la lira." :placeholder="pick ? pick.pitch : 'Une phrase. Google la lira.'" style="width:100%;min-height:4.5rem"></textarea>
+    <button class="btn" type="submit" style="margin-top:.7rem">Créer <span x-show="pick" x-cloak>— <span x-text="pick && pick.label"></span></span></button>
   </form>
 </main>
+
+<div class="pick-bar" x-show="pick" x-cloak>
+  <img :src="pick ? '/tpl/'+pick.id+'.svg' : ''" alt="" width="72" height="40">
+  <div>
+    <strong x-text="pick && pick.label"></strong>
+    <p class="muted" x-text="pick && pick.pitch"></p>
+  </div>
+  <a class="btn" href="#composer">Nommer ↓</a>
+</div>
 @endsection

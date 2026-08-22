@@ -410,8 +410,31 @@
 </nav>
 
 @else
-{{-- ========== VERA / ORION ========== --}}
-<section class="hero" style="min-height:48dvh" x-show="tab!=='forum' && tab!=='videos'">
+{{-- VERA SSR : chaque salle est une URL. --}}
+@if($tab === 'forum')
+  @include('partials.holo-forum')
+@elseif($tab === 'videos')
+  <div class="wrap" style="padding:2rem 1.25rem 6rem">
+    <p class="kicker">Entretiens</p>
+    <h1 class="font-display">Holo-fiches épreuve</h1>
+    @forelse($node->media as $m)
+      <a class="card" href="/n/{{ $node->slug }}/v/{{ \Illuminate\Support\Str::slug($m->title) }}" style="display:block;padding:1rem;margin:.5rem 0">
+        <p class="kicker">{{ $m->mode }} · {{ $m->access }}</p>
+        <h3 class="font-display">{{ $m->title }}</h3>
+        <p class="muted">{{ $m->duration }} · {{ $m->transcript }}</p>
+      </a>
+    @empty
+      <p class="muted">Pas encore de vidéo d’épreuve.</p>
+    @endforelse
+  </div>
+@elseif($tab === 'journal')
+  {{-- magazine index is a full page elsewhere; teaser --}}
+  <div class="wrap" style="padding:2rem 1.25rem 6rem">
+    <p class="kicker">Magazine</p>
+    <p><a class="btn" href="/n/{{ $node->slug }}/blog">Ouvrir le magazine</a></p>
+  </div>
+@else
+<section class="hero" style="min-height:48dvh">
     <img class="bg" src="{{ $node->hero }}" alt="">
     <div class="veil"></div>
     <div class="copy wrap">
@@ -420,53 +443,53 @@
         <p>{{ $node->summary }}</p>
     </div>
 </section>
-<div class="wrap" style="padding-top:1.5rem" x-show="tab!=='forum' && tab!=='videos'">
-    <div x-show="tab==='maison'">
-        <p style="max-width:40rem">{{ $node->summary }} Quêtes, pas des CV. Salon, arbre, 7 étapes.</p>
+<div class="wrap" style="padding:1.5rem 1.25rem 6rem">
+    @if($tab==='maison')
+        <p class="lede" style="max-width:40rem">Quêtes, pas des CV. Salon, arbre, 7 étapes, Passport.</p>
         <div class="rel" style="margin-top:1rem">
             @foreach($children as $c)
-                <a class="chip" href="/n/{{ $c->slug }}">{{ $c->title }}</a>
+                <a class="chip" href="/n/{{ $node->slug }}/f/{{ $c->slug }}">{{ $c->title }}</a>
             @endforeach
         </div>
-    </div>
-    <div x-show="tab==='salon'">
+        <p style="margin-top:1.2rem"><a class="btn" href="/n/{{ $node->slug }}/offres">Voir les offres</a>
+           <a class="btn-line" href="/n/{{ $node->slug }}/epreuve">Commencer l’épreuve</a></p>
+    @endif
+    @if($tab==='salon')
         <h2 class="font-display">Salon spatial</h2>
-        <p class="muted">Approchez un stand. (2.5D — pas du 3D lourd.)</p>
+        <p class="muted">Approchez un stand — visio. 2.5D, pas du WebGL lourd.</p>
         <div class="salon">
             <div class="cell">Accueil</div>
-            <div class="cell primary">Stand Orion</div>
+            <div class="cell primary">Stand Vera</div>
             <div class="cell">Café</div>
             <div class="cell">Drive</div>
             <div class="cell">Épreuve</div>
             <div class="cell">Sortie</div>
         </div>
-    </div>
-    <div x-show="tab==='arbre'">
+    @endif
+    @if($tab==='arbre')
         <h2 class="font-display">Arbre de compétences</h2>
         <svg class="tree" viewBox="0 0 320 220">
             <line x1="160" y1="30" x2="80" y2="110" stroke="currentColor" opacity="0.4"/>
             <line x1="160" y1="30" x2="240" y2="110" stroke="currentColor" opacity="0.4"/>
-            <line x1="80" y1="110" x2="80" y2="190" stroke="currentColor" opacity="0.4"/>
-            <line x1="240" y1="110" x2="240" y2="190" stroke="currentColor" opacity="0.4"/>
             <circle cx="160" cy="30" r="18" fill="var(--primary)"/>
             <circle cx="80" cy="110" r="16" fill="var(--surface)" stroke="var(--primary)"/>
             <circle cx="240" cy="110" r="16" fill="var(--surface)" stroke="var(--primary)"/>
-            <circle cx="80" cy="190" r="14" fill="var(--surface-2)"/>
-            <circle cx="240" cy="190" r="14" fill="var(--surface-2)"/>
-            <text x="160" y="34" text-anchor="middle" font-size="8" fill="var(--primary-fg)">Fit</text>
         </svg>
-    </div>
-    <div x-show="tab==='offres'">
-        <h2 class="font-display">Offres</h2>
-        @foreach($children as $c)
-            <a class="card" href="/n/{{ $c->slug }}" style="display:block;padding:1rem;margin:0.5rem 0">
+    @endif
+    @if($tab==='offres')
+        <h2 class="font-display">Offres · JobPosting</h2>
+        @forelse($children as $c)
+            <a class="card" href="/n/{{ $node->slug }}/f/{{ $c->slug }}" style="display:block;padding:1rem;margin:0.5rem 0">
                 <p class="kicker">{{ $c->kind }}</p>
                 <h3 class="font-display">{{ $c->title }}</h3>
                 <p class="muted">{{ $c->summary }}</p>
             </a>
-        @endforeach
-    </div>
-    <div x-show="tab==='epreuve'">
+        @empty
+            <p class="muted">Pas d’offre ouverte.</p>
+        @endforelse
+        <p><a class="btn" href="/n/{{ $node->slug }}/apply">Postuler avec le sac à dos</a></p>
+    @endif
+    @if($tab==='epreuve')
         <h2 class="font-display">Quêtes (pas un CV)</h2>
         @forelse($node->quests as $q)
             <article class="step">
@@ -479,64 +502,24 @@
                 </div>
             </article>
         @empty
-            <p class="muted">Pas d'épreuve.</p>
+            <p class="muted">Pas d’épreuve.</p>
         @endforelse
-    </div>
-    <div x-show="tab==='drive' || tab==='academie'">
-        <h2 class="font-display">{{ $tab === 'academie' ? 'Académie' : 'Drive' }}</h2>
-        @foreach($files as $f)
-            <p class="card" style="padding:0.9rem;margin:0.4rem 0">{{ $f->locked ? '🔒' : '📄' }} {{ $f->title }}</p>
-        @endforeach
+    @endif
+    @if(in_array($tab, ['guilde','guides','academie']))
+        <h2 class="font-display">{{ $tab === 'guilde' ? 'Équipe' : 'Académie' }}</h2>
         @foreach($node->wiki as $w)
-            <article class="card" style="padding:1rem;margin:0.5rem 0"><h3 class="font-display">{{ $w->title }}</h3><p class="muted">{{ $w->body }}</p></article>
-        @endforeach
-    </div>
-</div>
-
-<div x-show="tab==='forum'">
-    <div class="snap">
-        @foreach($forumThreads as $t)
-            <article class="snap-card">
-                <img src="{{ $t->cover ?: $node->hero }}" alt="">
-                <div class="veil"></div>
-                <div class="relative wrap" style="z-index:2">
-                    <p class="kicker">{{ $t->author }}</p>
-                    <h2 class="font-display" style="font-size:2.4rem">{{ $t->title }}</h2>
-                    <p>{{ $t->body }}</p>
-                    <button class="btn" type="button" @click="openId='{{ $t->id }}'">Discuter</button>
-                    <a class="btn-line" href="/n/{{ $node->slug }}/t/{{ $t->id }}">Fiche SEO</a>
-                </div>
+            <article class="card" style="padding:1rem;margin:0.5rem 0">
+                <h3 class="font-display"><a href="/n/{{ $node->slug }}/guide/{{ \Illuminate\Support\Str::slug($w->title) }}">{{ $w->title }}</a></h3>
+                <p>{{ $w->body }}</p>
             </article>
         @endforeach
-    </div>
-    <aside class="dive" x-show="openId" x-cloak>
-        @foreach($forumThreads as $t)
-            <div x-show="openId==='{{ $t->id }}'" style="padding:1rem;overflow:auto">
-                @foreach($replies->get($t->id, collect()) as $r)
-                    <article class="legacy-card"><p class="kicker">{{ $r->author }}</p><p>{{ $r->body }}</p></article>
-                @endforeach
-                <form method="post" action="/n/{{ $node->slug }}/t/{{ $t->id }}/reply">@csrf<input name="body" required placeholder="Legacy…" style="width:100%"></form>
-            </div>
-        @endforeach
-    </aside>
+    @endif
 </div>
-<div class="wrap" x-show="tab==='videos'" style="padding-top:1.5rem">
-    @foreach($node->media as $m)
-        <a class="card" href="/n/{{ $node->slug }}/v/{{ $m->id }}" style="display:block;padding:1rem;margin:0.5rem 0">
-            <p class="kicker">{{ $m->mode }} · entretien</p>
-            <h3 class="font-display">{{ $m->title }}</h3>
-        </a>
-    @endforeach
-</div>
+@endif
 <nav class="dock">
-    <button type="button" :class="tab==='maison' && 'active'" @click="tab='maison'">Maison</button>
-    <button type="button" :class="tab==='salon' && 'active'" @click="tab='salon'">Salon</button>
-    <button type="button" :class="tab==='arbre' && 'active'" @click="tab='arbre'">Arbre</button>
-    <button type="button" :class="tab==='offres' && 'active'" @click="tab='offres'">Offres</button>
-    <button type="button" :class="tab==='epreuve' && 'active'" @click="tab='epreuve'">Quêtes</button>
-    <button type="button" :class="tab==='drive' && 'active'" @click="tab='drive'">Drive</button>
-    <button type="button" :class="tab==='forum' && 'active'" @click="tab='forum'">Forum</button>
-    <button type="button" :class="tab==='videos' && 'active'" @click="tab='videos'">Vidéos</button>
+    @foreach($tabs as $t)
+      <a href="/n/{{ $node->slug }}/{{ $t->key }}" class="{{ $tab === $t->key ? 'active' : '' }}">{{ $t->label }}</a>
+    @endforeach
 </nav>
 @endif
 </div>

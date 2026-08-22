@@ -76,6 +76,11 @@ Catalogue `/create` : manga, Vera, jeux, pays, formation, annonces… Chaque id 
 
 Chaque salle : wow + schema.org. `/n/{slug}/schema.json`, `/studio/{slug}/jsonld`. Miniatures `/tpl/{id}.svg`.
 
+## 2026-08-22 — Vera + Lumen, Club 205 retiré
+
+Templates : clic = sélection + barre + scroll formulaire. Univers complets `/n/vera` (recrutement) et `/n/lumen` (galerie hologramme).
+
+
 
 
 
