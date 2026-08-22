@@ -34,21 +34,26 @@
       </div>
       @foreach($groups as $g => $rooms)
         <p class="primary" style="margin:1.1rem 0 .4rem">{{ $g }}</p>
-        @foreach($rooms as $key => [$label, $hint])
-          @php $row = $chosen[$key] ?? null; @endphp
+        @foreach($rooms as $key => $r)
+          @php $row = $chosen[$key] ?? null; $ex = json_encode(\App\Support\RoomSchema::example($key, $node), JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT); @endphp
           <div class="card" style="padding:.75rem;margin:.4rem 0">
             <label style="cursor:pointer;display:block">
               <input type="checkbox" name="rooms[]" value="{{ $key }}" {{ $row || in_array($key, ['forum','personnages','videos']) ? 'checked' : '' }}>
-              <strong>{{ $label }}</strong>
-              <span class="muted"> — {{ $hint }}</span>
+              <strong>{{ $r['label'] }}</strong>
+              <span class="muted"> — {{ $r['hint'] }}</span>
             </label>
-            <button class="btn-ghost" type="button" style="font-size:.75rem" @click="open['{{ $key }}']=!open['{{ $key }}']">Habiller cette salle</button>
+            <p class="kicker" style="margin:.35rem 0 0">Schema {{ $r['schema'] }} · {{ $r['wow'] }}</p>
+            <button class="btn-ghost" type="button" style="font-size:.75rem" @click="open['{{ $key }}']=!open['{{ $key }}']">Habiller + JSON-LD</button>
             <div x-show="open['{{ $key }}']" x-cloak style="margin-top:.6rem;display:grid;gap:.4rem">
               <label class="muted">Couleur <input type="color" name="style[{{ $key }}][color]" value="{{ $row->color ?? '#c9a36a' }}"></label>
               <label class="muted"><input type="checkbox" name="style[{{ $key }}][animate]" value="1" {{ !empty($row->animate) ? 'checked' : '' }}> Animation douce</label>
               <input name="style[{{ $key }}][seo_title]" placeholder="Titre SEO de la salle" value="{{ $row->seo_title ?? '' }}" style="width:100%">
               <input name="style[{{ $key }}][seo_desc]" placeholder="Description Google" value="{{ $row->seo_desc ?? '' }}" style="width:100%">
               <label class="muted">Image de fond <input type="file" name="bg_{{ $key }}" accept="image/*"></label>
+              <p class="kicker">JSON-LD généré ({{ $r['schema'] }})</p>
+              <textarea readonly rows="7" style="width:100%;font-size:.72rem;font-family:ui-monospace,monospace">{{ $ex }}</textarea>
+              <p><a class="primary" href="/n/{{ $node->slug }}/{{ $key }}/schema.json">schema.json de la salle</a>
+                 · <a class="primary" href="/studio/{{ $node->slug }}/jsonld?salle={{ $key }}">générateur</a></p>
             </div>
           </div>
         @endforeach

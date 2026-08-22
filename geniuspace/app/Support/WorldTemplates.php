@@ -40,11 +40,11 @@ class WorldTemplates
         $node->save();
         DB::table('node_tabs')->where('node_id', $node->id)->delete();
         foreach ($t['rooms'] as $i => $key) {
-            $meta = RoomCatalog::all()[$key] ?? [$key, $key];
+            $meta = RoomCatalog::all()[$key] ?? ['label' => $key];
             DB::table('node_tabs')->insert([
                 'node_id' => $node->id,
                 'key' => $key,
-                'label' => is_array($meta) ? $meta[0] : $key,
+                'label' => $meta['label'] ?? $key,
                 'icon' => 'spark',
                 'sort' => $i,
                 'color' => $t['primary'],

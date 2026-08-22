@@ -2,53 +2,67 @@
 
 namespace App\Support;
 
+/** Salles = produit. Chaque clé : label, hint, wow (ce que personne n’a), schema.org. */
 class RoomCatalog
 {
     public static function groups(): array
     {
-        return [
+        $g = [
             'Vie du club' => [
-                'forum' => ['Parler ensemble', 'Le garage : débats, entraide, comme un forum vivant'],
-                'journal' => ['Magazine', 'Articles + vidéos des membres, template chef-de-secteur'],
-                'guilde' => ['Les membres', 'Trombinoscope, grades, qui est qui'],
-                'agenda' => ['Agenda / sorties', 'Rassemblements, meets, dates'],
-                'stories' => ['Stories', 'Bulles courtes, 15 secondes, le pulse du club'],
+                'forum' => ['Parler ensemble', 'Holo-forum : Dive + Legacy SEO + live + relique in-thread', 'DiscussionForumPosting'],
+                'journal' => ['Magazine', 'Moule chef-de-secteur : résumé, FAQPage, speakable, cluster', 'Blog'],
+                'guilde' => ['Les membres', 'Passport cross-node : grades voyagent d’un univers à l’autre', 'Organization'],
+                'agenda' => ['Agenda / sorties', 'Chaque date = Event + geo, indexable, pas un Facebook', 'Event'],
+                'stories' => ['Stories', '15s indexées en Clip, digest Legacy le lendemain', 'VideoObject'],
             ],
             'Fiches' => [
-                'personnages' => ['Les fiches', 'Voitures, persos, pièces… une page chacun, graphe parent/enfant'],
-                'collections' => ['Collections', 'Séries, gammes, flottes'],
+                'personnages' => ['Les fiches', 'Graphe parent/enfant public /g/{slug} — Wikidata du club', 'ItemList'],
+                'collections' => ['Collections', 'Série → volumes enfants, une URL par gamme', 'CollectionPage'],
             ],
             'Médias' => [
-                'videos' => ['Vidéos', 'Essais, replays, holo-fiches SEO'],
-                'audio' => ['Podcasts / radio', 'Émissions, interviews'],
-                'gallery' => ['Galerie', 'Photos en grand, pas une grille molle'],
-                'reliques' => ['Photos & fichiers', 'Le Drive du club'],
+                'videos' => ['Vidéos', 'Holo-fiche : chapitres Clip, produits, Drive, auteur — YouTube n’a pas le graphe', 'VideoObject'],
+                'audio' => ['Podcasts / radio', 'PodcastEpisode + chapitres, transcript indexé', 'PodcastSeries'],
+                'gallery' => ['Galerie', 'ImageObject EXIF + maillage fiche, pas une grille Drive', 'ImageGallery'],
+                'reliques' => ['Photos & fichiers', 'Drive signé, paywall, jeton — le fichier a une URL SEO', 'DataDownload'],
             ],
             'Savoir' => [
-                'guides' => ['Guides', 'Tutos, mises à jour, wiki pratique'],
-                'reviews' => ['Essais & avis', 'Ce qui est bon, ce qui casse'],
+                'guides' => ['Guides', 'Wiki HowTo + bounty SEO : la guilde écrit, Google rank', 'HowTo'],
+                'reviews' => ['Essais & avis', 'Review + note, liée à la fiche et à l’offre', 'Review'],
             ],
             'Commerce' => [
-                'boutique' => ['Boutique', 'Pièces, prints, services'],
-                'boutique_expert' => ['Boutique expert', 'Vitrine luxe : prix, stock, SEO Offer, paywall fichiers'],
-                'classifieds' => ['Petites annonces', 'Entre membres, occasion'],
-                'merch' => ['Merch', 'Tee-shirts, stickers, le club sur le capot'],
+                'boutique' => ['Boutique', 'Offer + split auteurs, 1-tap depuis le forum', 'OfferCatalog'],
+                'boutique_expert' => ['Boutique expert', 'Vitrine luxe, RWA, crowd-goal, paywall fichiers', 'Store'],
+                'classifieds' => ['Petites annonces', 'Offer + geo (Reims). Leboncoin sans le SEO, Facebook sans l’URL', 'Offer'],
+                'merch' => ['Merch', 'Print + split 70/30 natif, Product group', 'Product'],
             ],
             'Lieu & jobs' => [
-                'carte' => ['Carte', 'Garages, meets, points GPS'],
-                'offres' => ['Offres / jobs', 'Si tu recrutes dans le club'],
-                'epreuve' => ['Quêtes', 'Candidatures en scénario, pas un CV'],
+                'carte' => ['Carte', 'Place + Offer locaux, meets = Event géolocalisé', 'Place'],
+                'offres' => ['Offres / jobs', 'JobPosting transparent + skill tree, pas une grille Indeed', 'JobPosting'],
+                'epreuve' => ['Quêtes', 'Candidature = scénario 7 étapes, sac à dos = CV', 'AskAction'],
             ],
         ];
+        $out = [];
+        foreach ($g as $name => $rooms) {
+            $out[$name] = [];
+            foreach ($rooms as $key => $row) {
+                $out[$name][$key] = [
+                    'label' => $row[0],
+                    'hint' => $row[1],
+                    'wow' => $row[1],
+                    'schema' => $row[2],
+                ];
+            }
+        }
+        return $out;
     }
 
     public static function packs(): array
     {
         return [
-            'auto' => ['label' => 'Club auto', 'rooms' => ['forum', 'personnages', 'classifieds', 'carte', 'agenda', 'videos', 'gallery']],
+            'auto' => ['label' => 'Club auto', 'rooms' => ['forum', 'personnages', 'classifieds', 'carte', 'agenda', 'videos', 'gallery', 'journal']],
             'manga' => ['label' => 'Hub manga / série', 'rooms' => ['forum', 'personnages', 'videos', 'journal', 'guides', 'stories', 'boutique']],
             'boutique_expert' => ['label' => 'Boutique expert', 'rooms' => ['boutique_expert', 'gallery', 'videos', 'journal', 'classifieds', 'guides']],
-            'jobs' => ['label' => 'Maison / jobs', 'rooms' => ['offres', 'epreuve', 'forum', 'videos', 'guides', 'guilde']],
+            'jobs' => ['label' => 'Maison / jobs', 'rooms' => ['offres', 'epreuve', 'forum', 'videos', 'guides', 'guilde', 'journal']],
         ];
     }
 
@@ -61,8 +75,13 @@ class RoomCatalog
         return $out;
     }
 
+    public static function label(string $key): string
+    {
+        return self::all()[$key]['label'] ?? $key;
+    }
+
     public static function keys(): string
     {
-        return implode('|', array_merge(array_keys(self::all()), ['vivre', 'maison', 'salon', 'arbre', 'academie']));
+        return implode('|', array_merge(array_keys(self::all()), ['vivre', 'maison', 'salon', 'arbre', 'academie', 'blog']));
     }
 }

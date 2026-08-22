@@ -72,6 +72,11 @@ Le dock dit **Forum** (plus « Parler »). Split héros / pane claire. Réponse 
 
 Catalogue `/create` : manga, Vera, jeux, pays, formation, annonces… Chaque id = schema + salles + curseur + CCK vide. Magazine : TOC sticky, OG, speakable, barre de lecture, drop cap, responsive.
 
+## 2026-08-22 — Innovations salles + générateur JSON-LD + thumbs templates
+
+Chaque salle : wow + schema.org. `/n/{slug}/schema.json`, `/studio/{slug}/jsonld`. Miniatures `/tpl/{id}.svg`.
+
+
 
 
 

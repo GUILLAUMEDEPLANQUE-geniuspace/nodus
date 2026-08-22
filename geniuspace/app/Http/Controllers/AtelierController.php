@@ -55,7 +55,7 @@ class AtelierController extends Controller
             if ($request->file('bg_'.$key)) {
                 $bg = '/'.SignedMedia::storeUpload($request->file('bg_'.$key));
             }
-            $label = $key === 'vivre' ? 'Accueil' : ($catalog[$key][0] ?? $key);
+            $label = $key === 'vivre' ? 'Accueil' : RoomCatalog::label($key);
             DB::table('node_tabs')->insert([
                 'node_id' => $node->id,
                 'key' => $key,
@@ -66,7 +66,7 @@ class AtelierController extends Controller
                 'bg' => $bg,
                 'animate' => ! empty($st['animate']),
                 'seo_title' => $st['seo_title'] ?? ($label.' — '.$node->title),
-                'seo_desc' => $st['seo_desc'] ?? ($catalog[$key][1] ?? ''),
+                'seo_desc' => $st['seo_desc'] ?? ($catalog[$key]['hint'] ?? ''),
             ]);
         }
         return redirect('/n/'.$node->slug)->with('ok', 'Club habillé. Chaque salle a sa peau.');

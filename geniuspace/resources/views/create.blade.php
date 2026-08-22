@@ -20,7 +20,7 @@
       <div class="tpl-grid">
         @foreach($list as $t)
           <button type="button" class="tpl" style="--tpl:{{ $t['primary'] }}" @click="id=@js($t['id'])" :class="id===@js($t['id']) && 'on'">
-            <span class="tpl-dot"></span>
+            <img src="/tpl/{{ $t['id'] }}.svg" alt="{{ $t['label'] }}" width="320" height="180">
             <strong>{{ $t['label'] }}</strong>
             <em>{{ $t['innovation'] }}</em>
             <small>{{ $t['schema'] }} · {{ count($t['rooms']) }} salles</small>
