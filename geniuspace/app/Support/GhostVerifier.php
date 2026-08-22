@@ -64,6 +64,7 @@ class GhostVerifier
         $parts[] = json_encode($ctx['fourchette'] ?? [], JSON_UNESCAPED_UNICODE);
         $parts[] = json_encode($ctx['details'] ?? [], JSON_UNESCAPED_UNICODE);
         $parts[] = json_encode($ctx['liens'] ?? [], JSON_UNESCAPED_UNICODE);
+        $parts[] = json_encode($exec['constraints'] ?? [], JSON_UNESCAPED_UNICODE);
 
         return mb_strtolower(implode(' ', $parts));
     }

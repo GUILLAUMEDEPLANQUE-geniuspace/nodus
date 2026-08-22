@@ -72,6 +72,7 @@ class GhostExecutor
             'data' => $data,
             'pick' => $pick,
             'ceiling' => $ceiling,
+            'constraints' => $plan['constraints'] ?? [],
         ];
     }
 
