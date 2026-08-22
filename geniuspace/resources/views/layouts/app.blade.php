@@ -29,7 +29,15 @@
     </form>
     <nav class="nav">
         <a class="btn-ghost" href="/explore">Explorer</a>
+        <a class="btn-ghost" href="/create">Créer</a>
         <a class="btn-ghost" href="/drive">Drive</a>
+        <a class="btn-ghost" href="/studio/image">Éditeur</a>
+        @auth
+          <a class="btn-ghost" href="/profil">{{ auth()->user()->name }}</a>
+          <form method="post" action="/logout">@csrf<button class="btn-ghost" type="submit">Out</button></form>
+        @else
+          <a class="btn-line" href="/login/demo">Créateur</a>
+        @endauth
         <button class="btn-line" type="button" onclick="document.documentElement.setAttribute('data-theme',document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');localStorage.setItem('nodus-theme',document.documentElement.getAttribute('data-theme'))">Thème</button>
     </nav>
 </header>

@@ -1,6 +1,6 @@
 @extends('layouts.app')
-@section('title', $node->seoTitle())
-@section('description', $node->summary)
+@section('title', ($seoRow->title ?? null) ?: $node->seoTitle())
+@section('description', ($seoRow->description ?? null) ?: $node->summary)
 @section('canonical', url('/n/'.$node->slug))
 @push('jsonld')
 <script type="application/ld+json">
@@ -131,6 +131,8 @@
         <div style="margin-top:1.1rem;display:flex;gap:0.5rem;flex-wrap:wrap">
             <button class="btn" type="button" @click="tab='personnages'">Rejoindre l'équipage</button>
             <button class="btn-line" type="button" @click="tab='guilde'">Entrer dans la guilde</button>
+            <a class="btn-line" href="/studio/image?src={{ urlencode($node->hero) }}&target=hero&slug={{ $node->slug }}">Éditer le héros</a>
+            <a class="btn-ghost" href="/n/{{ $node->slug }}/studio">Studio</a>
         </div>
     </div>
 </section>
@@ -139,6 +141,14 @@
     <div x-show="tab==='vivre'">
         <p style="max-width:40rem;font-size:1.1rem">{{ $node->summary }}</p>
         @if($node->body)<p class="muted" style="max-width:40rem">{{ $node->body }}</p>@endif
+        @isset($cck)
+          @if($cck->count())
+            <p class="kicker">CCK</p>
+            @foreach($cck as $f)
+              <span class="chip">{{ $f->name }}: {{ $f->value }}</span>
+            @endforeach
+          @endif
+        @endisset
         @if($children->count())
             <h2 class="font-display" style="font-size:2rem">Âmes liées</h2>
             <div class="grid-3">
@@ -242,6 +252,7 @@
                                 <button class="btn" type="submit">Panier</button>
                             </form>
                             <a class="btn-line" href="/n/{{ $node->slug }}/p/{{ $p->id }}">Fiche</a>
+                            <a class="btn-ghost" href="/studio/image?src={{ urlencode($p->image) }}&target=product&id={{ $p->id }}&slug={{ $node->slug }}">Éditer image</a>
                             <a class="btn-ghost" href="https://twitter.com/intent/tweet?text={{ urlencode($p->title.' '.$p->price) }}&url={{ urlencode(url('/n/'.$node->slug.'/p/'.$p->id)) }}">Partager</a>
                         </div>
                     </div>

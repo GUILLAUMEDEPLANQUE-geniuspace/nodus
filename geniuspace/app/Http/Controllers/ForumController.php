@@ -9,9 +9,18 @@ use App\Models\Reply;
 use App\Models\Thread;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class ForumController extends Controller
 {
+    private function author(string $nodeId): string
+    {
+        $name = Auth::user()->name ?? 'Toi';
+        abort_if(DB::table('forum_bans')->where('node_id', $nodeId)->where('author', $name)->exists(), 403, 'Banni de ce forum');
+        return $name;
+    }
+
     public function thread(Request $request): RedirectResponse
     {
         $data = $request->validate([
@@ -26,7 +35,7 @@ class ForumController extends Controller
             'node_id' => $node->id,
             'kind' => 'forum',
             'title' => $data['title'],
-            'author' => 'Toi',
+            'author' => $this->author($node->id),
             'body' => $data['body'],
             'cover' => $node->hero,
             'views' => 1,
@@ -39,11 +48,14 @@ class ForumController extends Controller
     public function reply(Request $request, string $slug, string $tid): RedirectResponse
     {
         $data = $request->validate(['body' => 'required|string|max:4000']);
+        $nodeId = GpNode::query()->where('slug', $slug)->value('id');
         Reply::query()->create([
             'thread_id' => $tid,
-            'author' => 'Toi',
+            'author' => $this->author($nodeId),
             'body' => $data['body'],
             'votes' => 0,
+            'pending' => 0,
+            'media_path' => '',
         ]);
         Thread::query()->where('id', $tid)->increment('replies_count');
         return redirect('/n/'.$slug.'?tab=forum&tid='.$tid)->with('ok', 'Réponse Legacy indexée.');
@@ -52,9 +64,10 @@ class ForumController extends Controller
     public function live(Request $request, string $slug, string $tid): RedirectResponse
     {
         $data = $request->validate(['body' => 'required|string|max:500']);
+        $nodeId = GpNode::query()->where('slug', $slug)->value('id');
         LiveMessage::query()->create([
             'thread_id' => $tid,
-            'author' => 'Toi',
+            'author' => $this->author($nodeId),
             'body' => $data['body'],
         ]);
         return redirect('/n/'.$slug.'?tab=forum&tid='.$tid.'&mode=live')->with('ok', 'Live envoyé.');
@@ -66,7 +79,7 @@ class ForumController extends Controller
         $node = GpNode::query()->where('slug', $slug)->firstOrFail();
         GuildMessage::query()->create([
             'node_id' => $node->id,
-            'author' => 'Toi',
+            'author' => $this->author($node->id),
             'body' => $data['body'],
         ]);
         return redirect('/n/'.$slug.'?tab=guilde')->with('ok', 'Message de guilde.');

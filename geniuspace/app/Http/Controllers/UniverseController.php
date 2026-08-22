@@ -19,7 +19,16 @@ class UniverseController extends Controller
     public function home(): View
     {
         $featured = GpNode::query()->where('featured', true)->get();
-        return view('home', compact('featured'));
+        $hot = \Illuminate\Support\Facades\DB::table('visits')
+            ->select('node_id', \Illuminate\Support\Facades\DB::raw('count(*) as c'))
+            ->groupBy('node_id')
+            ->orderByDesc('c')
+            ->limit(4)
+            ->pluck('node_id');
+        $reco = $hot->isNotEmpty()
+            ? GpNode::query()->whereIn('id', $hot)->get()
+            : $featured;
+        return view('home', compact('featured', 'reco'));
     }
 
     public function explore(): View
@@ -46,8 +55,16 @@ class UniverseController extends Controller
         $tab = $request->query('tab', $node->skin === 'vera' ? 'maison' : 'vivre');
         $tid = $request->query('tid');
         $mode = $request->query('mode', 'legacy');
+        $cck = \Illuminate\Support\Facades\DB::table('cck_fields')->where('node_id', $node->id)->get();
+        $seoRow = \Illuminate\Support\Facades\DB::table('node_seo')->where('node_id', $node->id)->first();
+        $tabs = \Illuminate\Support\Facades\DB::table('node_tabs')->where('node_id', $node->id)->orderBy('sort')->get();
+        \Illuminate\Support\Facades\DB::table('visits')->insert([
+            'node_id' => $node->id,
+            'path' => $request->path(),
+            'session' => substr($request->session()->getId(), 0, 16),
+        ]);
         return view('universe', compact(
-            'node', 'children', 'parents', 'goal', 'replies', 'live', 'files', 'guild', 'tab', 'tid', 'mode'
+            'node', 'children', 'parents', 'goal', 'replies', 'live', 'files', 'guild', 'tab', 'tid', 'mode', 'cck', 'seoRow', 'tabs'
         ));
     }
 

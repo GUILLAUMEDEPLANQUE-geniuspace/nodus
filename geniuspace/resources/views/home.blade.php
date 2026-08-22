@@ -12,6 +12,7 @@
             <a class="btn" href="/n/one-piece">Vivre One Piece</a>
             <a class="btn-line" href="/n/maison-orion">Maison recruteur</a>
             <a class="btn-line" href="/n/atelier-nocturne/p/sp-at-1">Galerie RWA</a>
+            <a class="btn-line" href="/create">Créer un univers</a>
         </div>
     </div>
 </section>
@@ -27,4 +28,15 @@
         </a>
     @endforeach
 </section>
+@isset($reco)
+<section class="wrap" style="padding-bottom:4rem">
+    <p class="kicker">Matching (visites)</p>
+    <h2 class="font-display">Pour toi</h2>
+    <div class="rel">
+        @foreach($reco as $n)
+            <a class="chip" href="/n/{{ $n->slug }}">{{ $n->title }}</a>
+        @endforeach
+    </div>
+</section>
+@endisset
 @endsection
