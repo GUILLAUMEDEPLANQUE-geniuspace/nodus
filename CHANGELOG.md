@@ -2,6 +2,19 @@
 
 Format : ce qui est **dans le code**, pas la vision PDF.
 
+## 0.7.0 — 2026-08-22
+
+### Onglet Vidéos (fiches JoomCCK-grade)
+- Onglet **Vidéos** dédié (plus caché dans le Drive / Studio)
+- Console : genre, durée, saison, épisode, langue, difficulté, ruban
+- Chapitres seek + transcript + JSON-LD `VideoObject` + `Clip`
+- URL unique `/n/:slug/v/:id`
+- Les vidéos des **enfants** (Luffy, O’Neill…) remontent dans l’univers parent
+
+### Dock
+- Dédoublonnage `guilde` / `guildes` (même stem)
+- Reliques relabel **Drive** — l’engrenage reste le Studio de config
+
 ## 0.6.0 — 2026-08-21
 
 ### Holo-Forum (Scroll & Dive)

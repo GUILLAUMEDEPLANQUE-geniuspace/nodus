@@ -13,7 +13,7 @@ import { RealmCanvas } from "@/components/realm-canvas";
 import { ShopFloor } from "@/components/shop-floor";
 import { StudioPanel } from "@/components/studio-panel";
 import { UniverseDock } from "@/components/universe-dock";
-import { VideoFiche } from "@/components/video-fiche";
+import { VideoStudio } from "@/components/video-studio";
 import { WikiGuide } from "@/components/wiki-guide";
 import { KIND_LABEL, type GraphNode, type NodeUniverse, type UniverseTab } from "@/lib/graph";
 import { heroOf, portraitOf } from "@/lib/skins";
@@ -28,8 +28,19 @@ const FALLBACK_TABS: UniverseTab[] = [
   { id: "guilde", key: "guilde", label: "Guilde", icon: "radio" },
   { id: "guides", key: "guides", label: "Guides", icon: "book" },
   { id: "boutique", key: "boutique", label: "Boutique", icon: "store" },
-  { id: "reliques", key: "reliques", label: "Studio", icon: "film" },
+  { id: "videos", key: "videos", label: "Vidéos", icon: "film" },
+  { id: "reliques", key: "reliques", label: "Drive", icon: "folder" },
 ];
+
+function uniqueTabs(tabs: UniverseTab[]) {
+  const seen = new Set<string>();
+  return tabs.filter((t) => {
+    const stem = t.key.toLowerCase().replace(/s$/, "");
+    if (seen.has(stem)) return false;
+    seen.add(stem);
+    return true;
+  });
+}
 
 export function LivingWorld({ universe }: { universe: NodeUniverse }) {
   const {
@@ -52,7 +63,7 @@ export function LivingWorld({ universe }: { universe: NodeUniverse }) {
     playlists,
     heroUrl,
   } = universe;
-  const dockTabs = tabs.length ? tabs : FALLBACK_TABS;
+  const dockTabs = uniqueTabs(tabs.length ? tabs : FALLBACK_TABS);
   const [tab, setTab] = useState(dockTabs[0]?.key ?? "vivre");
   const [bubbles, setBubbles] = useState<{ id: string; author: string }[]>([]);
   const bodyRef = useRef<HTMLDivElement>(null);
@@ -92,6 +103,8 @@ export function LivingWorld({ universe }: { universe: NodeUniverse }) {
           products={products}
           onPosted={ping}
         />
+      ) : tab === "videos" ? (
+        <VideoStudio slug={node.slug} videos={media} />
       ) : (
         <>
       <section className="relative h-[78dvh] min-h-[480px] overflow-hidden">
@@ -175,13 +188,6 @@ export function LivingWorld({ universe }: { universe: NodeUniverse }) {
         {tab === "reliques" ? (
           <div className="space-y-10">
             <PlaylistDeck slug={node.slug} playlists={playlists} />
-            {videos.length > 0 ? (
-              <div className="grid gap-4 lg:grid-cols-2">
-                {videos.map((m) => (
-                  <VideoFiche key={m.id} media={m} />
-                ))}
-              </div>
-            ) : null}
             <DriveBrowser folders={folders} files={files} slug={node.slug} />
           </div>
         ) : null}

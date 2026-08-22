@@ -19,6 +19,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as NSlugRouteImport } from './routes/n.$slug'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as NSlugTTidRouteImport } from './routes/n.$slug.t.$tid'
+import { Route as NSlugVVidRouteImport } from './routes/n.$slug.v.$vid'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -70,6 +71,11 @@ const NSlugTTidRoute = NSlugTTidRouteImport.update({
   path: '/t/$tid',
   getParentRoute: () => NSlugRoute,
 } as any)
+const NSlugVVidRoute = NSlugVVidRouteImport.update({
+  id: '/v/$vid',
+  path: '/v/$vid',
+  getParentRoute: () => NSlugRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -82,6 +88,7 @@ export interface FileRoutesByFullPath {
   '/n/$slug': typeof NSlugRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/n/$slug/t/$tid': typeof NSlugTTidRoute
+  '/n/$slug/v/$vid': typeof NSlugVVidRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -94,6 +101,7 @@ export interface FileRoutesByTo {
   '/n/$slug': typeof NSlugRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/n/$slug/t/$tid': typeof NSlugTTidRoute
+  '/n/$slug/v/$vid': typeof NSlugVVidRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -107,6 +115,7 @@ export interface FileRoutesById {
   '/n/$slug': typeof NSlugRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/n/$slug/t/$tid': typeof NSlugTTidRoute
+  '/n/$slug/v/$vid': typeof NSlugVVidRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -121,6 +130,7 @@ export interface FileRouteTypes {
     | '/n/$slug'
     | '/api/auth/$'
     | '/n/$slug/t/$tid'
+    | '/n/$slug/v/$vid'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -133,6 +143,7 @@ export interface FileRouteTypes {
     | '/n/$slug'
     | '/api/auth/$'
     | '/n/$slug/t/$tid'
+    | '/n/$slug/v/$vid'
   id:
     | '__root__'
     | '/'
@@ -145,6 +156,7 @@ export interface FileRouteTypes {
     | '/n/$slug'
     | '/api/auth/$'
     | '/n/$slug/t/$tid'
+    | '/n/$slug/v/$vid'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -231,15 +243,24 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NSlugTTidRouteImport
       parentRoute: typeof NSlugRoute
     }
+    '/n/$slug/v/$vid': {
+      id: '/n/$slug/v/$vid'
+      path: '/v/$vid'
+      fullPath: '/n/$slug/v/$vid'
+      preLoaderRoute: typeof NSlugVVidRouteImport
+      parentRoute: typeof NSlugRoute
+    }
   }
 }
 
 interface NSlugRouteChildren {
   NSlugTTidRoute: typeof NSlugTTidRoute
+  NSlugVVidRoute: typeof NSlugVVidRoute
 }
 
 const NSlugRouteChildren: NSlugRouteChildren = {
   NSlugTTidRoute: NSlugTTidRoute,
+  NSlugVVidRoute: NSlugVVidRoute,
 }
 
 const NSlugRouteWithChildren = NSlugRoute._addFileChildren(NSlugRouteChildren)

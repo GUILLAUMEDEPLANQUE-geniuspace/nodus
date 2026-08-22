@@ -132,11 +132,50 @@ export const getNodeBundle = createServerFn({ method: "GET" })
       [node.id],
     );
 
-    const media = await sql.query<GraphMedia>(
-      `select id, kind, title, url, duration, genre, chapters, transcript
-       from node_media where node_id = $1 order by sort_order, id`,
+    const mediaRows = await sql.query<{
+      id: number;
+      node_id: string;
+      kind: string;
+      title: string;
+      url: string;
+      duration: string;
+      genre: string;
+      chapters: string;
+      transcript: string;
+      season: string;
+      episode: string;
+      language: string;
+      difficulty: string;
+      ribbon: string;
+    }>(
+      `select id, node_id, kind, title, url, duration, genre, chapters, transcript,
+              coalesce(season, '') as season,
+              coalesce(episode, '') as episode,
+              coalesce(language, '') as language,
+              coalesce(difficulty, '') as difficulty,
+              coalesce(ribbon, '') as ribbon
+       from node_media
+       where node_id = $1
+          or node_id in (select to_id from edges where from_id = $1)
+       order by sort_order, id`,
       [node.id],
     );
+    const media: GraphMedia[] = mediaRows.map((m) => ({
+      id: Number(m.id),
+      nodeId: m.node_id,
+      kind: m.kind,
+      title: m.title,
+      url: m.url,
+      duration: m.duration,
+      genre: m.genre,
+      chapters: m.chapters,
+      transcript: m.transcript,
+      season: m.season,
+      episode: m.episode,
+      language: m.language,
+      difficulty: m.difficulty,
+      ribbon: m.ribbon,
+    }));
 
     type EdgeRow = DbNode & {
       edge_kind: string;

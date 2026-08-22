@@ -26,10 +26,20 @@ const VERA_TABS: UniverseTab[] = [
   { id: "forum", key: "forum", label: "Forum", icon: "messages" },
 ];
 
+function uniqueVera(tabs: UniverseTab[]) {
+  const seen = new Set<string>();
+  return tabs.filter((t) => {
+    const stem = t.key.toLowerCase().replace(/s$/, "");
+    if (seen.has(stem)) return false;
+    seen.add(stem);
+    return true;
+  });
+}
+
 export function VeraHouse({ universe }: { universe: NodeUniverse }) {
   const { node, children, threads, messages, files, folders, cck, wiki, tabs, staff, categories, replies, live, quests, rooms, products } =
     universe;
-  const dockTabs = tabs.length ? tabs : VERA_TABS;
+  const dockTabs = uniqueVera(tabs.length ? tabs : VERA_TABS);
   const [tab, setTab] = useState(node.kind === "job" ? "offres" : "maison");
   const [bubbles, setBubbles] = useState<{ id: string; author: string }[]>([]);
   const jobs = children.filter((c) => c.kind === "job");

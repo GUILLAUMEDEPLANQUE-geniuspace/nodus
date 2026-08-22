@@ -72,6 +72,7 @@ export type GraphNode = {
 
 export type GraphMedia = {
   id: number;
+  nodeId?: string;
   kind: string;
   title: string;
   url: string;
@@ -79,6 +80,11 @@ export type GraphMedia = {
   genre: string;
   chapters: string;
   transcript: string;
+  season?: string;
+  episode?: string;
+  language?: string;
+  difficulty?: string;
+  ribbon?: string;
 };
 
 export type Neighbor = {
