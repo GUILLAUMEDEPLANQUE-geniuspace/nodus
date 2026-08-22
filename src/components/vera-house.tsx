@@ -7,6 +7,7 @@ import { useState } from "react";
 import { CckPanel } from "@/components/cck-panel";
 import { DriveBrowser } from "@/components/drive-browser";
 import { HoloForum } from "@/components/holo-forum";
+import { PipelineBoard } from "@/components/pipeline-board";
 import { QuestPath } from "@/components/quest-path";
 import { SalonMap } from "@/components/salon-map";
 import { SkillTree } from "@/components/skill-tree";
@@ -140,7 +141,9 @@ export function VeraHouse({ universe }: { universe: NodeUniverse }) {
           </div>
         ) : null}
 
-        {tab === "epreuve" ? <QuestPath quests={quests} /> : null}
+        {tab === "epreuve" ? (
+          <QuestPath quests={quests} slug={node.slug} jobId={jobs[0]?.id ?? node.id} />
+        ) : null}
 
         {tab === "drive" ? <DriveBrowser folders={folders} files={files} slug={node.slug} /> : null}
 
@@ -160,7 +163,10 @@ export function VeraHouse({ universe }: { universe: NodeUniverse }) {
         ) : null}
 
         {tab === "studio" ? (
-          <StudioPanel slug={node.slug} tabs={dockTabs} staff={staff} files={files} cck={cck} />
+          <div className="space-y-10">
+            <PipelineBoard slug={node.slug} />
+            <StudioPanel slug={node.slug} tabs={dockTabs} staff={staff} files={files} cck={cck} />
+          </div>
         ) : null}
       </div>
         </>

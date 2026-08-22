@@ -3,6 +3,7 @@ import { FileText, Film, Folder, Image as ImageIcon, Music } from "lucide-react"
 import type { DriveFile, DriveFolder } from "@/lib/graph";
 import { VideoFiche } from "@/components/video-fiche";
 import { addDriveFile } from "@/lib/graph-api";
+import { uploadDriveBlob } from "@/lib/platform-api";
 
 const KIND_ICON = {
   video: Film,
@@ -48,26 +49,63 @@ export function DriveBrowser({
               ? "pdf"
               : "doc";
       try {
-        const res = await addDriveFile({
-          data: { slug, name: file.name, kind, folderId: folderId === "all" ? undefined : folderId },
-        });
-        setExtra((cur) => [
-          ...cur,
-          {
-            id: res.id,
-            nodeId: "",
-            folderId: folderId === "all" ? null : folderId,
-            name: file.name,
-            kind,
-            sizeLabel: `${Math.round(file.size / 1024)} Ko`,
-            version: 1,
-            summary: "Déposé depuis le gestionnaire",
-            chapters: "",
-            transcript: "",
-          },
-        ]);
+        if (file.size < 900_000) {
+          const base64 = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+              const s = String(reader.result);
+              resolve(s.slice(s.indexOf(",") + 1));
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+          });
+          const res = await uploadDriveBlob({
+            data: {
+              slug,
+              name: file.name,
+              kind,
+              mime: file.type || "application/octet-stream",
+              base64,
+              locked: kind === "pdf" || kind === "doc" ? false : false,
+            },
+          });
+          setExtra((cur) => [
+            ...cur,
+            {
+              id: res.id,
+              nodeId: "",
+              folderId: folderId === "all" ? null : folderId,
+              name: file.name,
+              kind,
+              sizeLabel: `${Math.round(file.size / 1024)} Ko`,
+              version: 1,
+              summary: "Blob stocké (ACL)",
+              chapters: "",
+              transcript: "",
+            },
+          ]);
+        } else {
+          const res = await addDriveFile({
+            data: { slug, name: file.name, kind, folderId: folderId === "all" ? undefined : folderId },
+          });
+          setExtra((cur) => [
+            ...cur,
+            {
+              id: res.id,
+              nodeId: "",
+              folderId: folderId === "all" ? null : folderId,
+              name: file.name,
+              kind,
+              sizeLabel: `${Math.round(file.size / 1024)} Ko`,
+              version: 1,
+              summary: "Métadonnée — fichier trop lourd pour le blob démo (prod = S3)",
+              chapters: "",
+              transcript: "",
+            },
+          ]);
+        }
       } catch {
-        /* auth */
+        /* auth / ACL */
       }
     }
   }

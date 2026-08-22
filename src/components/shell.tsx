@@ -1,6 +1,9 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { Compass, Plus, Search } from "lucide-react";
 import { useState, type FormEvent } from "react";
+import { CartButton } from "@/components/cart-button";
+import { LocaleSwitch } from "@/components/locale-switch";
+import { NotifyBell } from "@/components/notify-bell";
 import { SignedIn, SignedOut, UserButton } from "@/lib/auth/gates";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import { ThemeToggle } from "@/lib/theme";
@@ -69,6 +72,15 @@ export function Shell({ children }: { children: React.ReactNode }) {
               <Compass className="size-4" />
               <span className="hidden sm:inline">Explorer</span>
             </Link>
+            <Link
+              to="/inbox"
+              className="hidden h-11 items-center rounded-full px-3 text-sm text-muted hover:text-fg sm:inline-flex"
+            >
+              Messages
+            </Link>
+            <NotifyBell />
+            <CartButton />
+            <LocaleSwitch />
             <Link
               to="/create"
               className="inline-flex h-11 items-center gap-2 rounded-full bg-primary px-3.5 text-sm font-medium text-primary-fg"

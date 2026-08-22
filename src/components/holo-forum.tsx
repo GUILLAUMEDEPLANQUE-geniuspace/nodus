@@ -52,6 +52,17 @@ export function HoloForum({
     () => localLive.filter((l) => l.threadId === active?.id),
     [localLive, active],
   );
+  const ranks = useMemo(() => {
+    const c: Record<string, number> = {};
+    for (const r of localReplies) c[r.author] = (c[r.author] ?? 0) + 1;
+    return c;
+  }, [localReplies]);
+  function badge(author: string) {
+    const n = ranks[author] ?? 0;
+    if (n >= 3) return "Expert lore";
+    if (n >= 1) return "Marin";
+    return "Mousse";
+  }
   const split = Boolean(active);
 
   async function send() {
@@ -193,7 +204,9 @@ export function HoloForum({
               top.length ? (
                 top.map((r) => (
                   <article key={r.id} className="rounded-2xl bg-surface p-4 shadow-[var(--shadow-border)]">
-                    <p className="text-xs tracking-[0.14em] text-primary uppercase">{r.author}</p>
+                    <p className="text-xs tracking-[0.14em] text-primary uppercase">
+                      {r.author} · {badge(r.author)}
+                    </p>
                     <p className="mt-2 text-sm leading-relaxed">{r.body}</p>
                     <button
                       type="button"

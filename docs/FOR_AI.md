@@ -17,4 +17,7 @@ Tu travailles sur NODUS. Avant de coder :
 13. CCK builder : `CckBuilder` dans le Studio. Pas de colonne SQL métier.
 14. Forum = `HoloForum` (cartes + Legacy/Live). Pas de liste wpForo. Chaque sujet a `/n/:slug/t/:id`.
 16. Vidéo : `HoloPlayer`. Modes `lore|formation|game|shop|interview`. Assets locked → `url` vide. Grant = `unlockVideo` (auth).
-17. Drive séquencé = fichiers par chapitre, pas un dump. Prod = signed URL / HLS.
+18. Plateforme 0.9 : ACL `src/lib/acl.ts`. Blobs locked hors payload public. Checkout démo ≠ Stripe.
+19. Panier / notifs / inbox / profil = `src/lib/platform-api.ts`.
+20. Quêtes ATS : `startOrAdvanceCandidate`. Ne pas re-stocker les choix en local uniquement.
+21. i18n chrome seulement (`src/lib/i18n.ts`). Pas de traduction auto des fiches (SEO).

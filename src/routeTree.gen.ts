@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CreateRouteImport } from './routes/create'
 import { Route as ExploreRouteImport } from './routes/explore'
+import { Route as InboxRouteImport } from './routes/inbox'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ProfilRouteImport } from './routes/profil'
 import { Route as SearchRouteImport } from './routes/search'
@@ -35,6 +36,11 @@ const CreateRoute = CreateRouteImport.update({
 const ExploreRoute = ExploreRouteImport.update({
   id: '/explore',
   path: '/explore',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InboxRoute = InboxRouteImport.update({
+  id: '/inbox',
+  path: '/inbox',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -87,6 +93,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/create': typeof CreateRoute
   '/explore': typeof ExploreRoute
+  '/inbox': typeof InboxRoute
   '/login': typeof LoginRoute
   '/profil': typeof ProfilRoute
   '/search': typeof SearchRoute
@@ -101,6 +108,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/create': typeof CreateRoute
   '/explore': typeof ExploreRoute
+  '/inbox': typeof InboxRoute
   '/login': typeof LoginRoute
   '/profil': typeof ProfilRoute
   '/search': typeof SearchRoute
@@ -116,6 +124,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/create': typeof CreateRoute
   '/explore': typeof ExploreRoute
+  '/inbox': typeof InboxRoute
   '/login': typeof LoginRoute
   '/profil': typeof ProfilRoute
   '/search': typeof SearchRoute
@@ -132,6 +141,7 @@ export interface FileRouteTypes {
     | '/'
     | '/create'
     | '/explore'
+    | '/inbox'
     | '/login'
     | '/profil'
     | '/search'
@@ -146,6 +156,7 @@ export interface FileRouteTypes {
     | '/'
     | '/create'
     | '/explore'
+    | '/inbox'
     | '/login'
     | '/profil'
     | '/search'
@@ -160,6 +171,7 @@ export interface FileRouteTypes {
     | '/'
     | '/create'
     | '/explore'
+    | '/inbox'
     | '/login'
     | '/profil'
     | '/search'
@@ -175,6 +187,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CreateRoute: typeof CreateRoute
   ExploreRoute: typeof ExploreRoute
+  InboxRoute: typeof InboxRoute
   LoginRoute: typeof LoginRoute
   ProfilRoute: typeof ProfilRoute
   SearchRoute: typeof SearchRoute
@@ -204,6 +217,13 @@ declare module '@tanstack/react-router' {
       path: '/explore'
       fullPath: '/explore'
       preLoaderRoute: typeof ExploreRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/inbox': {
+      id: '/inbox'
+      path: '/inbox'
+      fullPath: '/inbox'
+      preLoaderRoute: typeof InboxRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -290,6 +310,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CreateRoute: CreateRoute,
   ExploreRoute: ExploreRoute,
+  InboxRoute: InboxRoute,
   LoginRoute: LoginRoute,
   ProfilRoute: ProfilRoute,
   SearchRoute: SearchRoute,

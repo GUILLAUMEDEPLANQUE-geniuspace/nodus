@@ -5,6 +5,7 @@ import { CckPanel } from "@/components/cck-panel";
 import { ShareBar, Stars } from "@/components/share-bar";
 import type { CckField, ShopProduct } from "@/lib/graph";
 import { addProduct } from "@/lib/graph-api";
+import { addToCart } from "@/lib/platform-api";
 
 export function ShopFloor({
   slug,
@@ -62,7 +63,11 @@ export function ShopFloor({
               <CckPanel fields={cck.filter((f) => f.targetKind === "product" && f.targetId === p.id)} />
             </div>
             <div className="mt-4 flex flex-wrap gap-2">
-              <button type="button" className="h-11 rounded-full bg-primary px-4 text-sm font-medium text-primary-fg">
+              <button
+                type="button"
+                onClick={() => void addToCart({ data: { productId: p.id } })}
+                className="h-11 rounded-full bg-primary px-4 text-sm font-medium text-primary-fg"
+              >
                 Ajouter au panier
               </button>
               <Link

@@ -1,11 +1,20 @@
 /**
- * Quêtes à la place des candidatures.
- * Situation + deux choix (Bending Spoons / Foo.bar) — le CV n'est plus la porte.
+ * Quêtes persistées (ATS). Chaque choix écrit candidate_answers + step++.
+ * Le CV n'est plus la porte. Prod : anti-cheat + timer.
  */
 import { useState } from "react";
 import type { Quest } from "@/lib/graph";
+import { startOrAdvanceCandidate } from "@/lib/platform-api";
 
-export function QuestPath({ quests }: { quests: Quest[] }) {
+export function QuestPath({
+  quests,
+  slug,
+  jobId,
+}: {
+  quests: Quest[];
+  slug: string;
+  jobId: string;
+}) {
   const [i, setI] = useState(0);
   const [picks, setPicks] = useState<string[]>([]);
   const q = quests[i];
@@ -14,7 +23,7 @@ export function QuestPath({ quests }: { quests: Quest[] }) {
     return (
       <div className="rounded-3xl bg-surface p-6">
         <h2 className="font-display text-3xl">Jury</h2>
-        <p className="mt-2 text-sm text-muted">Parcours terminé. Vos choix restent dans le Node.</p>
+        <p className="mt-2 text-sm text-muted">Parcours terminé. Vos choix sont dans le vivier recruteur.</p>
         <ul className="mt-4 space-y-2 text-sm">
           {picks.map((p) => (
             <li key={p} className="rounded-xl bg-surface-2 p-3">
@@ -41,6 +50,9 @@ export function QuestPath({ quests }: { quests: Quest[] }) {
             onClick={() => {
               setPicks((cur) => [...cur, `${q.title} → ${opt}`]);
               setI((n) => n + 1);
+              void startOrAdvanceCandidate({
+                data: { slug, jobId, questId: q.id, choice: opt },
+              }).catch(() => {});
             }}
             className="rounded-2xl border border-border bg-surface p-4 text-left text-sm hover:border-primary"
           >

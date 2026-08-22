@@ -1,8 +1,10 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { LivingWorld } from "@/components/living-world";
 import { NodeJsonLd } from "@/components/json-ld";
 import { VeraHouse } from "@/components/vera-house";
 import { getNodeUniverse } from "@/lib/graph-api";
+import { recordVisit } from "@/lib/platform-api";
 import { seoForNode } from "@/lib/seo";
 import { skinOf } from "@/lib/skins";
 
@@ -39,6 +41,9 @@ export const Route = createFileRoute("/n/$slug")({
 function NodePage() {
   const universe = Route.useLoaderData();
   const skin = skinOf(universe.node);
+  useEffect(() => {
+    void recordVisit({ data: { slug: universe.node.slug } }).catch(() => {});
+  }, [universe.node.slug]);
   return (
     <>
       <NodeJsonLd universe={universe} />

@@ -4,6 +4,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { ShareBar, Stars } from "@/components/share-bar";
 import { getNodeUniverse } from "@/lib/graph-api";
+import { addToCart } from "@/lib/platform-api";
 import { productOfferLd } from "@/lib/seo";
 
 export const Route = createFileRoute("/n/$slug/p/$pid")({
@@ -52,7 +53,11 @@ function ProductPage() {
       <Stars rating={product.rating} votes={product.votes} />
       <p className="mt-1 text-sm text-muted">{product.stock}</p>
       <div className="mt-6 flex flex-wrap gap-2">
-        <button type="button" className="h-11 rounded-full bg-primary px-5 text-sm font-medium text-primary-fg">
+        <button
+          type="button"
+          onClick={() => void addToCart({ data: { productId: product.id } })}
+          className="h-11 rounded-full bg-primary px-5 text-sm font-medium text-primary-fg"
+        >
           Ajouter au panier
         </button>
         <button type="button" className="h-11 rounded-full border border-border px-4 text-sm">

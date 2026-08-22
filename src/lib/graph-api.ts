@@ -332,11 +332,16 @@ export const createNode = createServerFn({ method: "POST" })
         }
       }
     }
-    await seedNodeShell(sql, id, data.kind);
+    await seedNodeShell(sql, id, data.kind, context.userId);
     return { slug };
   });
 
-async function seedNodeShell(sql: Awaited<ReturnType<typeof getSql>>, nodeId: string, kind: string) {
+async function seedNodeShell(
+  sql: Awaited<ReturnType<typeof getSql>>,
+  nodeId: string,
+  kind: string,
+  userId: string,
+) {
   const folders =
     kind === "series" || kind === "franchise"
       ? ["Lore", "Art & cartes", "Vidéos", "Merch"]
@@ -364,6 +369,44 @@ async function seedNodeShell(sql: Awaited<ReturnType<typeof getSql>>, nodeId: st
     `insert into timeline_events (id, node_id, year_label, title, body, sort_order) values ($1, $2, $3, $4, $5, 0)`,
     [crypto.randomUUID(), nodeId, "Début", "Ouverture du Node", "Premier jalon. La chronologie grandit avec l'univers."],
   );
+  // Owner = admin. Sans ça le Studio est un décor.
+  await sql.query(`insert into node_staff (id, node_id, name, role, user_id) values ($1, $2, $3, 'admin', $4)`, [
+    crypto.randomUUID(),
+    nodeId,
+    "Fondateur",
+    userId,
+  ]);
+  const tabs =
+    kind === "company"
+      ? [
+          ["maison", "Maison", "building"],
+          ["offres", "Offres", "briefcase"],
+          ["epreuve", "Quêtes", "list"],
+          ["videos", "Vidéos", "film"],
+          ["forum", "Forum", "messages"],
+        ]
+      : [
+          ["vivre", "Univers", "compass"],
+          ["forum", "Forum", "messages"],
+          ["videos", "Vidéos", "film"],
+          ["boutique", "Boutique", "store"],
+          ["reliques", "Drive", "folder"],
+        ];
+  let s = 0;
+  for (const [key, label, icon] of tabs) {
+    await sql.query(
+      `insert into node_tabs (id, node_id, tab_key, label, icon, sort_order) values ($1, $2, $3, $4, $5, $6)`,
+      [crypto.randomUUID(), nodeId, key, label, icon, s],
+    );
+    s += 1;
+  }
+  if (kind === "company" || kind === "job") {
+    await sql.query(
+      `insert into quests (id, node_id, title, skill, prompt, option_a, option_b, body, sort_order)
+       values ($1, $2, 'Culture fit', 'alignement', 'Un collègue publie un lore faux. Vous…', 'Corrigez en public, sources.', 'Message privé + source Drive.', 'Étape 1/7', 0)`,
+      [crypto.randomUUID(), nodeId],
+    );
+  }
 }
 
 export const getNodeUniverse = createServerFn({ method: "GET" })

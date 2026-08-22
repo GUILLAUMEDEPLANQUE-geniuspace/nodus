@@ -32,7 +32,9 @@ maison-orion           --parent_of-->  lead-game-designer
 | `src/components/skill-tree.tsx` | Arbre de talents / offres |
 | `src/components/holo-player.tsx` | Cockpit VOD sécurisé (modes) |
 | `src/lib/video-mode.ts` | Copy formation / jeu / shop / entretien |
-| `src/lib/theme.tsx` | Dark / light |
+| `src/lib/platform-api.ts` | Panier, blobs, ATS, notifs, DM, profil |
+| `src/lib/acl.ts` | Rôles owner/admin/mod |
+| `src/lib/i18n.ts` | FR/EN/JA chrome |
 | `migrations/*.sql` | Schéma + seed. Ne jamais editer une migration déjà appliquée : en ajouter une. |
 
 ## Peaux

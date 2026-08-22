@@ -2,6 +2,44 @@
 
 Format : ce qui est **dans le code**, pas la vision PDF.
 
+## 0.9.0 — 2026-08-22
+
+Couche plateforme. Lectures toujours publiques (SEO). Écritures auth + ACL.
+
+### Drive
+- `drive_blobs` : fichier < ~0,9 Mo stocké (base64). `locked` jamais dans `getNodeUniverse`
+- `uploadDriveBlob` / `readDriveBlob` : staff ou grant
+- Au-delà : métadonnée seule (prod = S3 + scan)
+
+### Commerce
+- Panier persisté, checkout démo `card` | `crypto`
+- Commande `paid` → `video_grants` sur les VOD du Node
+- Prod : webhook Stripe seul autorisé à passer `paid` (commenté dans `checkoutCart`)
+
+### Profils
+- Cover, bio, locale, univers suivis, visites
+- Plus de liens en dur One Piece / Orion
+
+### ACL
+- `owner > admin > mod > member`
+- Seed Node : fondateur = admin + dock + wiki + quête recruteur
+
+### ATS
+- `candidates` + `candidate_answers`
+- Quêtes persistées (step 1–7)
+- Vivier staff dans le Studio Maison
+
+### Social
+- Notifications (cloche)
+- DM par canal d'univers (`/inbox`)
+- Ranks forum (Mousse / Marin / Expert lore)
+
+### i18n
+- FR / EN / JA (chrome UI). Le contenu d'un Node reste la langue de l'auteur
+
+### Reco
+- `node_visits` à chaque ouverture de fiche
+
 ## 0.8.1 — 2026-08-22
 
 ### Commerce + partage

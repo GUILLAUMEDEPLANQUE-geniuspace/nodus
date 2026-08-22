@@ -80,9 +80,9 @@ function Wizard() {
     <main className="mx-auto max-w-lg px-4 py-10">
       <p className="text-[11px] tracking-[0.22em] text-primary uppercase">Studio guidé</p>
       <h1 className="mt-2 font-display text-4xl">On vous prend par la main</h1>
-      <p className="mt-2 text-sm text-muted">Étape {step + 1} / 3</p>
+      <p className="mt-2 text-sm text-muted">Étape {step + 1} / 4 — onglets, Drive et rôles se créent tout seuls.</p>
       <div className="mt-4 h-1 overflow-hidden rounded-full bg-surface-2">
-        <div className="h-full bg-primary transition-all" style={{ width: `${((step + 1) / 3) * 100}%` }} />
+        <div className="h-full bg-primary transition-all" style={{ width: `${((step + 1) / 4) * 100}%` }} />
       </div>
 
       {step === 0 ? (
@@ -212,6 +212,34 @@ function Wizard() {
             </button>
             <button
               type="button"
+              onClick={() => setStep(3)}
+              className="h-12 flex-1 rounded-full bg-primary text-sm font-medium text-primary-fg"
+            >
+              Voir ce qui sera créé
+            </button>
+          </div>
+          <Link to="/" className="block text-center text-sm text-muted">
+            Annuler
+          </Link>
+        </div>
+      ) : null}
+
+      {step === 3 ? (
+        <div className="mt-8 space-y-4">
+          <h2 className="font-display text-2xl">On pose le lieu de vie</h2>
+          <ul className="space-y-2 text-sm text-muted">
+            <li>Vous êtes admin de cet univers.</li>
+            <li>Dock : forum, vidéos, boutique ou offres (selon le profil).</li>
+            <li>Drive + wiki d'introduction.</li>
+            {profile === "recruiter" ? <li>Une première quête Culture fit (étape 1/7).</li> : null}
+          </ul>
+          {error ? <p className="text-sm text-primary">{error}</p> : null}
+          <div className="flex gap-2">
+            <button type="button" className="h-12 flex-1 rounded-full border border-border" onClick={() => setStep(2)}>
+              Retour
+            </button>
+            <button
+              type="button"
               disabled={busy}
               onClick={() => void submit()}
               className="h-12 flex-1 rounded-full bg-primary text-sm font-medium text-primary-fg disabled:opacity-40"
@@ -219,9 +247,6 @@ function Wizard() {
               {busy ? "Publication…" : "Publier le nœud"}
             </button>
           </div>
-          <Link to="/" className="block text-center text-sm text-muted">
-            Annuler
-          </Link>
         </div>
       ) : null}
     </main>
