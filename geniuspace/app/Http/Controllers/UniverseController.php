@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\MagazineController;
+use App\Http\Controllers\VeraController;
 use App\Models\CrowdGoal;
 use App\Models\DriveFile;
 use App\Models\Edge;
@@ -64,6 +65,9 @@ class UniverseController extends Controller
         $node = GpNode::query()->where('slug', $slug)->firstOrFail();
         $node->load(['products', 'media', 'threads', 'wiki', 'quests', 'translations']);
         $node->localized($request->cookie('locale', 'fr'));
+        if ($node->slug === 'vera' || $node->skin === 'vera') {
+            return app(VeraController::class)->room($request, $node, $tab ?: 'home');
+        }
         $childIds = Edge::query()->where('from_id', $node->id)->pluck('to_id');
         $children = GpNode::query()->whereIn('id', $childIds)->get();
         $parentIds = Edge::query()->where('to_id', $node->id)->pluck('from_id');
@@ -128,6 +132,9 @@ class UniverseController extends Controller
     public function fiche(string $slug, string $fiche): View
     {
         $club = GpNode::query()->where('slug', $slug)->firstOrFail();
+        if ($club->slug === 'vera' || $club->skin === 'vera') {
+            return app(VeraController::class)->jobShow($fiche);
+        }
         $node = GpNode::query()->where('slug', $fiche)->firstOrFail();
         abort_unless(Edge::query()->where('from_id', $club->id)->where('to_id', $node->id)->exists(), 404);
         abort_unless(Spoiler::ok((int) ($node->appear_order ?? 0), $club->id), 403, 'Spoiler. Recule le curseur d’arc.');

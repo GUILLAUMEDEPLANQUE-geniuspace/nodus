@@ -1,0 +1,136 @@
+/* Vera — tokens du repo GUILLAUMEDEPLANQUE-geniuspace/vera (Instrument + papier). */
+@import url("https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Instrument+Serif:ital@0;1&display=swap");
+
+html.vera, .vera-root {
+  --bg: #f2efe6;
+  --surface: #faf8f2;
+  --paper: #e7e2d4;
+  --ink: #161614;
+  --fg: #161614;
+  --muted: #6a6960;
+  --subtle: #8c8a80;
+  --primary: #1b4332;
+  --primary-fg: #f2efe6;
+  --border: #d4cfc0;
+  --good: #2d5a3d;
+  --warn: #8a6a2f;
+  --bad: #8b3a2a;
+  --font: "Instrument Sans", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+  --display: "Instrument Serif", "Iowan Old Style", Palatino, serif;
+  --shadow: 0 1px 0 color-mix(in srgb, var(--ink) 6%, transparent), 0 18px 40px -28px color-mix(in srgb, var(--ink) 35%, transparent);
+  background: var(--bg);
+  color: var(--ink);
+}
+html.vera, html.vera body { background: var(--bg); color: var(--ink); font-family: var(--font); min-height: 100dvh; margin: 0; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+html.vera a { color: inherit; text-decoration: none; }
+html.vera h1, html.vera h2, html.vera h3 { font-family: var(--display); letter-spacing: -0.03em; line-height: 1.12; text-wrap: balance; font-weight: 400; }
+.vera-root { min-height: 100dvh; display: flex; flex-direction: column; }
+.vera-wrap { width: min(72rem, calc(100% - 2rem)); margin-inline: auto; padding-inline: .5rem; }
+.vera-head { position: sticky; top: 0; z-index: 30; border-bottom: 1px solid var(--border); background: color-mix(in srgb, var(--bg) 90%, transparent); backdrop-filter: blur(8px); }
+.vera-head-inner { display: flex; align-items: center; gap: .75rem; height: 4rem; }
+.vera-brand { font-family: var(--display); font-size: 1.65rem; color: var(--primary); letter-spacing: -0.03em; }
+.vera-tag { font-size: .7rem; color: var(--muted); letter-spacing: .04em; }
+.vera-nav { display: none; flex: 1; justify-content: flex-end; gap: 1.15rem; }
+.vera-nav a { font-size: .9rem; font-weight: 500; color: var(--muted); }
+.vera-nav a.on, .vera-nav a:hover { color: var(--ink); }
+.vera-actions { margin-left: auto; display: flex; gap: .4rem; align-items: center; }
+.vera-burger { display: grid; place-items: center; width: 2.6rem; height: 2.6rem; border: 0; background: none; font-size: 1.3rem; }
+.vera-drawer { display: none; border-top: 1px solid var(--border); padding: .6rem 1rem 1rem; }
+.vera-drawer.open { display: block; }
+.vera-drawer a { display: block; padding: .7rem 0; font-size: 1.05rem; }
+@media (min-width: 1024px) {
+  .vera-nav { display: flex; }
+  .vera-burger { display: none; }
+  .vera-actions { margin-left: 0; }
+}
+.vera-btn { display: inline-flex; align-items: center; height: 2.75rem; padding: 0 1.15rem; border-radius: .6rem; background: var(--primary); color: var(--primary-fg); font-size: .875rem; font-weight: 500; border: 0; }
+.vera-btn.ghost { background: var(--surface); color: var(--ink); border: 1px solid var(--border); }
+.vera-btn.line { background: transparent; color: var(--ink); border: 1px solid var(--border); }
+.vera-hero { padding: 4rem 0 3.5rem; border-bottom: 1px solid var(--border); }
+.vera-kicker { font-size: .72rem; font-weight: 500; letter-spacing: .18em; text-transform: uppercase; color: var(--primary); }
+.vera-hero h1 { font-size: clamp(2.6rem, 8vw, 4.6rem); line-height: .95; max-width: 16ch; margin: 1rem 0 0; }
+.vera-lead { margin-top: 1.4rem; max-width: 36rem; font-size: 1.12rem; color: var(--muted); }
+.vera-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.4rem; margin-top: 2.6rem; }
+@media (min-width: 640px) { .vera-stats { grid-template-columns: repeat(4, 1fr); } }
+.vera-stats dt { font-size: .75rem; color: var(--muted); }
+.vera-stats dd { font-family: var(--display); font-size: 1.7rem; margin: .15rem 0 0; }
+.vera-search { display: flex; gap: .4rem; margin-top: 1.8rem; max-width: 36rem; }
+.vera-search input { flex: 1; height: 3rem; border: 1px solid var(--border); background: var(--surface); border-radius: .6rem; padding: 0 1rem; font: inherit; }
+.vera-grid { display: grid; gap: 1rem; }
+.vera-grid.g2 { grid-template-columns: 1fr; }
+.vera-grid.g3 { grid-template-columns: 1fr; }
+.vera-grid.g4 { grid-template-columns: 1fr; }
+@media (min-width: 640px) { .vera-grid.g2 { grid-template-columns: 1fr 1fr; } .vera-grid.g3 { grid-template-columns: 1fr 1fr; } .vera-grid.g4 { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 960px) { .vera-grid.g3 { grid-template-columns: repeat(3, 1fr); } .vera-grid.g4 { grid-template-columns: repeat(4, 1fr); } }
+.job-card, .v-card { background: var(--surface); border: 1px solid var(--border); border-radius: 1rem; padding: 1.2rem 1.3rem; box-shadow: var(--shadow); display: grid; gap: .35rem; }
+.job-card:hover, .v-card:hover { transform: translateY(-2px); }
+.job-card h3, .v-card h3 { font-size: 1.45rem; margin: .2rem 0 0; }
+.job-card .co { font-size: .8rem; color: var(--muted); }
+.salary { font-family: var(--display); font-size: 1.45rem; color: var(--ink); }
+.badge { display: inline-flex; align-items: center; font-size: .72rem; padding: .18rem .5rem; border-radius: 999px; border: 1px solid var(--border); background: var(--paper); }
+.badge.primary { background: var(--primary); color: var(--primary-fg); border-color: var(--primary); }
+.badge.good { color: var(--good); border-color: color-mix(in srgb, var(--good) 40%, var(--border)); }
+.badge.warn { color: var(--warn); }
+.badge.bad { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 40%, var(--border)); }
+.chips { display: flex; flex-wrap: wrap; gap: .4rem; }
+.band { display: grid; grid-template-columns: repeat(4, 1fr); gap: .4rem; margin: 1rem 0; }
+.band div { background: var(--surface); border: 1px solid var(--border); padding: .65rem .4rem; border-radius: .6rem; text-align: center; }
+.band strong { display: block; font-family: var(--display); font-size: 1.15rem; }
+.band .on { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 8%, var(--surface)); }
+.ppqc { display: grid; gap: .7rem; margin: 1.2rem 0; }
+.ppqc article { border-left: 3px solid var(--primary); padding: .55rem .9rem; background: var(--surface); }
+.honesty { display: grid; gap: .8rem; margin: 1.2rem 0; }
+.honesty article { padding: 1rem 1.1rem; border-radius: .9rem; background: var(--surface); border: 1px solid var(--border); }
+.honesty .hard { border-left: 3px solid var(--bad); }
+.honesty .good { border-left: 3px solid var(--good); }
+.honesty .ex { border-left: 3px solid var(--primary); }
+.sim-box { background: var(--ink); color: var(--bg); border-radius: 1rem; padding: 1.3rem; margin: 1.2rem 0; }
+.sim-box .kicker { color: #b7c4b0; font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; }
+.sim-box button { display: block; width: 100%; text-align: left; margin: .4rem 0; padding: .7rem .8rem; border-radius: .5rem; border: 1px solid #3a3a32; background: #22221c; color: var(--bg); font: inherit; }
+.sim-box button:hover, .sim-box button.on { border-color: #8fb89a; }
+.sim-box .ok { color: #9dcead; }
+.sim-box .ko { color: #e0a090; }
+.week { display: grid; gap: .55rem; margin: 1rem 0; }
+.week .row { display: grid; grid-template-columns: 8rem 1fr auto; gap: .6rem; align-items: center; font-size: .85rem; }
+.week .bar { height: .5rem; background: var(--paper); border-radius: 999px; overflow: hidden; }
+.week .bar > i { display: block; height: 100%; background: var(--primary); }
+.tour { position: relative; border-radius: 1rem; overflow: hidden; border: 1px solid var(--border); }
+.tour img { width: 100%; display: block; max-height: 28rem; object-fit: cover; }
+.hot { position: absolute; width: 1.4rem; height: 1.4rem; border-radius: 999px; background: var(--primary); color: var(--primary-fg); border: 2px solid #fff; transform: translate(-50%, -50%); font-size: .7rem; display: grid; place-items: center; cursor: pointer; }
+.voices { display: grid; gap: 1rem; }
+@media (min-width: 700px) { .voices { grid-template-columns: 1fr 1fr; } }
+.voice { display: grid; grid-template-columns: 4.5rem 1fr; gap: .8rem; padding: 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: 1rem; }
+.voice img { width: 4.5rem; height: 4.5rem; object-fit: cover; border-radius: .6rem; }
+.stepper { display: flex; gap: .3rem; flex-wrap: wrap; margin: 1rem 0; }
+.stepper span { font-size: .68rem; letter-spacing: .08em; text-transform: uppercase; border: 1px solid var(--border); padding: .28rem .55rem; border-radius: 999px; }
+.stepper span.on { background: var(--primary); color: var(--primary-fg); border-color: var(--primary); }
+.band-dark { background: var(--primary); color: var(--primary-fg); }
+.band-dark .vera-kicker { color: color-mix(in srgb, var(--primary-fg) 70%, transparent); }
+.band-dark p { color: color-mix(in srgb, var(--primary-fg) 82%, transparent); }
+.section { padding: 3.4rem 0; border-bottom: 1px solid var(--border); }
+.section.paper { background: color-mix(in srgb, var(--surface) 60%, transparent); }
+.principle { padding: 0 .2rem; }
+.principle .n { font-size: .75rem; color: var(--primary); letter-spacing: .12em; }
+.filters { display: flex; flex-wrap: wrap; gap: .45rem; margin: 1.1rem 0; }
+.filters select { height: 2.4rem; border: 1px solid var(--border); background: var(--surface); border-radius: .5rem; padding: 0 .6rem; font: inherit; font-size: .85rem; }
+.term-bang { display: inline-grid; place-items: center; width: 1.05rem; height: 1.05rem; margin: 0 .12rem 0 .2rem; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); color: var(--primary); font-size: .62rem; font-weight: 700; vertical-align: super; }
+.lex-item { border-top: 1px solid var(--border); padding-top: 1.4rem; }
+.career { display: grid; gap: .7rem; }
+.career article { padding: .9rem 1rem; border: 1px solid var(--border); border-radius: .8rem; background: var(--surface); }
+.career article.cur { border-color: var(--primary); }
+.tools { display: grid; gap: .8rem; }
+@media (min-width: 640px) { .tools { grid-template-columns: 1fr 1fr; } }
+.tools figure { margin: 0; border: 1px solid var(--border); border-radius: .9rem; overflow: hidden; background: var(--surface); }
+.tools img { width: 100%; height: 9rem; object-fit: cover; display: block; }
+.tools figcaption { padding: .8rem 1rem 1rem; font-size: .85rem; }
+.mark { width: 2.6rem; height: 2.6rem; border-radius: .7rem; background: var(--primary); color: var(--primary-fg); display: grid; place-items: center; font-family: var(--display); font-size: 1.2rem; flex-shrink: 0; }
+.job-head { display: flex; gap: 1rem; align-items: flex-start; }
+.side { position: sticky; top: 5rem; }
+.apply-box { border: 1px solid var(--border); background: var(--surface); border-radius: 1rem; padding: 1.1rem; }
+.vera-footer { border-top: 1px solid var(--border); padding: 2.6rem 0 3.4rem; margin-top: auto; font-size: .85rem; color: var(--muted); }
+.vera-footer .cols { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1.4rem; }
+.crumb { font-size: .75rem; color: var(--muted); }
+.crumb a:hover { color: var(--ink); }
+@media (max-width: 700px) { .band { grid-template-columns: 1fr 1fr; } .week .row { grid-template-columns: 1fr; } }
+html.vera header.site-head, html.vera body > footer.wrap { display: none; }
+html.vera .term-bang:hover { border-color: var(--primary); background: var(--paper); }

@@ -51,92 +51,119 @@ class DualWorldsSeeder extends Seeder
         $id = 'vera';
         $this->node([
             'id' => $id, 'slug' => 'vera', 'kind' => 'company', 'title' => 'Vera',
-            'subtitle' => 'Recrutement expérientiel',
-            'summary' => 'Pas un jobboard. Salon, arbre de compétences, 7 épreuves, Passport CV. JobPosting transparent.',
-            'hero' => '/realms/studio-hero.jpg', 'skin' => 'vera', 'featured' => 1, 'template' => 'vera-tech',
+            'subtitle' => 'L’emploi, enfin lisible',
+            'summary' => 'Jobboard indépendant. Verdict avant candidature, pacte de réponse public, brief à la place du CV, épreuve métier, PPQC, Passport. Indeed n’a aucun intérêt à faire ça.',
+            'hero' => '/offer/releve-atelier.jpg', 'skin' => 'vera', 'featured' => 1, 'template' => 'vera-tech',
         ]);
         $this->tabs($id, [
-            ['maison', 'Campus', '#38bdf8', 'Vera', 'Maison de recrutement expérientiel.'],
-            ['salon', 'Salon', '#38bdf8', 'Vera', 'Stands, visio quand tu t’approches.'],
-            ['arbre', 'Skill tree', '#38bdf8', 'Vera', 'Offres en constellations, pas une liste.'],
-            ['offres', 'Offres', '#38bdf8', 'Vera', 'JobPosting : salaire, remote, épreuve.'],
-            ['epreuve', 'Épreuves', '#38bdf8', 'Vera', '7 étapes configurables. Pas un CV.'],
-            ['forum', 'Forum', '#38bdf8', 'Vera', 'Holo-forum candidats × recruteurs.'],
-            ['journal', 'Magazine', '#38bdf8', 'Vera', 'Playbooks métier, FAQPage.'],
-            ['videos', 'Vidéos', '#38bdf8', 'Vera', 'Épreuves filmées, holo-fiches.'],
-            ['guides', 'Académie', '#38bdf8', 'Vera', 'HowTo onboarding.'],
-            ['guilde', 'Équipe', '#38bdf8', 'Vera', 'Trombinoscope, grades.'],
+            ['home', 'Accueil', '#1b4332', 'Vera', 'L’emploi, enfin lisible.'],
+            ['offres', 'Emplois', '#1b4332', 'Offres', 'Salaire publié, PPQC, épreuve, JobPosting.'],
+            ['europe', 'Europe', '#1b4332', 'Europe', 'Preuve avant le titre, remote ±2h.'],
+            ['preuve', 'Épreuve', '#1b4332', 'Épreuve', 'Geste 6 min, module, retry.'],
+            ['passport', 'Passeport', '#1b4332', 'Passeport', 'Registre Open Badge, pas un CV IA.'],
+            ['savoirs', 'Fiches', '#1b4332', 'Savoirs', 'Hub métier lié aux offres.'],
+            ['viviers', 'Viviers', '#1b4332', 'Viviers', 'RSA, seniors, slashers, reprise.'],
+            ['lexique', 'Lexique', '#1b4332', 'Lexique', 'Verdict, Pacte, Brief, PPQC.'],
+            ['pacte', 'Pacte', '#1b4332', 'Pacte', 'L’honneur est public.'],
+            ['ppqc', 'PPQC', '#1b4332', 'PPQC', 'Payer le qualifié, pas le clic.'],
+            ['journal', 'Journal', '#1b4332', 'Journal', 'Carnets d’entreprises.'],
+            ['reliques', 'Drive', '#1b4332', 'Drive', 'Visites et modes opératoires.'],
         ]);
         DB::table('node_seo')->updateOrInsert(['node_id' => $id], [
-            'title' => 'Vera — recrutement expérientiel | Geniuspace',
-            'description' => 'Offres en quêtes, skill tree, 7 épreuves, Passport. LinkedIn ne peut pas importer ça.',
+            'title' => 'Vera — l’emploi enfin lisible | Offres à salaire publié',
+            'description' => 'Jobboard indépendant. Verdict, pacte, brief, épreuve métier, PPQC. Pas de pubs, pas de ghost cachés.',
         ]);
-        $jobs = [
-            ['vera-gd', 'vera-lead-game-designer', 'Lead Game Designer', 'Remote EU · 65–80k · épreuve Culture fit'],
-            ['vera-fe', 'vera-frontend-craft', 'Frontend Craft', 'Paris / remote · 55–70k · épreuve UI en 48h'],
-            ['vera-pm', 'vera-product-narratif', 'Product narratif', 'Hybrid · 60–75k · étude de cas salon'],
-            ['vera-ops', 'vera-ops-campus', 'Ops campus', 'Paris · 42–50k · quête J1'],
-        ];
-        DB::table('edges')->where('from_id', $id)->delete();
-        foreach ($jobs as $j) {
-            $this->node([
-                'id' => $j[0], 'slug' => $j[1], 'kind' => 'job', 'title' => $j[2],
-                'subtitle' => 'Offre Vera', 'summary' => $j[3],
-                'hero' => '/realms/studio-hero.jpg', 'skin' => 'vera', 'template' => 'vera-tech',
-            ]);
-            DB::table('edges')->insert(['from_id' => $id, 'to_id' => $j[0], 'kind' => 'parent_of', 'label' => 'Offre']);
+
+        foreach (['vera-gd', 'vera-fe', 'vera-pm', 'vera-ops'] as $old) {
+            DB::table('edges')->where('from_id', $id)->where('to_id', $old)->delete();
+            DB::table('nodes')->where('id', $old)->delete();
         }
+        DB::table('edges')->where('from_id', $id)->delete();
+
+        $jobs = \App\Support\VeraCatalog::jobs();
+        foreach ($jobs as $j) {
+            $nid = 'vj-'.$j['slug'];
+            $taken = DB::table('nodes')->where('slug', $j['slug'])->where('id', '!=', $nid)->first();
+            if ($taken) {
+                DB::table('nodes')->where('id', $taken->id)->update(['slug' => $taken->slug.'-old']);
+            }
+            $hero = $j['pack']['workplace']['image'] ?? '/offer/releve-atelier.jpg';
+            $this->node([
+                'id' => $nid,
+                'slug' => $j['slug'],
+                'kind' => 'job',
+                'title' => $j['title'],
+                'subtitle' => $j['company']['name'].' · '.$j['salaryLabel'],
+                'summary' => $j['description'],
+                'body' => $j['description'],
+                'hero' => $hero,
+                'skin' => 'vera',
+                'template' => 'vera-tech',
+            ]);
+            DB::table('edges')->insert(['from_id' => $id, 'to_id' => $nid, 'kind' => 'parent_of', 'label' => 'Offre']);
+        }
+
         DB::table('quests')->where('node_id', $id)->delete();
         $qs = [
-            [1, 'Culture fit', 'alignement', 'Un collègue publie un lore faux en public. Vous…', 'Corrigez en public, sources.', 'Message privé + source Drive.'],
-            [2, 'Dossier Drive', 'preuve', 'Le PDF de l’épreuve est locké. Vous…', 'Passez l’étape 1 pour le jeton.', 'Demandez un accès modo.'],
-            [3, 'Cas salon', 'récit', 'Un candidat freeze dans le salon 2.5D. Vous…', 'Ouvrez la visio automatique.', 'Laissez le stand vide.'],
-            [4, 'Skill tree', 'stack', 'Le profil n’a pas le nœud “systems”. Vous…', 'Proposez la quête systems.', 'Rejetez.'],
-            [5, 'Paie transparente', 'éthique', 'Le candidat demande la fourchette. Vous…', 'Affichez 65–80k dans le JobPosting.', '« Selon profil ».'],
-            [6, 'Passport', 'confiance', 'Il coche 12 guides validés d’un autre Node. Vous…', 'Les compter comme reliques CV.', 'Ignorer, LinkedIn only.'],
-            [7, 'Offre', 'close', 'Il réussit. Vous…', 'Contrat + split d’onboarding.', 'Ghost.'],
+            [1, 'Honnêteté', 'lire', 'Le difficile est-il écrit ?', 'Oui, trois blocs : dur / bien / exceptionnel.', '« Selon profil ».'],
+            [2, 'Salaire', 'marché', 'La bande P25–P90 est-elle publique ?', 'Oui, Observatoire Vera 2026.', 'Fourchette cachée.'],
+            [3, 'Épreuve', 'geste', 'Les coordonnées avant l’épreuve ?', 'Non. Après un 55.', 'Formulaire LinkedIn.'],
+            [4, 'PPQC', 'modèle', 'Quand facture-t-on ?', 'Épreuve tenue + grille ≥ 55.', 'Au clic.'],
+            [5, 'Pacte', 'honneur', 'Un retard ?', 'L’honneur baisse, public.', 'Silence.'],
+            [6, 'Passport', 'preuve', 'Le CV IA ?', 'Registre JSON exportable.', 'PDF LinkedIn.'],
+            [7, 'Close', 'tenu', 'Le dossier tient. Vous…', 'Contrat + split d’onboarding.', 'Ghost.'],
         ];
         foreach ($qs as $q) {
             DB::table('quests')->insert(['node_id' => $id, 'step' => $q[0], 'title' => $q[1], 'skill' => $q[2], 'prompt' => $q[3], 'option_a' => $q[4], 'option_b' => $q[5]]);
         }
-        DB::table('node_arcs')->where('node_id', $id)->delete();
-        foreach (['Candidature', 'Épreuve 1–3', 'Épreuve 4–6', 'Offre'] as $i => $l) {
-            DB::table('node_arcs')->insert(['node_id' => $id, 'label' => $l, 'ord' => $i + 1]);
+
+        DB::table('wiki_pages')->where('node_id', $id)->delete();
+        foreach (\App\Support\VeraCatalog::json('savoirs-arts') as $a) {
+            DB::table('wiki_pages')->insert([
+                'node_id' => $id,
+                'title' => $a['title'],
+                'body' => implode("\n\n", $a['body'] ?? []),
+            ]);
         }
-        DB::table('media')->where('node_id', $id)->delete();
-        DB::table('media')->insert([
-            ['node_id' => $id, 'title' => 'Épreuve Culture fit — teaser', 'path' => 'media/orion.mp4', 'mode' => 'interview', 'access' => 'freemium', 'teaser_sec' => 8, 'price' => '', 'duration' => '00:18', 'chapters' => "00:00 — Maison\n00:08 — Cas (premium)", 'transcript' => 'Teaser. Le dossier Drive s’ouvre à l’étape 2.', 'kind' => 'video', 'views' => 410, 'rating' => '4.8'],
+
+        $now = now();
+        DB::table('articles')->updateOrInsert(['id' => 'art-vera-1'], [
+            'node_id' => $id, 'slug' => 'verdict-avant-candidature',
+            'title' => 'Le Verdict avant candidature : pourquoi un « Passez » est le produit',
+            'theme' => 'Métier', 'dossier' => 'Dossier métier',
+            'resume' => 'Ghost, honneur, fourchette, process. Un « Passez » épargne des heures. Indeed n’a aucun intérêt à le dire.',
+            'body' => "Vera n’est pas un ATS. C’est un jobboard éditorial. L’offre @technicien-maintenance-releve s’ouvre en salaire, honnêteté, épreuve.\n\nPublic : candidats, C-level, OPCO.",
+            'definition_term' => 'Verdict Vera',
+            'definition' => 'Score public avant candidature : ghost, honneur, salaire, durée du process. Trois issues : Allez, Demandez, Passez.',
+            'toc' => "Pourquoi le CV ment\nLe Pacte\nPPQC\nFAQ",
+            'longtail' => "jobboard salaire publié|Vera\nrecrutement par épreuve|Preuve\nppqc|Modèle",
+            'faq' => "C’est du gamification gadget ?||Non. Chaque étape alimente le JobPosting et le PPQC.\nLinkedIn peut importer le Passport ?||Non. JSON Open Badge, pas un PDF.",
+            'cover' => '/offer/releve-atelier.jpg', 'video_path' => 'offer/v/karim.mp4',
+            'author' => 'Observatoire Vera', 'author_role' => 'Éditorial', 'reading_min' => 8, 'views' => 240,
+            'published_at' => $now, 'updated_at' => $now,
         ]);
+
+        DB::table('drive_files')->where('node_id', $id)->delete();
+        foreach ([
+            ['Atelier Relève.jpg', '/offer/releve-atelier.jpg', 'image'],
+            ['Chantier Kora.jpg', '/offer/kora-chantier.jpg', 'image'],
+            ['Domicile Lise.jpg', '/offer/lise-domicile.jpg', 'image'],
+            ['Kit consignation.jpg', '/offer/tool-consignation.jpg', 'image'],
+            ['Voix Karim.mp4', '/offer/v/karim.mp4', 'video'],
+        ] as $f) {
+            DB::table('drive_files')->insert([
+                'node_id' => $id, 'title' => $f[0], 'path' => $f[1], 'kind' => $f[2], 'locked' => 0,
+            ]);
+        }
+
         DB::table('threads')->updateOrInsert(['id' => 'th-vera-1'], [
-            'node_id' => $id, 'kind' => 'forum', 'title' => 'L’épreuve 4 est-elle trop dure ?',
-            'author' => 'Camille', 'body' => 'On parle skill tree, pas LeetCode. Voir @lead-game-designer.',
-            'cover' => '/realms/studio-hero.jpg', 'views' => 220, 'fires' => 9, 'replies_count' => 2,
+            'node_id' => $id, 'kind' => 'forum', 'title' => 'Un cadenas partagé = 0. On est d’accord ?',
+            'author' => 'Karim', 'body' => 'Relève Fos. Voir @technicien-maintenance-releve. L’épreuve lockout n’est pas un QCM LinkedIn.',
+            'cover' => '/offer/releve-atelier.jpg', 'views' => 410, 'fires' => 18, 'replies_count' => 2,
         ]);
         DB::table('replies')->where('thread_id', 'th-vera-1')->delete();
         DB::table('replies')->insert([
-            ['thread_id' => 'th-vera-1', 'author' => 'Noah', 'body' => 'Sans le Passport, c’est encore LinkedIn.', 'votes' => 14, 'badge' => 'Recruteur', 'product_id' => '', 'file_title' => '', 'file_path' => '', 'file_locked' => 0, 'video_title' => '', 'video_path' => '', 'video_meta' => ''],
-        ]);
-        DB::table('wiki_pages')->updateOrInsert(['node_id' => $id, 'title' => 'Bible recruteur'], [
-            'body' => 'Sept étapes. JobPosting visible. Pas de « selon profil ».',
-        ]);
-        $now = now();
-        DB::table('articles')->updateOrInsert(['id' => 'art-vera-1'], [
-            'node_id' => $id, 'slug' => 'recrutement-epreuves-pas-cv',
-            'title' => 'Recrutement par épreuves : pourquoi le CV est mort',
-            'theme' => 'Métier', 'dossier' => 'Dossier métier',
-            'resume' => 'Remplacer le CV par 7 micro-quêtes. JobPosting transparent, Passport cross-node, skill tree.',
-            'body' => "Vera n’est pas un ATS. C’est un campus. L’offre @lead-game-designer s’ouvre en quête.\n\nPublic : recruteurs, C-level, candidats senior.",
-            'definition_term' => 'Épreuve Vera',
-            'definition' => 'Scénario interactif noté, lié à un JobPosting. Le sac à dos (reliques d’autres Nodes) compte.',
-            'toc' => "Pourquoi le CV ment\nLes 7 étapes\nPassport\nFAQ",
-            'longtail' => "recrutement par épreuve|Ce guide\njob board rpg|Salon Vera\nats skill tree|Arbre campus",
-            'faq' => "C’est du gamification gadget ?||Non. Chaque étape alimente le JobPosting et le graphe.\nLinkedIn peut importer le Passport ?||Non. C’est le moat.",
-            'cover' => '/realms/studio-hero.jpg', 'video_path' => 'media/orion.mp4',
-            'author' => 'Camille', 'author_role' => 'Head of Talent', 'reading_min' => 8, 'views' => 90,
-            'published_at' => $now, 'updated_at' => $now,
-        ]);
-        DB::table('drive_files')->updateOrInsert(['node_id' => $id, 'title' => 'Dossier épreuve.pdf'], [
-            'path' => '/realms/studio-hero.jpg', 'kind' => 'pdf', 'locked' => 1,
+            ['thread_id' => 'th-vera-1', 'author' => 'Nadia', 'body' => 'Kora pareil sur le neutre ouvert. @electricien-ombrieres-kora', 'votes' => 21, 'badge' => 'Terrain', 'product_id' => '', 'file_title' => '', 'file_path' => '', 'file_locked' => 0, 'video_title' => '', 'video_path' => '', 'video_meta' => ''],
         ]);
     }
 

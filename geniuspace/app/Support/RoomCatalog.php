@@ -82,6 +82,10 @@ class RoomCatalog
 
     public static function keys(): string
     {
-        return implode('|', array_merge(array_keys(self::all()), ['vivre', 'maison', 'salon', 'arbre', 'academie', 'blog']));
+        return implode('|', array_merge(array_keys(self::all()), [
+            'vivre', 'maison', 'salon', 'arbre', 'academie', 'blog', 'home',
+            'savoirs', 'lexique', 'viviers', 'europe', 'passport', 'preuve',
+            'pacte', 'ppqc', 'marches', 'entreprises', 'maisons', 'metiers', 'apprendre',
+        ]));
     }
 }
