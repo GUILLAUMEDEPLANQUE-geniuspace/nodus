@@ -63,7 +63,7 @@ class GpNode extends Model
     public function seoTitle(): string
     {
         return match ($this->kind) {
-            'series' => "{$this->title} — wiki, forum, personnages | Geniuspace",
+            'auto' => "{$this->title} — garage, fiches, pièces | Geniuspace",
             'company' => "{$this->title} — maison, salon, épreuves | Geniuspace",
             'product' => "{$this->title} — boutique du Node | Geniuspace",
             default => "{$this->title} — {$this->kind} | Geniuspace",

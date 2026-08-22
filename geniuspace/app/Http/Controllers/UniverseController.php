@@ -10,6 +10,7 @@ use App\Models\GuildMessage;
 use App\Models\LiveMessage;
 use App\Models\Product;
 use App\Models\Reply;
+use App\Support\RoomSchema;
 use App\Support\SignedMedia;
 use App\Support\Spoiler;
 use Illuminate\Http\Request;
@@ -81,6 +82,7 @@ class UniverseController extends Controller
         }
         $cursor = Spoiler::cursor($node->id);
         $openBounties = DB::table('bounties')->where('node_id', $node->id)->where('status', 'open')->count();
+        $tabMeta = $tabs->firstWhere('key', $tab);
         $white = $request->is('w/*');
         \Illuminate\Support\Facades\DB::table('visits')->insert([
             'node_id' => $node->id,
@@ -88,7 +90,7 @@ class UniverseController extends Controller
             'session' => substr($request->session()->getId(), 0, 16),
         ]);
         return view('universe', compact(
-            'node', 'children', 'parents', 'goal', 'replies', 'live', 'files', 'guild', 'tab', 'tid', 'mode', 'cck', 'seoRow', 'tabs', 'white', 'arcs', 'cursor', 'openBounties'
+            'node', 'children', 'parents', 'goal', 'replies', 'live', 'files', 'guild', 'tab', 'tid', 'mode', 'cck', 'seoRow', 'tabs', 'white', 'arcs', 'cursor', 'openBounties', 'tabMeta'
         ));
     }
 
@@ -139,5 +141,14 @@ class UniverseController extends Controller
         $children = GpNode::query()->whereIn('id', $childIds)->get();
         $files = DriveFile::query()->where('node_id', $node->id)->get();
         return view('video', compact('node', 'media', 'src', 'related', 'children', 'files'));
+    }
+
+    public function guide(string $slug, string $wid): View
+    {
+        $node = GpNode::query()->where('slug', $slug)->firstOrFail();
+        $pages = $node->wiki;
+        $page = $pages->first(fn ($w) => (string) $w->id === $wid || \Illuminate\Support\Str::slug($w->title) === $wid);
+        abort_unless($page, 404);
+        return view('guide', compact('node', 'page'));
     }
 }

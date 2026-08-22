@@ -36,8 +36,8 @@ class LeaderController extends Controller
         foreach (DB::table('products')->where('node_id', $club->id)->get() as $p) {
             $urls[] = url('/n/'.$slug.'/p/'.$p->id);
         }
-        foreach (DB::table('media')->where('node_id', $club->id)->get() as $m) {
-            $urls[] = url('/n/'.$slug.'/v/'.$m->id);
+        foreach (DB::table('wiki_pages')->where('node_id', $club->id)->get() as $w) {
+            $urls[] = url('/n/'.$slug.'/guide/'.\Illuminate\Support\Str::slug($w->title));
         }
         $xml = '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
         foreach (array_unique($urls) as $u) {

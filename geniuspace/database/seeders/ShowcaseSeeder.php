@@ -103,8 +103,15 @@ class ShowcaseSeeder extends Seeder
             ['Boîte', 'text', 'BE3 5 rapports'],
             ['Poids', 'digits', '880'],
         ];
-        foreach ($ccks as $i => $f) {
-            DB::table('cck_fields')->insert(['node_id' => 'peugeot-205-gti-19', 'name' => $f[0], 'type' => $f[1], 'value' => $f[2], 'sort' => $i]);
+        DB::table('cck_fields')->where('node_id', 'peugeot-205-gti-16')->delete();
+        foreach ([['Cylindrée', 'text', '1580 cm³'], ['Puissance', 'text', '115 ch DIN'], ['Années', 'text', '1984–1992'], ['Boîte', 'text', 'BE1 / BE3'], ['Poids', 'digits', '850']] as $i => $f) {
+            DB::table('cck_fields')->insert(['node_id' => 'peugeot-205-gti-16', 'name' => $f[0], 'type' => $f[1], 'value' => $f[2], 'sort' => $i]);
+        }
+        if (DB::table('replies')->where('thread_id', 'th-205-1')->count() === 0) {
+            DB::table('replies')->insert([
+                ['thread_id' => 'th-205-1', 'author' => 'Marc', 'body' => 'Fait à Reims. Couple 2.0 puis 2.2. Voir @joint-culasse-205-gti.', 'votes' => 12],
+                ['thread_id' => 'th-205-1', 'author' => 'Léa', 'body' => 'Le @p-205-joint du club était bon. Pas de fuite à 800 km.', 'votes' => 7],
+            ]);
         }
 
         $threads = [

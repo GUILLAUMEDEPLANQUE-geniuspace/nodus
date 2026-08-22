@@ -1,6 +1,6 @@
 @extends('layouts.app')
-@section('title', ($seoRow->title ?? null) ?: $node->seoTitle())
-@section('description', ($seoRow->description ?? null) ?: $node->summary)
+@section('title', ($tabMeta->seo_title ?? null) ?: (($seoRow->title ?? null) ?: $node->seoTitle()))
+@section('description', ($tabMeta->seo_desc ?? null) ?: (($seoRow->description ?? null) ?: $node->summary))
 @section('canonical', url($tab && $tab !== 'vivre' && $tab !== 'maison' ? '/n/'.$node->slug.'/'.$tab : '/n/'.$node->slug))
 @push('jsonld')
 <script type="application/ld+json">
@@ -13,7 +13,7 @@
       ['@'.'type' => 'ListItem', 'position' => isset($parents[0]) ? 3 : 2, 'name' => $node->title, 'item' => url('/n/'.$node->slug)],
     ]))],
     ['@'.'type' => $node->kind === 'company' ? 'Organization' : 'CreativeWork', 'name' => $node->title, 'description' => $node->summary, 'url' => url('/n/'.$node->slug)],
-    ['@'.'type' => 'ItemList', 'name' => ($tabs->firstWhere('key', $tab)->label ?? $tab).' — '.$node->title, 'url' => url('/n/'.$node->slug.'/'.$tab)],
+    \App\Support\RoomSchema::graph($node, $tab ?: 'vivre', $tabs),
   ],
 ], JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) !!}
 </script>
@@ -137,7 +137,8 @@
 </div>
 @else
 <div>
-<section class="hero" style="min-height:70dvh">
+@if($tab === 'vivre')
+<section class="hero" style="min-height:78dvh">
     <img class="bg" src="{{ $node->hero }}" alt="">
     <div class="veil"></div>
     <div class="copy wrap">
@@ -166,8 +167,12 @@
         @endif
         <div style="margin-top:1.1rem;display:flex;gap:0.5rem;flex-wrap:wrap">
             <form action="/n/{{ $node->slug }}/q"><input name="q" placeholder="Chercher dans le club" style="width:12rem"><button class="btn-line" type="submit">OK</button></form>
-            @if($children->count()>=2)
-              <a class="btn-line" href="/n/{{ $node->slug }}/vs/{{ $children[0]->slug }}/{{ $children[1]->slug }}">Comparer 2 fiches</a>
+            @php
+              $vsA = $children->firstWhere('slug','peugeot-205-gti-16') ?? $children[0] ?? null;
+              $vsB = $children->firstWhere('slug','peugeot-205-gti-19') ?? ($children[1] ?? null);
+            @endphp
+            @if($vsA && $vsB)
+              <a class="btn-line" href="/n/{{ $node->slug }}/vs/{{ $vsA->slug }}/{{ $vsB->slug }}">Comparer 1.6 vs 1.9</a>
             @endif
             <a class="btn-ghost" href="/n/{{ $node->slug }}/digest">Digest</a>
             <a class="btn" href="/n/{{ $node->slug }}/forum">Parler</a>
@@ -179,6 +184,13 @@
         </div>
     </div>
 </section>
+@else
+  <header class="room-head wrap">
+    <p class="kicker">{{ $node->title }} · salle</p>
+    <h1 class="font-display" style="font-size:clamp(2rem,5vw,3.2rem);margin:.2rem 0">{{ $tabMeta->label ?? $tab }}</h1>
+    @if(!empty($tabMeta->seo_desc))<p class="muted">{{ $tabMeta->seo_desc }}</p>@endif
+  </header>
+@endif
 
 <div class="wrap" style="padding-top:2rem">
     @if($tab==='vivre')
@@ -279,8 +291,9 @@
         <h2 class="font-display" style="font-size:2.4rem">Guides / wiki</h2>
         @forelse($node->wiki as $w)
             <article class="card" style="padding:1.25rem;margin:0.5rem 0">
-                <h3 class="font-display">{{ $w->title }}</h3>
-                <p class="muted">{{ $w->body }}</p>
+                <h3 class="font-display"><a href="/n/{{ $node->slug }}/guide/{{ \Illuminate\Support\Str::slug($w->title) }}">{{ $w->title }}</a></h3>
+                <p class="muted">{{ \Illuminate\Support\Str::limit($w->body, 180) }}</p>
+                <a class="btn-line" href="/n/{{ $node->slug }}/guide/{{ \Illuminate\Support\Str::slug($w->title) }}">Lire la page</a>
             </article>
         @empty
             <p class="muted">Wiki vide.</p>

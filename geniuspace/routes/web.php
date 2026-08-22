@@ -94,7 +94,13 @@ Route::post('/n/{slug}/host', [LeaderController::class, 'host']);
 Route::get('/g/{slug}.json', [LeaderController::class, 'graph']);
 Route::get('/g/{slug}', [LeaderController::class, 'graph']);
 Route::get('/w/{slug}', [LeaderController::class, 'white']);
+Route::get('/n/{slug}/guide/{wid}', [UniverseController::class, 'guide']);
 Route::get('/n/{slug}/f/{fiche}', [UniverseController::class, 'fiche']);
+Route::get('/n/{slug}/llms.txt', function (string $slug) {
+    $n = \App\Models\GpNode::query()->where('slug', $slug)->firstOrFail();
+    $txt = "# {$n->title}\n\n{$n->summary}\n\nPages: ".url('/n/'.$slug)."\nGraphe: ".url('/api/v1/g/'.$slug)."\n";
+    return response($txt, 200, ['Content-Type' => 'text/plain; charset=utf-8']);
+});
 Route::get('/n/{slug}/{salle}', [UniverseController::class, 'room'])->where('salle', RoomCatalog::keys());
 Route::get('/n/{slug}', [UniverseController::class, 'show'])->name('node.show');
 Route::get('/n/{slug}/t/{tid}', [UniverseController::class, 'thread'])->name('thread.show');

@@ -48,6 +48,15 @@
 
 Le pilote n’est plus 3 salles vides. Garage ciné, 14 salles, graphe 1.9→pièces, holo-forum, pièces geo Reims, guides, meets, Drive, quêtes SEO, pulse sur l’accueil.
 
+## 2026-08-22 — Leader : salles uniques + wiki pages
+
+- Titre/desc SEO **par salle** (plus le même title sur tout le club).
+- JSON-LD métier (DiscussionForumPosting, OfferCatalog, TechArticle…).
+- Hero 78vh **seulement** sur Univers. Les autres salles ont un en-tête propre.
+- Guides = pages `/n/{club}/guide/{slug}` + sitemap.
+- Comparateur 1.6 vs 1.9. `llms.txt`. Réponses forum seedées.
+
+
 
 
 

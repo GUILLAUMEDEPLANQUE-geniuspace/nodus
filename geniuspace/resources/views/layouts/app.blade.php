@@ -36,7 +36,7 @@
     @else
     <a href="/" class="brand">Geniuspace</a>
     <form action="/explore" class="nav" style="flex:1;max-width:20rem">
-        <input name="q" placeholder="Jack O'Neill, Luffy…" style="width:100%">
+        <input name="q" placeholder="205 GTI, joint culasse, Luffy…" style="width:100%">
     </form>
     <nav class="nav">
         <a class="btn-ghost" href="/explore">Explorer</a>
