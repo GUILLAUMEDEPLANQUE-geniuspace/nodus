@@ -11,5 +11,6 @@ class DatabaseSeeder extends Seeder
         $this->call(GeniuspaceSeeder::class);
         $this->call(ForumVideoSeeder::class);
         $this->call(PlatformSeeder::class);
+        $this->call(GodSeeder::class);
     }
 }

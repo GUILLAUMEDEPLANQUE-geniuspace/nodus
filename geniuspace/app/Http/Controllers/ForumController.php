@@ -84,4 +84,35 @@ class ForumController extends Controller
         ]);
         return redirect('/n/'.$slug.'?tab=guilde')->with('ok', 'Message de guilde.');
     }
+
+    public function fire(string $slug, string $tid): RedirectResponse
+    {
+        Thread::query()->where('id', $tid)->increment('fires');
+        DB::table('forum_awards')->insert(['thread_id' => $tid, 'kind' => 'feu', 'author' => Auth::user()->name ?? 'Toi']);
+        return redirect('/n/'.$slug.'?tab=forum&tid='.$tid);
+    }
+
+    public function echoLive(Request $request, string $slug, string $tid): RedirectResponse
+    {
+        $id = $request->integer('live_id');
+        $row = DB::table('live_messages')->where('id', $id)->first();
+        abort_unless($row, 404);
+        Reply::query()->create([
+            'thread_id' => $tid,
+            'author' => $row->author,
+            'body' => $row->body,
+            'votes' => 1,
+            'pending' => 0,
+            'media_path' => '',
+            'author_avatar' => \App\Support\Faces::of($row->author),
+        ]);
+        Thread::query()->where('id', $tid)->increment('replies_count');
+        return redirect('/n/'.$slug.'?tab=forum&tid='.$tid)->with('ok', 'Écho : le Live devient Legacy (SEO).');
+    }
+
+    public function award(string $slug, string $tid): RedirectResponse
+    {
+        DB::table('forum_awards')->insert(['thread_id' => $tid, 'kind' => 'relique', 'author' => Auth::user()->name ?? 'Toi']);
+        return redirect('/n/'.$slug.'/t/'.$tid)->with('ok', 'Relique posée.');
+    }
 }

@@ -5,13 +5,13 @@
 @push('jsonld')
 <script type="application/ld+json">
 {!! json_encode([
-  '@context' => 'https://schema.org',
-  '@type' => 'DiscussionForumPosting',
+  '@'.'context' => 'https://schema.org',
+  '@'.'type' => 'DiscussionForumPosting',
   'headline' => $thread->title,
   'articleBody' => $thread->body,
-  'author' => ['@type' => 'Person', 'name' => $thread->author],
+  'author' => ['@'.'type' => 'Person', 'name' => $thread->author],
   'interactionStatistic' => [
-    ['@type' => 'InteractionCounter', 'interactionType' => 'https://schema.org/CommentAction', 'userInteractionCount' => $replies->count()],
+    ['@'.'type' => 'InteractionCounter', 'interactionType' => 'https://schema.org/CommentAction', 'userInteractionCount' => $replies->count()],
   ],
   'url' => url()->current(),
 ], JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) !!}
@@ -21,7 +21,10 @@
 <main class="wrap" style="padding:2rem 1.25rem 6rem" x-data="{ mode: 'legacy' }">
     <a class="kicker" href="/n/{{ $node->slug }}?tab=forum">{{ $node->title }} · Holo-Forum</a>
     <h1 class="font-display" style="font-size:clamp(2rem,6vw,3.2rem)">{{ $thread->title }}</h1>
-    <p class="muted">{{ $thread->author }} · {{ $thread->views }} vues · {{ $thread->fires }} feux</p>
+    <p class="muted" style="display:flex;align-items:center;gap:.5rem">
+        <img src="{{ $thread->author_avatar ?: \App\Support\Faces::of($thread->author) }}" alt="" style="width:2rem;height:2rem;border-radius:999px;object-fit:cover">
+        {{ $thread->author }} · {{ $thread->views }} vues · {{ $thread->fires }} feux
+    </p>
     <p style="max-width:40rem;font-size:1.1rem">{{ $thread->body }}</p>
     <div class="rel" style="margin:1rem 0">
         <button class="chip" type="button" @click="mode='legacy'">Top SEO</button>

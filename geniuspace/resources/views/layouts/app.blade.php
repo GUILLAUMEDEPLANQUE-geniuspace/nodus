@@ -31,7 +31,7 @@
         <a class="btn-ghost" href="/explore">Explorer</a>
         <a class="btn-ghost" href="/create">Créer</a>
         <a class="btn-ghost" href="/drive">Drive</a>
-        <a class="btn-ghost" href="/studio/image">Éditeur</a>
+        <a class="btn-ghost" href="/builder/one-piece">God Canvas</a>
         @auth
           <a class="btn-ghost" href="/profil">{{ auth()->user()->name }}</a>
           <form method="post" action="/logout">@csrf<button class="btn-ghost" type="submit">Out</button></form>

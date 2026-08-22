@@ -5,12 +5,12 @@
 @push('jsonld')
 <script type="application/ld+json">
 {!! json_encode([
-  '@context' => 'https://schema.org',
-  '@type' => 'VideoObject',
+  '@'.'context' => 'https://schema.org',
+  '@'.'type' => 'VideoObject',
   'name' => $media->title,
   'description' => $media->transcript,
   'thumbnailUrl' => url($node->hero),
-  'uploadDate' => '2026-08-22',
+  'author' => ['@'.'type' => 'Person', 'name' => $media->author_name ?: 'Créateur'],
   'duration' => 'PT'.($media->duration ?: '0M'),
   'embedUrl' => url('/n/'.$node->slug.'/v/'.$media->id),
   'contentUrl' => url('/'.$media->path),
@@ -33,6 +33,13 @@
         · {{ $node->products->first()->price }}
       @endif
     </div>
+    <a href="/profil" class="wrap" style="display:flex;align-items:center;gap:.75rem;padding:.4rem 1rem 0.8rem">
+      <img src="{{ $media->author_avatar ?: \App\Support\Faces::of($media->author_name ?: 'Créateur') }}" alt="" style="width:2.6rem;height:2.6rem;border-radius:999px;object-fit:cover;border:1px solid var(--primary)">
+      <div>
+        <strong>{{ $media->author_name ?: 'Créateur' }}</strong>
+        <p class="muted" style="margin:0;font-size:.8rem">{{ $media->author_role ?: 'Auteur' }} · chaîne du Node</p>
+      </div>
+    </a>
     <div class="video-box" style="margin:0 0.75rem;border-radius:1rem;overflow:hidden;border:1px solid var(--border)">
       <video id="v" src="{{ $src }}" poster="{{ $node->hero }}" playsinline
         :style="(!granted && teaser && t>=teaser) ? 'filter:blur(8px)' : ''"

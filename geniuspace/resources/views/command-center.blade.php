@@ -4,12 +4,12 @@
 @section('canonical', url('/n/'.$node->slug.'/p/'.$product->id))
 @push('jsonld')
 <script type="application/ld+json">
-{!! json_encode(['@context'=>'https://schema.org','@graph'=>[[
-  '@type' => $product->rwa ? 'VisualArtwork' : 'Product',
+{!! json_encode(['@'.'context'=>'https://schema.org','@'.'graph'=>[[
+  '@'.'type' => $product->rwa ? 'VisualArtwork' : 'Product',
   'name' => $product->title,
   'description' => $product->summary,
   'image' => url($product->image),
-  'offers' => ['@type'=>'Offer','priceCurrency'=>'EUR','price'=>$product->priceAmount(),'availability'=>'https://schema.org/InStock'],
+  'offers' => ['@'.'type'=>'Offer','priceCurrency'=>'EUR','price'=>$product->priceAmount(),'availability'=>'https://schema.org/InStock'],
   'url' => url('/n/'.$node->slug.'/p/'.$product->id),
 ]]], JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) !!}
 </script>

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BuilderController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CreateController;
 use App\Http\Controllers\DriveController;
@@ -43,6 +44,12 @@ Route::post('/n/{slug}/studio/ats', [StudioController::class, 'ats']);
 Route::post('/n/{slug}/studio/weave', [StudioController::class, 'weave']);
 Route::post('/n/{slug}/studio/ban', [StudioController::class, 'ban']);
 Route::post('/n/{slug}/studio/approve', [StudioController::class, 'approve']);
+Route::get('/builder/{slug?}', [BuilderController::class, 'show']);
+Route::get('/builder/{slug}/state', [BuilderController::class, 'state']);
+Route::post('/builder/{slug}/bang', [BuilderController::class, 'bang']);
+Route::post('/builder/{slug}/add', [BuilderController::class, 'add']);
+Route::post('/builder/{slug}/link', [BuilderController::class, 'link']);
+Route::post('/builder/{slug}/sync', [BuilderController::class, 'sync']);
 Route::get('/n/{slug}', [UniverseController::class, 'show'])->name('node.show');
 Route::get('/n/{slug}/t/{tid}', [UniverseController::class, 'thread'])->name('thread.show');
 Route::get('/n/{slug}/p/{pid}', [UniverseController::class, 'product'])->name('product.show');
@@ -56,6 +63,9 @@ Route::post('/drive/lock', [DriveController::class, 'lock']);
 Route::post('/forum', [ForumController::class, 'thread']);
 Route::post('/n/{slug}/t/{tid}/reply', [ForumController::class, 'reply']);
 Route::post('/n/{slug}/t/{tid}/live', [ForumController::class, 'live']);
+Route::post('/n/{slug}/t/{tid}/fire', [ForumController::class, 'fire']);
+Route::post('/n/{slug}/t/{tid}/echo', [ForumController::class, 'echoLive']);
+Route::post('/n/{slug}/t/{tid}/award', [ForumController::class, 'award']);
 Route::post('/n/{slug}/guilde', [ForumController::class, 'guild']);
 Route::post('/cart', [CartController::class, 'add'])->name('cart.add');
 Route::post('/cart/checkout', [CartController::class, 'checkout'])->name('cart.checkout');

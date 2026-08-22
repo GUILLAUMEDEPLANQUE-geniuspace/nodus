@@ -5,14 +5,14 @@
 @push('jsonld')
 <script type="application/ld+json">
 {!! json_encode([
-  '@context' => 'https://schema.org',
-  '@graph' => [
-    ['@type' => 'BreadcrumbList', 'itemListElement' => array_values(array_filter([
-      ['@type' => 'ListItem', 'position' => 1, 'name' => 'Geniuspace', 'item' => url('/')],
-      isset($parents[0]) ? ['@type' => 'ListItem', 'position' => 2, 'name' => $parents[0]->title, 'item' => url('/n/'.$parents[0]->slug)] : null,
-      ['@type' => 'ListItem', 'position' => isset($parents[0]) ? 3 : 2, 'name' => $node->title, 'item' => url('/n/'.$node->slug)],
+  '@'.'context' => 'https://schema.org',
+  '@'.'graph' => [
+    ['@'.'type' => 'BreadcrumbList', 'itemListElement' => array_values(array_filter([
+      ['@'.'type' => 'ListItem', 'position' => 1, 'name' => 'Geniuspace', 'item' => url('/')],
+      isset($parents[0]) ? ['@'.'type' => 'ListItem', 'position' => 2, 'name' => $parents[0]->title, 'item' => url('/n/'.$parents[0]->slug)] : null,
+      ['@'.'type' => 'ListItem', 'position' => isset($parents[0]) ? 3 : 2, 'name' => $node->title, 'item' => url('/n/'.$node->slug)],
     ]))],
-    ['@type' => $node->kind === 'company' ? 'Organization' : 'CreativeWork', 'name' => $node->title, 'description' => $node->summary, 'url' => url('/n/'.$node->slug)],
+    ['@'.'type' => $node->kind === 'company' ? 'Organization' : 'CreativeWork', 'name' => $node->title, 'description' => $node->summary, 'url' => url('/n/'.$node->slug)],
   ],
 ], JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) !!}
 </script>
@@ -48,15 +48,19 @@
           <div class="veil"></div>
           <div class="relative z-10 wrap" style="display:flex;justify-content:space-between;align-items:flex-end;gap:1rem;width:100%">
             <div style="max-width:36rem">
-              <p class="kicker">Sujet · {{ $t->author }}</p>
+              <p class="kicker" style="display:flex;align-items:center;gap:.5rem">
+                <img src="{{ $t->author_avatar ?: \App\Support\Faces::of($t->author) }}" alt="" style="width:1.6rem;height:1.6rem;border-radius:999px;object-fit:cover">
+                Sujet · {{ $t->author }}
+              </p>
               <h2 class="font-display" style="font-size:clamp(2rem,6vw,3.4rem);margin:0.3rem 0;line-height:0.95">{{ $t->title }}</h2>
               <p>{{ $t->body }}</p>
               <p class="muted" style="font-size:0.8rem">{{ $t->views }} vues · {{ $t->fires }} feux · {{ $t->replies_count }} réponses</p>
             </div>
             <div class="side-btns">
-              <span class="orb">🔥 {{ $t->fires }}</span>
+              <form method="post" action="/n/{{ $node->slug }}/t/{{ $t->id }}/fire"><input type="hidden" name="_token" value="{{ csrf_token() }}"><button type="submit" class="orb">🔥 {{ $t->fires }}</button></form>
               <button type="button" class="orb pri" @click="openId='{{ $t->id }}'">💬 {{ $t->replies_count }}</button>
               <a class="orb" href="/n/{{ $node->slug }}/t/{{ $t->id }}" aria-label="Fiche SEO">↗</a>
+              <a class="orb" href="/studio/image?src={{ urlencode($t->cover ?: $node->hero) }}&target=thread&id={{ $t->id }}&slug={{ $node->slug }}">✎</a>
             </div>
           </div>
         </article>
@@ -67,6 +71,12 @@
           <input type="hidden" name="slug" value="{{ $node->slug }}">
           <p class="kicker">Nouveau sujet — indexé Google</p>
           <input name="title" required placeholder="Titre du débat" style="width:100%;margin:0.5rem 0">
+          <select name="category" style="width:100%;margin-bottom:.4rem">
+            <option value="">Catégorie</option>
+            <option>Lore</option>
+            <option>Théories</option>
+            <option>Quêtes</option>
+          </select>
           <textarea name="body" required placeholder="Accroche Legacy" style="width:100%;min-height:6rem"></textarea>
           <button class="btn" type="submit" style="margin-top:0.75rem">Publier le sujet</button>
         </form>
@@ -85,7 +95,10 @@
           <div x-show="openId==='{{ $t->id }}' && mode==='legacy'">
             @forelse($replies->get($t->id, collect()) as $r)
               <article class="legacy-card">
-                <p class="kicker">{{ $r->author }} · {{ $r->votes }} votes</p>
+                <p class="kicker" style="display:flex;align-items:center;gap:.4rem">
+                  <img src="{{ $r->author_avatar ?: \App\Support\Faces::of($r->author) }}" alt="" style="width:1.4rem;height:1.4rem;border-radius:999px;object-fit:cover">
+                  {{ $r->author }} · {{ $r->votes }} votes
+                </p>
                 <p>{{ $r->body }}</p>
               </article>
             @empty
@@ -99,8 +112,13 @@
           <div x-show="openId==='{{ $t->id }}' && mode==='live'">
             @foreach($live->get($t->id, collect()) as $l)
               <div class="live-row">
-                <span class="av">{{ mb_substr($l->author,0,2) }}</span>
+                <img src="{{ \App\Support\Faces::of($l->author) }}" alt="" style="width:2rem;height:2rem;border-radius:999px;object-fit:cover">
                 <p class="bubble"><span class="primary" style="font-size:0.75rem">{{ $l->author }}</span> {{ $l->body }}</p>
+                <form method="post" action="/n/{{ $node->slug }}/t/{{ $t->id }}/echo">
+                  @csrf
+                  <input type="hidden" name="live_id" value="{{ $l->id }}">
+                  <button class="chip" type="submit">Écho → Legacy</button>
+                </form>
               </div>
             @endforeach
             <form method="post" action="/n/{{ $node->slug }}/t/{{ $t->id }}/live" @submit="ping('Toi')">
@@ -133,6 +151,7 @@
             <button class="btn-line" type="button" @click="tab='guilde'">Entrer dans la guilde</button>
             <a class="btn-line" href="/studio/image?src={{ urlencode($node->hero) }}&target=hero&slug={{ $node->slug }}">Éditer le héros</a>
             <a class="btn-ghost" href="/n/{{ $node->slug }}/studio">Studio</a>
+            <a class="btn-ghost" href="/builder/{{ $node->slug }}">God Canvas 3D</a>
         </div>
     </div>
 </section>
