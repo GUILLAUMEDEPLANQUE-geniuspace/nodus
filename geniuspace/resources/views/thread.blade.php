@@ -9,7 +9,7 @@
 @endpush
 @section('content')
 <main class="wrap" style="padding:2.5rem 1.25rem 6rem">
-    <a class="kicker" href="{{ route('node.show', $node->slug) }}">{{ $node->title }} · Forum</a>
+    <a class="kicker" href="/n/{{ $node->slug }}">{{ $node->title }} · Forum</a>
     <h1 class="font-display" style="font-size:3rem">{{ $thread->title }}</h1>
     <p class="muted">{{ $thread->author }}</p>
     <p style="max-width:40rem;font-size:1.1rem">{{ $thread->body }}</p>

@@ -18,9 +18,9 @@ class MediaController extends Controller
         $exp = (int) $request->query('exp');
         $sig = (string) $request->query('sig');
         abort_unless($path && SignedMedia::valid($path, $exp, $sig), 403, 'Jeton expiré');
-        $full = storage_path('app/'.$path);
+        $full = public_path($path);
         if (! is_file($full)) {
-            $full = public_path($path);
+            $full = storage_path('app/'.$path);
         }
         abort_unless(is_file($full), 404);
         return response()->file($full, [

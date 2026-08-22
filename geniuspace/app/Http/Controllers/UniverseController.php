@@ -50,7 +50,7 @@ class UniverseController extends Controller
         $product = Product::query()->where('id', $pid)->where('node_id', $node->id)->firstOrFail();
         $products = $node->products;
         $media = $node->media->first();
-        $src = $media ? SignedMedia::sign($media->path) : '/media/atelier.mp4';
+        $src = $media ? SignedMedia::url($media) : '/media/atelier.mp4';
         $goal = CrowdGoal::query()->find($node->id);
         return view('command-center', compact('node', 'product', 'products', 'media', 'src', 'goal'));
     }
@@ -59,7 +59,7 @@ class UniverseController extends Controller
     {
         $node = GpNode::query()->where('slug', $slug)->firstOrFail();
         $media = $node->media()->where('id', $vid)->firstOrFail();
-        $src = SignedMedia::sign($media->path);
+        $src = SignedMedia::url($media);
         return view('video', compact('node', 'media', 'src'));
     }
 }

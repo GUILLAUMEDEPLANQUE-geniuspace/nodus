@@ -24,7 +24,7 @@
     <div class="veil"></div>
     <div class="copy wrap">
         @if($parents->first())
-            <a class="kicker" href="{{ route('node.show', $parents->first()->slug) }}">Univers parent · {{ $parents->first()->title }}</a>
+            <a class="kicker" href="/n/{{ $parents->first()->slug }}">Univers parent · {{ $parents->first()->title }}</a>
         @else
             <p class="kicker">{{ $node->skin === 'vera' ? 'Maison' : 'Lieu de vie' }} · {{ $node->kind }}</p>
         @endif
@@ -40,7 +40,7 @@
             <h2 class="font-display" style="font-size:2rem">{{ $node->skin === 'vera' ? 'Offres' : 'Personnages / enfants' }}</h2>
             <div class="rel">
                 @foreach($children as $c)
-                    <a class="chip" href="{{ route('node.show', $c->slug) }}">{{ $c->title }}</a>
+                    <a class="chip" href="/n/{{ $c->slug }}">{{ $c->title }}</a>
                 @endforeach
             </div>
         @endif
@@ -57,7 +57,7 @@
 
     <div class="panel" :class="tab==='forum' ? 'active' : ''">
         @forelse($node->threads as $t)
-            <a class="forum-card" href="{{ route('thread.show', ['slug' => $node->slug, 'tid' => $t->id]) }}">
+            <a class="forum-card" href="/n/{{ $node->slug }}/t/{{ $t->id }}">
                 <img src="{{ $t->cover ?: $node->hero }}" alt="">
                 <div class="veil"></div>
                 <div class="copy">
@@ -74,7 +74,7 @@
     <div class="panel" :class="tab==='boutique' ? 'active' : ''">
         <div class="grid-3">
             @foreach($node->products as $p)
-                <a class="card" href="{{ route('product.show', ['slug' => $node->slug, 'pid' => $p->id]) }}">
+                <a class="card" href="/n/{{ $node->slug }}/p/{{ $p->id }}">
                     <img src="{{ $p->image }}" alt="">
                     <div class="pad">
                         @if($p->rwa)<p class="kicker">RWA</p>@endif
@@ -89,7 +89,7 @@
 
     <div class="panel" :class="tab==='videos' ? 'active' : ''">
         @foreach($node->media as $m)
-            <a class="card" href="{{ route('video.show', ['slug' => $node->slug, 'vid' => $m->id]) }}" style="display:flex;gap:1rem;padding:1rem;margin:0.5rem 0">
+            <a class="card" href="/n/{{ $node->slug }}/v/{{ $m->id }}" style="display:flex;gap:1rem;padding:1rem;margin:0.5rem 0">
                 <div>
                     <p class="kicker">{{ $m->mode }} · {{ $m->access }}</p>
                     <h3 class="font-display">{{ $m->title }}</h3>

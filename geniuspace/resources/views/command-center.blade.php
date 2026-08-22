@@ -45,7 +45,7 @@
                 <h2 class="font-display" style="margin:0.2rem 0;font-size:1.2rem">{{ $p->title }}</h2>
                 <p class="primary" style="font-family:ui-monospace,monospace">{{ $p->price }}</p>
                 <p class="muted" style="font-size:0.75rem">{{ $p->rating }}/5 · {{ $p->votes }} avis</p>
-                <form method="post" action="{{ route('cart.add') }}" style="margin-top:0.5rem">
+                    <form method="post" action="/cart" style="margin-top:0.5rem">
                     @csrf
                     <input type="hidden" name="product_id" value="{{ $p->id }}">
                     <button class="btn" type="submit" style="width:100%;height:2.4rem">Chaudron</button>
@@ -64,11 +64,11 @@
         <div class="cauldron" @dragover.prevent @drop.prevent="add($event.target)">
             <p class="muted">Déposez l'œuvre</p>
         </div>
-        <form method="post" action="{{ route('cart.checkout') }}">
+        <form method="post" action="/cart/checkout">
             @csrf
             <button class="btn" type="submit" style="width:100%;margin-top:0.75rem">Acquérir</button>
         </form>
-        <p class="muted" style="font-size:0.75rem;margin-top:0.75rem">Fichiers : disque local (démo) ou Cloudflare R2 (prod). Pas YouTube — tu restes maître du fichier.</p>
+        <p class="muted" style="font-size:0.75rem;margin-top:0.75rem">MP4 sur le disque du serveur (mutu / VPS / dédié) : <code>public/media</code>. Drive : <a href="/drive">/drive</a>.</p>
     </aside>
     <div x-show="loot" style="position:fixed;inset:0;background:color-mix(in srgb,var(--bg) 90%,transparent);display:grid;place-items:center;z-index:80">
         <div class="card" style="padding:2rem;text-align:center">

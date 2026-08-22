@@ -8,7 +8,7 @@
 @endpush
 @section('content')
 <main class="wrap" style="padding:2rem 1.25rem 6rem" x-data="{ t:0, granted: {{ $media->access==='free' ? 'true':'false' }}, teaser: {{ $media->teaser_sec }} }">
-    <a class="kicker" href="{{ route('node.show', $node->slug) }}">{{ $node->title }}</a>
+    <a class="kicker" href="/n/{{ $node->slug }}">{{ $node->title }}</a>
     <h1 class="font-display" style="font-size:2.5rem">{{ $media->title }}</h1>
     <div class="video-box" style="border-radius:1rem;overflow:hidden;border:1px solid var(--border)">
         <video src="{{ $src }}" controls playsinline

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="dark">
+<html lang="fr" data-theme="dark">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -8,8 +8,14 @@
     <meta name="robots" content="@yield('robots', 'index,follow,max-image-preview:large')">
     <link rel="canonical" href="@yield('canonical', url()->current())">
     <link rel="icon" href="/favicon.svg">
-    <link rel="stylesheet" href="{{ asset('css/geniuspace.css') }}">
+    <style>
+      :root{--bg:#07080c;--fg:#f3eadc;--primary:#c9a36a;--muted:#8d8794;--border:#2a2c38;--font:system-ui,sans-serif;--display:Georgia,serif}
+      html,body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font);min-height:100%}
+      a{color:inherit;text-decoration:none} button{cursor:pointer}
+    </style>
+    <link rel="stylesheet" href="/css/geniuspace.css">
     @stack('jsonld')
+    <script src="/js/preview-bridge.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.3/dist/cdn.min.js"></script>
     <script>
       try{var t=localStorage.getItem('nodus-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}
@@ -17,12 +23,13 @@
 </head>
 <body>
 <header class="site-head">
-    <a href="{{ route('home') }}" class="brand">Geniuspace</a>
-    <form action="{{ route('explore') }}" class="nav" style="flex:1;max-width:20rem">
+    <a href="/" class="brand">Geniuspace</a>
+    <form action="/explore" class="nav" style="flex:1;max-width:20rem">
         <input name="q" placeholder="Jack O'Neill, Luffy…" style="width:100%">
     </form>
     <nav class="nav">
-        <a class="btn-ghost" href="{{ route('explore') }}">Explorer</a>
+        <a class="btn-ghost" href="/explore">Explorer</a>
+        <a class="btn-ghost" href="/drive">Drive</a>
         <button class="btn-line" type="button" onclick="document.documentElement.setAttribute('data-theme',document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');localStorage.setItem('nodus-theme',document.documentElement.getAttribute('data-theme'))">Thème</button>
     </nav>
 </header>

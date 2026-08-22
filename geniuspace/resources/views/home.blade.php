@@ -9,15 +9,15 @@
         <h1>Les fans bâtissent le monde.<br>La guilde l'habite.</h1>
         <p class="muted" style="max-width:36rem">Wiki, forum, journal, reliques, carte — le même univers. Un recruteur ouvre une Maison, des offres, une épreuve.</p>
         <div style="margin-top:1.5rem;display:flex;gap:0.6rem;flex-wrap:wrap">
-            <a class="btn" href="{{ route('node.show', 'one-piece') }}">Vivre One Piece</a>
-            <a class="btn-line" href="{{ route('node.show', 'maison-orion') }}">Maison recruteur</a>
-            <a class="btn-line" href="{{ route('product.show', ['slug' => 'atelier-nocturne', 'pid' => 'sp-at-1']) }}">Galerie RWA</a>
+            <a class="btn" href="/n/one-piece">Vivre One Piece</a>
+            <a class="btn-line" href="/n/maison-orion">Maison recruteur</a>
+            <a class="btn-line" href="/n/atelier-nocturne/p/sp-at-1">Galerie RWA</a>
         </div>
     </div>
 </section>
 <section class="wrap grid-3">
     @foreach($featured as $n)
-        <a class="card" href="{{ route('node.show', $n->slug) }}">
+        <a class="card" href="/n/{{ $n->slug }}">
             <img src="{{ $n->hero }}" alt="">
             <div class="pad">
                 <p class="kicker">{{ $n->kind }}</p>
