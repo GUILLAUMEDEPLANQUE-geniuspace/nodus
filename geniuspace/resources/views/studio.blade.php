@@ -50,7 +50,7 @@
     <input name="value" placeholder="Valeur">
     <button class="btn" type="submit">Champ</button>
   </form>
-  <p><a class="btn" href="/builder/{{ $node->slug }}">Modifier dans le God Canvas</a></p>
+  <p><a class="btn-line" href="/atelier/{{ $node->slug }}">Atelier simple</a> <a class="btn-ghost" href="/builder/{{ $node->slug }}">3D pro</a></p>
 
   <h2 class="font-display">ATS (7 étapes)</h2>
   @foreach($steps as $s)

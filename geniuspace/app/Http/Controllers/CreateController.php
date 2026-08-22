@@ -25,7 +25,12 @@ class CreateController extends Controller
             'skin' => 'required|in:living,vera',
             'summary' => 'nullable|string',
         ]);
-        $slug = Str::slug($data['title']);
+        $base = Str::slug($data['title']) ?: 'club';
+        $slug = $base;
+        $n = 2;
+        while (GpNode::query()->where('slug', $slug)->exists()) {
+            $slug = $base.'-'.$n++;
+        }
         $id = substr(md5($slug.microtime()), 0, 12);
         GpNode::query()->create([
             'id' => $id,
@@ -39,15 +44,13 @@ class CreateController extends Controller
             'skin' => $data['skin'],
             'featured' => false,
         ]);
-        $tabs = $data['skin'] === 'vera'
-            ? [['maison','Maison'],['salon','Salon'],['offres','Offres'],['epreuve','Quêtes'],['forum','Forum'],['videos','Vidéos'],['drive','Drive']]
-            : [['vivre','Univers'],['personnages','Personnages'],['forum','Forum'],['journal','Journal'],['guilde','Guilde'],['guides','Guides'],['boutique','Boutique'],['videos','Vidéos'],['reliques','Drive']];
+        $tabs = [['vivre', 'Accueil'], ['forum', 'Parler'], ['personnages', 'Fiches'], ['videos', 'Vidéos']];
         foreach ($tabs as $i => $t) {
             DB::table('node_tabs')->insert(['node_id' => $id, 'key' => $t[0], 'label' => $t[1], 'icon' => 'spark', 'sort' => $i]);
         }
         if (Auth::id()) {
             DB::table('node_staff')->insert(['node_id' => $id, 'user_id' => Auth::id(), 'role' => 'owner']);
         }
-        return redirect('/builder/'.$slug.'?new=1')->with('ok', 'Univers créé. Sculptez-le dans le God Canvas.');
+        return redirect('/atelier/'.$slug)->with('ok', 'On continue tout doux.');
     }
 }

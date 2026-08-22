@@ -151,7 +151,7 @@
             <button class="btn-line" type="button" @click="tab='guilde'">Entrer dans la guilde</button>
             <a class="btn-line" href="/studio/image?src={{ urlencode($node->hero) }}&target=hero&slug={{ $node->slug }}">Éditer le héros</a>
             <a class="btn-ghost" href="/n/{{ $node->slug }}/studio">Studio</a>
-            <a class="btn-ghost" href="/builder/{{ $node->slug }}">God Canvas 3D</a>
+            <a class="btn-ghost" href="/atelier/{{ $node->slug }}">Modifier le club</a>
         </div>
     </div>
 </section>

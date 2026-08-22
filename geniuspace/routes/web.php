@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AtelierController;
 use App\Http\Controllers\BuilderController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CreateController;
@@ -19,6 +19,8 @@ Route::get('/', [UniverseController::class, 'home'])->name('home');
 Route::get('/explore', [UniverseController::class, 'explore'])->name('explore');
 Route::get('/create', [CreateController::class, 'form']);
 Route::post('/create', [CreateController::class, 'store']);
+Route::get('/atelier/{slug}', [AtelierController::class, 'show']);
+Route::post('/atelier/{slug}', [AtelierController::class, 'save']);
 Route::get('/login', [AuthController::class, 'form']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
