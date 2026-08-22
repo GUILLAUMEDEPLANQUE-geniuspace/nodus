@@ -23,7 +23,7 @@
         <input name="bio" value="{{ $user->bio }}" placeholder="Bio">
         <button class="btn" type="submit">Sauver</button>
       </form>
-      <p class="kicker">{{ $user->nodecoins ?? 0 }} NodeCoins</p>
+      <p class="kicker">{{ $user->nodecoins ?? 0 }} NodeCoins · <a class="primary" href="/cv/{{ $user->id }}">CV public</a></p>
       <h2 class="font-display">Sac à dos (cross-node)</h2>
       <p class="muted">Reliques, titres, épreuves — voyagent avec toi, sans blockchain.</p>
       @forelse($pack ?? [] as $it)

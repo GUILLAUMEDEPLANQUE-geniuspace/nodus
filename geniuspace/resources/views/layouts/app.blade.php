@@ -6,6 +6,10 @@
     <title>@yield('title', 'Geniuspace')</title>
     <meta name="description" content="@yield('description', 'Univers interconnectés — graphe, boutique RWA, recrutement expérientiel.')">
     <meta name="robots" content="@yield('robots', 'index,follow,max-image-preview:large')">
+    @isset($node)
+      @php $gsc = \Illuminate\Support\Facades\DB::table('node_seo')->where('node_id', $node->id)->value('gsc'); @endphp
+      @if($gsc)<meta name="google-site-verification" content="{{ $gsc }}">@endif
+    @endisset
     <link rel="canonical" href="@yield('canonical', url()->current())">
     <link rel="icon" href="/favicon.svg">
     <style>

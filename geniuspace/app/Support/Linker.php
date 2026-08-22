@@ -44,7 +44,16 @@ class Linker
         if ($p) {
             $uid = auth()->id() ?: 0;
             $href = '/n/'.$club->slug.'/p/'.$p->id.'?koc='.$uid;
-            return '<a class="cite-card cite-shop" href="'.$href.'"><strong>'.$p->title.'</strong><span>'.$p->price.' · KOC</span></a>';
+            $csrf = csrf_token();
+            return '<span class="cite-card cite-shop">'
+                .'<a href="'.$href.'"><strong>'.e($p->title).'</strong></a>'
+                .'<span>'.$p->price.' · 5 % pour toi si achat</span>'
+                .'<form method="post" action="/cart" style="margin:.3rem 0 0">'
+                .'<input type="hidden" name="_token" value="'.$csrf.'">'
+                .'<input type="hidden" name="product_id" value="'.$p->id.'">'
+                .'<input type="hidden" name="koc" value="'.$uid.'">'
+                .'<button class="btn" type="submit">Acheter ici</button>'
+                .'</form></span>';
         }
         return '@'.$key;
     }

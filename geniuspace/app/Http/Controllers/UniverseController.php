@@ -75,6 +75,10 @@ class UniverseController extends Controller
         $node->setRelation('products', $node->products->filter(fn ($p) => Spoiler::ok((int) ($p->appear_order ?? 0), $node->id))->values());
         $node->setRelation('threads', $node->threads->filter(fn ($t) => Spoiler::ok((int) ($t->appear_order ?? 0), $node->id))->values());
         $arcs = DB::table('node_arcs')->where('node_id', $node->id)->orderBy('ord')->get();
+        if ($arcs->isEmpty()) {
+            $steps = DB::table('ats_steps')->where('node_id', $node->id)->orderBy('step')->get();
+            $arcs = $steps->map(fn ($s) => (object) ['ord' => $s->step, 'label' => 'Étape '.$s->step.' · '.$s->title]);
+        }
         $cursor = Spoiler::cursor($node->id);
         $openBounties = DB::table('bounties')->where('node_id', $node->id)->where('status', 'open')->count();
         $white = $request->is('w/*');

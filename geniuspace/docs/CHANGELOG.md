@@ -31,4 +31,18 @@
 4. **Sac à dos cross-node** — inventaire profil (relique / titre / épreuve).
 5. **Split paiement** — plusieurs créateurs, ledger (Stripe Connect en prod).
 
+## 2026-08-22 — Pilote Club 205 + 10 leviers
+
+- Un seul club mis en avant : **Club 205** (3 salles, 20 fiches vides, 5 bounties). Le reste = bientôt.
+- Import Facebook/Discord (texte ou JSON) → sujets Legacy.
+- GSC (balise) + ping sitemap + robots.txt. 10 fiches avec descriptions longue traîne.
+- File publique `/bounties` (guides manquants FR).
+- Curseur : auto = Phase 1 / 1.9 / kit rallye ; jobs = étapes ATS si pas d’arcs.
+- Citation @produit = achat 1 tap + 5 % KOC.
+- Sac → `/cv/{id}` JSON-LD + candidature `/n/{slug}/apply`.
+- DNS : `/n/{slug}/dns` (CNAME + aperçu `/w/`).
+- HLS documenté (`Hls.php`) — Bunny/R2 plus tard, pas sur mutu.
+- API `/api/v1/g/{slug}` version 1.0 + `rel` + headers Link.
+
+
 

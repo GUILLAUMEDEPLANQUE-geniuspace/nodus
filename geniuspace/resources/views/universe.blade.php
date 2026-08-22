@@ -211,7 +211,7 @@
 
     @if($tab==='personnages')
     <div>
-        <h2 class="font-display" style="font-size:2.4rem">Personnages</h2>
+        <h2 class="font-display" style="font-size:2.4rem">{{ optional($tabs->firstWhere('key','personnages'))->label ?: 'Fiches' }}</h2>
         <div class="grid-3">
             @forelse($children as $c)
                 <a class="card" href="/n/{{ $node->slug }}/f/{{ $c->slug }}">
@@ -445,6 +445,7 @@
         @foreach($node->quests as $q)
             <article class="step"><p class="kicker">{{ $q->skill }}</p><h3>{{ $q->title }}</h3><p>{{ $q->prompt }}</p></article>
         @endforeach
+        <p style="margin-top:1rem"><a class="btn" href="/n/{{ $node->slug }}/apply">Postuler avec le sac à dos</a></p>
     </div>
     @endif
 </div>

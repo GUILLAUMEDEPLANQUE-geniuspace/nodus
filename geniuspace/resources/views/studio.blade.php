@@ -31,7 +31,11 @@
      <a class="btn-line" href="/n/{{ $node->slug }}/digest">Digest</a>
      <a class="btn-line" href="/n/{{ $node->slug }}/sitemap.xml">Sitemap club</a>
      <a class="btn-line" href="/g/{{ $node->slug }}">Graphe public</a>
-     <a class="btn-line" href="/n/{{ $node->slug }}/bounties">Bounties SEO</a></p>
+     <a class="btn-line" href="/n/{{ $node->slug }}/bounties">Bounties SEO</a>
+     <a class="btn-line" href="/n/{{ $node->slug }}/import">Import FB/Discord</a>
+     <a class="btn-line" href="/n/{{ $node->slug }}/dns">DNS 1 clic</a>
+     <a class="btn-line" href="/api/v1/g/{{ $node->slug }}">API graphe v1</a></p>
+  <form method="post" action="/n/{{ $node->slug }}/ping" style="margin:.4rem 0">@csrf<button class="btn-line" type="submit">Ping sitemap Google</button></form>
   <p class="kicker">Split paiement (objet hybride, plusieurs créateurs)</p>
   @foreach($products ?? [] as $p)
     <div class="card" style="padding:.8rem;margin:.4rem 0;max-width:36rem">

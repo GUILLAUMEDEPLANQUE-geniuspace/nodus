@@ -12,7 +12,13 @@
     <input name="reward" type="number" value="500" style="width:6rem"> NodeCoins
     <button class="btn" type="submit">Ouvrir la quête</button>
   </form>
-  @foreach($issues as $i)
+  <form method="post" action="/n/{{ $node->slug }}/gsc" class="card" style="padding:1rem;margin:1rem 0">
+    @csrf
+    <p class="kicker">Search Console</p>
+    <input name="gsc" placeholder="code google-site-verification" style="width:100%">
+    <button class="btn" type="submit">Balise GSC</button>
+  </form>
+  <form method="post" action="/n/{{ $node->slug }}/ping">@csrf<button class="btn-line" type="submit">Ping sitemap</button></form>
     <a class="card" href="{{ $i['href'] }}" style="display:block;padding:1rem;margin:.5rem 0">
       <p class="kicker">{{ $i['niveau'] }}</p>
       <p>{{ $i['msg'] }}</p>

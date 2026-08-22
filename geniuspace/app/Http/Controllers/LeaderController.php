@@ -28,7 +28,7 @@ class LeaderController extends Controller
         }
         $ids = Edge::query()->where('from_id', $club->id)->pluck('to_id');
         foreach (GpNode::query()->whereIn('id', $ids)->get() as $n) {
-            $urls[] = url('/n/'.$n->slug);
+            $urls[] = url('/n/'.$slug.'/f/'.$n->slug);
         }
         foreach (DB::table('threads')->where('node_id', $club->id)->get() as $th) {
             $urls[] = url('/n/'.$slug.'/t/'.$th->id);
@@ -119,17 +119,50 @@ class LeaderController extends Controller
         $in = Edge::query()->where('to_id', $n->id)->get();
         $ids = $out->pluck('to_id')->merge($in->pluck('from_id'))->unique()->push($n->id);
         $nodes = GpNode::query()->whereIn('id', $ids)->get()->keyBy('id');
+        $rel = [];
+        foreach ($out as $e) {
+            $t = $nodes[$e->to_id] ?? null;
+            if ($t) {
+                $rel[] = ['rel' => $e->kind === 'parent_of' ? 'child' : $e->kind, 'href' => url('/api/v1/g/'.$t->slug), 'title' => $t->title];
+            }
+        }
+        foreach ($in as $e) {
+            $t = $nodes[$e->from_id] ?? null;
+            if ($t) {
+                $rel[] = ['rel' => 'parent', 'href' => url('/api/v1/g/'.$t->slug), 'title' => $t->title];
+            }
+        }
+        $parents = [];
+        foreach ($in as $e) {
+            $t = $nodes[$e->from_id] ?? null;
+            if ($t) {
+                $parents[] = ['kind' => $e->kind, 'label' => $e->label, 'node' => $t->only(['slug', 'title', 'kind'])];
+            }
+        }
+        $children = [];
+        foreach ($out as $e) {
+            $t = $nodes[$e->to_id] ?? null;
+            if ($t) {
+                $children[] = ['kind' => $e->kind, 'label' => $e->label, 'node' => $t->only(['slug', 'title', 'kind'])];
+            }
+        }
         $payload = [
+            'api' => 'geniuspace.graph',
+            'version' => '1.0',
             'id' => $n->id,
             'slug' => $n->slug,
             'title' => $n->title,
             'kind' => $n->kind,
             'url' => url('/n/'.$n->slug),
-            'parents' => $in->map(fn ($e) => ['kind' => $e->kind, 'label' => $e->label, 'node' => $nodes[$e->from_id]->only(['slug', 'title', 'kind']) ?? null])->values(),
-            'children' => $out->map(fn ($e) => ['kind' => $e->kind, 'label' => $e->label, 'node' => $nodes[$e->to_id]->only(['slug', 'title', 'kind']) ?? null])->values(),
+            'rel' => $rel,
+            'parents' => $parents,
+            'children' => $children,
         ];
-        if ($request->wantsJson() || $request->is('g/*.json') || str_ends_with($request->path(), '.json')) {
-            return response()->json($payload);
+        $headers = [
+            'Link' => '<'.url('/n/'.$n->slug).'>; rel="canonical", <'.url('/api/v1/g/'.$n->slug).'>; rel="describedby", <'.url('/g/'.$n->slug.'.json').'>; rel="alternate"',
+        ];
+        if ($request->wantsJson() || $request->is('g/*.json') || $request->is('api/*') || str_ends_with($request->path(), '.json')) {
+            return response()->json($payload, 200, $headers);
         }
         return view('graph', ['node' => $n, 'payload' => $payload]);
     }
