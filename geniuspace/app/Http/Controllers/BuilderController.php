@@ -58,7 +58,7 @@ class BuilderController extends Controller
 
     public function bang(Request $request, string $slug): JsonResponse
     {
-        $prompt = $request->validate(['prompt' => 'required|string|max:800'])['prompt'];
+        $prompt = $request->input('prompt', '');
         $compiled = WorldCompiler::run($slug, $prompt);
         $state = $this->state($slug)->getData(true);
         $state['compile'] = $compiled;
@@ -68,6 +68,12 @@ class BuilderController extends Controller
     public function compile(Request $request, string $slug): JsonResponse
     {
         return $this->bang($request, $slug);
+    }
+
+    public function propose(Request $request, string $slug): JsonResponse
+    {
+        $prompt = $request->input('prompt', '');
+        return response()->json(WorldCompiler::propose($slug, $prompt));
     }
 
     public function add(Request $request, string $slug): JsonResponse

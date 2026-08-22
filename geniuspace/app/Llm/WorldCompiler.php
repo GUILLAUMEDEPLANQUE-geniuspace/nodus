@@ -5,53 +5,53 @@ namespace App\Llm;
 use App\Models\GpNode;
 
 /**
- * Compilateur de monde — les outils LLM dans l’ordre Star Atlas :
- * 1. archétype  2. schéma CCK  3. flotte d’astres  4. SEO sur chaque nœud.
- * Le créateur voit le log des tools. Grok appellera le même pipeline.
+ * Le monde naît VIDE. Aucun preset (pas de flotte Star Atlas, pas de Maya).
+ * Le prompt est de l’intention. Les astres, le créateur (ou le LLM via propose) les pose un par un.
  */
 class WorldCompiler
 {
     public static function run(string $slug, string $prompt): array
     {
         $uni = GpNode::query()->where('slug', $slug)->firstOrFail();
-        $p = mb_strtolower($prompt);
-        $arch = 'anime';
-        if (str_contains($p, 'job') || str_contains($p, 'recrut') || str_contains($p, 'vera')) {
-            $arch = 'vera';
-        } elseif (str_contains($p, 'rwa') || str_contains($p, 'crypto') || str_contains($p, 'vaisseau') || str_contains($p, 'flotte') || str_contains($p, 'atlas') || str_contains($p, 'luxe')) {
-            $arch = 'fleet';
-        }
-        $log = [];
         $uni->summary = $prompt;
-        $uni->skin = $arch === 'vera' ? 'vera' : 'living';
         $uni->save();
-        $log[] = ['tool' => 'seed_cck_schema', 'result' => Toolbelt::seedSchema($uni->id, $arch)];
-        $log[] = ['tool' => 'write_seo', 'result' => Toolbelt::seo([
+        Toolbelt::seo([
             'node_id' => $uni->id,
-            'title' => $uni->title.' — univers spatial | Geniuspace',
-            'description' => $prompt,
-            'keywords' => $arch.', spatial, rwa, seo',
-        ])];
-        $fleet = match ($arch) {
-            'vera' => [
-                ['job', 'Lead Game Designer'], ['job', 'Ingénieur lore'], ['shop', 'Campus virtuel'],
-                ['video', 'Brief culture-fit'], ['character', 'Recruteur Maya'],
-            ],
-            'fleet' => [
-                ['crypto', 'Croiseur Orichalque'], ['crypto', 'Frégate Lumen'], ['shop', 'Hangar premium'],
-                ['video', 'Teaser flotte 4K'], ['crypto', 'Blueprint tokenisé'], ['shop', 'Marketplace luxe'],
-            ],
-            default => [
-                ['character', 'Capitaine'], ['character', 'Navigatrice'], ['shop', 'Relique'],
-                ['video', 'Holo-fiche arc'], ['shop', 'Print limité'],
-            ],
-        };
-        foreach ($fleet as $i => [$type, $title]) {
-            $log[] = ['tool' => 'spawn_spatial_node', 'result' => Toolbelt::spawn([
-                'slug' => $slug, 'type' => $type, 'title' => $title,
-                'angle' => $i * 0.9, 'radius' => 55 + $i * 12,
-            ])];
+            'title' => $uni->title.' | Geniuspace',
+            'description' => $prompt ?: $uni->title,
+        ]);
+        return [
+            'mode' => 'empty',
+            'slug' => $slug,
+            'spawned' => [],
+            'hint' => 'Noyau seul. Dock = briques. LLM propose, ne remplit pas.',
+        ];
+    }
+
+    /** Suggestions à partir DU texte du créateur — pas d’archétype figé. */
+    public static function propose(string $slug, string $prompt): array
+    {
+        $bits = preg_split('/[,;\n]| et /u', $prompt) ?: [];
+        $out = [];
+        foreach ($bits as $raw) {
+            $t = trim($raw);
+            if (mb_strlen($t) < 3 || mb_strlen($t) > 48) {
+                continue;
+            }
+            if (str_word_count($t) > 6) {
+                continue;
+            }
+            $type = 'shop';
+            $l = mb_strtolower($t);
+            if (preg_match('/offre|job|poste|quête/u', $l)) {
+                $type = 'job';
+            } elseif (preg_match('/vidéo|fiche|film/u', $l)) {
+                $type = 'video';
+            } elseif (preg_match('/perso|character|héros/u', $l)) {
+                $type = 'character';
+            }
+            $out[] = ['type' => $type, 'title' => $t];
         }
-        return ['archetype' => $arch, 'log' => $log, 'slug' => $slug];
+        return ['slug' => $slug, 'suggestions' => array_slice($out, 0, 12)];
     }
 }

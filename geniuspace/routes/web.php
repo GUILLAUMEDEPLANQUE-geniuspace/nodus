@@ -49,6 +49,7 @@ Route::get('/builder/{slug?}', [BuilderController::class, 'show']);
 Route::get('/builder/{slug}/state', [BuilderController::class, 'state']);
 Route::post('/builder/{slug}/bang', [BuilderController::class, 'bang']);
 Route::post('/builder/{slug}/compile', [BuilderController::class, 'compile']);
+Route::post('/builder/{slug}/propose', [BuilderController::class, 'propose']);
 Route::post('/builder/{slug}/add', [BuilderController::class, 'add']);
 Route::post('/builder/{slug}/link', [BuilderController::class, 'link']);
 Route::post('/builder/{slug}/sync', [BuilderController::class, 'sync']);

@@ -203,10 +203,32 @@
       spawn(st);
     });
   }
+  function propose() {
+    const p = document.getElementById("prompt");
+    return api("/builder/" + slug + "/propose", { prompt: p ? p.value : "" }).then(function (res) {
+      const box = document.getElementById("ideas");
+      if (!box) return;
+      box.innerHTML = (res.suggestions || [])
+        .map(function (s) {
+          return '<button type="button" class="chip" data-sug-type="' + s.type + '" data-sug-title="' + s.title.replace(/"/g, "") + '">+ ' + s.title + "</button>";
+        })
+        .join("") || "<p class='muted'>Rien à extraire — écris une liste (Luffy, Zoro, carte) ou pose les briques à la main.</p>";
+      box.querySelectorAll("[data-sug-title]").forEach(function (b) {
+        b.onclick = function () {
+          api("/builder/" + slug + "/add", { type: b.getAttribute("data-sug-type"), title: b.getAttribute("data-sug-title") }).then(function (st) {
+            revealHud();
+            spawn(st);
+          });
+        };
+      });
+    });
+  }
   const go = document.getElementById("go-bang");
   if (go) go.onclick = compile;
+  const gp = document.getElementById("go-propose");
+  if (gp) gp.onclick = propose;
   const rc = document.getElementById("recompile");
-  if (rc) rc.onclick = compile;
+  if (rc) rc.onclick = propose;
 
   function sendFile(file) {
     const fd = new FormData();

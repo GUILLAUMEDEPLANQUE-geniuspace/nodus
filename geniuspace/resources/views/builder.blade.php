@@ -34,6 +34,7 @@
     <a class="btn-line" href="/n/{{ $node->slug }}">Vivre le monde</a>
   </div>
 </header>
+<div id="ideas" class="hud rel" style="top:3.4rem;left:50%;transform:translateX(-50%);z-index:16;max-width:90vw"></div>
 <aside class="palette" id="palette" style="{{ $fresh ? 'opacity:0' : '' }}">
   <p class="kicker">CCK · coller sur le nœud visé</p>
   @php $g=''; @endphp
@@ -48,16 +49,14 @@
 @if($fresh)
 <div class="bang" id="bang">
   <div class="bang-box">
-    <p class="kicker">Création · Big Bang LLM</p>
+    <p class="kicker">Création · monde vide</p>
     <h1 class="font-display" style="font-size:2.3rem">Sculpter {{ $node->title }}</h1>
-    <p class="muted">Pas une grille Shopify. Un espace cinématique (flotte, campus, sanctuaire). Les outils LLM posent CCK, SEO, astres, rayons.</p>
-    <input id="prompt" style="width:100%;margin:1rem 0;height:3rem" value="{{ $node->summary }}">
+    <p class="muted">Rien n’est prérempli. Tu poses les briques. L’IA peut proposer des nœuds à partir de ta liste — elle ne dump pas une flotte.</p>
+    <input id="prompt" style="width:100%;margin:1rem 0;height:3rem" value="{{ $node->summary }}" placeholder="Ex. Luffy, Zoro, carte Grand Line — ou rien">
     <div class="rel" style="justify-content:center;margin-bottom:1rem">
-      <button type="button" class="chip" data-p="Flotte luxe type Star Atlas, marketplace spatial, vaisseaux RWA tokenisés">Flotte luxe</button>
-      <button type="button" class="chip" data-p="Campus de recrutement RPG, quêtes, stands Vera">Campus Vera</button>
-      <button type="button" class="chip" data-p="Sanctuaire manga, constellations de personnages, wiki">Sanctuaire</button>
+      <button class="btn" type="button" id="go-bang">Commencer vide</button>
+      <button class="btn-line" type="button" id="go-propose">Proposer depuis mon texte</button>
     </div>
-    <button class="btn" type="button" id="go-bang">Compiler le monde (LLM tools)</button>
   </div>
 </div>
 @else
@@ -65,13 +64,13 @@
 <input id="prompt" type="hidden" value="{{ $node->summary }}">
 @endif
 <nav class="gdock" id="dock" style="{{ $fresh ? 'opacity:0' : '' }}">
-  <button type="button" data-add="video">Holo-Fiche</button>
-  <button type="button" data-add="job">Offre</button>
-  <button type="button" data-add="crypto">Vaisseau RWA</button>
   <button type="button" data-add="character">Personnage</button>
-  <button type="button" data-add="shop">Produit luxe</button>
+  <button type="button" data-add="shop">Produit</button>
+  <button type="button" data-add="video">Vidéo</button>
+  <button type="button" data-add="job">Offre</button>
+  <button type="button" data-add="crypto">Actif</button>
   <button type="button" id="link-mode">Lier</button>
-  <button type="button" id="recompile">Relancer LLM</button>
+  <button type="button" id="recompile">Proposer (LLM)</button>
   <label class="muted" style="font-size:.75rem;padding:.4rem">Importer <input id="imp" type="file" accept="image/*,video/*,audio/*" style="width:8rem"></label>
 </nav>
 <aside class="slide" id="panel">

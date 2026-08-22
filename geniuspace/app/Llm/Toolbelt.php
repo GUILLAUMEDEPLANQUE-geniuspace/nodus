@@ -21,7 +21,8 @@ class Toolbelt
     public static function schema(): array
     {
         return [
-            ['name' => 'compile_world', 'description' => 'Orchestre un univers cinématique (flotte, campus, sanctuaire) à partir d’un prompt.', 'parameters' => ['prompt' => 'string', 'slug' => 'string']],
+            ['name' => 'compile_world', 'description' => 'Noyau vide + SEO. Ne spawn rien. Le créateur pose les briques.', 'parameters' => ['prompt' => 'string', 'slug' => 'string']],
+            ['name' => 'propose_nodes', 'description' => 'Lit le texte du créateur (liste) et suggère des nœuds, sans les créer.', 'parameters' => ['slug' => 'string', 'prompt' => 'string']],
             ['name' => 'spawn_spatial_node', 'description' => 'Crée un nœud 3D (job, crypto, video, character, shop, ship) + arête parent.', 'parameters' => ['slug' => 'string', 'type' => 'string', 'title' => 'string']],
             ['name' => 'link_parent_child', 'description' => 'Rayon parent/enfant dans edges.', 'parameters' => ['from' => 'string', 'to' => 'string']],
             ['name' => 'add_cck_field', 'description' => 'Ajoute un champ du catalogue CCK (image, geo, drip, og…).', 'parameters' => ['node_id' => 'string', 'type' => 'string', 'name' => 'string', 'value' => 'string']],
@@ -37,6 +38,7 @@ class Toolbelt
     {
         return match ($name) {
             'compile_world' => WorldCompiler::run($args['slug'], $args['prompt'] ?? ''),
+            'propose_nodes' => WorldCompiler::propose($args['slug'] ?? '', $args['prompt'] ?? ''),
             'spawn_spatial_node' => self::spawn($args),
             'link_parent_child' => self::link($args['from'], $args['to']),
             'add_cck_field' => self::field($args),
