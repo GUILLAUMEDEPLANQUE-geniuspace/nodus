@@ -66,6 +66,15 @@ class WorldTemplates
         foreach ($t['arcs'] as $i => $label) {
             DB::table('node_arcs')->insert(['node_id' => $node->id, 'label' => $label, 'ord' => $i + 1]);
         }
+        $pack = match (true) {
+            str_contains($id, 'vera') => 'maison',
+            str_contains($id, 'galerie') || str_contains($id, 'merch') || str_contains($id, 'rwa') => 'produit',
+            default => null,
+        };
+        if ($pack) {
+            FieldTemplates::apply($node->id, $pack);
+        }
+        Chrome::applyPreset($node, Chrome::presetFromTemplate($id));
     }
 
     /** @return list<array<string,mixed>> */

@@ -2,6 +2,14 @@
 
 Format : ce qui est **dans le code**, pas la vision PDF.
 
+## 2026-08-22 — Éditeur de monde (A→Z)
+
+- **Thème, scène, boutons, salles, presets.** Tables `node_theme`, `node_scene_layers`, `node_actions`, `node_tabs.enabled`.
+- **Éditeur** `/n/{slug}/monde` : Structure (plan, fiches, Google, équipe) · Design (identité, calques) · Action (boutons, paywall) · Motion (fade/slide).
+- **Presets** living / galerie / Vera posés à la création. Lumen dit « Acquérir l’œuvre ». Une maison née de Vera dit « Voir les missions ».
+- **Plus de CTA en dur** sur le hero, la boutique, le player, le panier. Le moteur (panier, unlock) ne bouge pas.
+- Flagship Vera inchangé. Club 205 toujours parti.
+
 ## 2026-08-22 — Moteur secret (graphe + champs)
 
 - **Modèles de fiche** par métier : Offre tech, Offre industrie, Personnage, Produit, Maison. Un clic dans le Studio pose les détails.

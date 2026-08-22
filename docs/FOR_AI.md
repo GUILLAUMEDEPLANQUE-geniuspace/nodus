@@ -23,3 +23,7 @@ Tu travailles sur **Geniuspace**. Stack unique : Laravel dans `geniuspace/`.
 19. Le jargon graphe / CCK / Node / edge / parent_of est **interdit en copy produit**. Autorisé : code, docs techniques, commentaires.
 20. Chaque insight UI (« Alignement fort », « Aussi dans cet univers », « Cette maison répond en 4 jours ») doit être recalculable par une fonction pure sur nodes / edges / champs.
 21. Versionner le schéma : `field_key` stables, labels traduisibles, `schema_version`. Ne pas casser `GET /v1/nodes/{slug}/fields`.
+22. **Chrome = données.** Boutons, dock, paywall, calques, tokens : tables `node_theme` / `node_actions` / `node_scene_layers` / `node_tabs`. Pas de libellé métier en dur dans les vues. Handlers (panier, unlock) restent dans le code.
+23. **Éditeur de monde** : `/n/{slug}/monde`, modes Structure / Design / Action / Motion. Blade, pas React. Presets `living` | `merch` | `vera` à la création.
+24. Custom total sur identité, scène, navigation, actions, champs, contenus, droits. Contraint sur player, panier, grants, graphe.
+25. Le flagship `/n/vera` reste le jobboard éditorial (slug exact). Une maison née du template Vera passe par l’éditeur de monde.

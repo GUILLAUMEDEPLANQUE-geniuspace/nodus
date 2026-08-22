@@ -1,5 +1,11 @@
 # Changelog Geniuspace
 
+## 2026-08-22 — Éditeur de monde
+
+- Chrome data-driven : thème, calques, actions, onglets. Éditeur `/n/{slug}/monde`.
+- Presets living / merch / vera. Boutique et player lisent les labels.
+- Création d’univers atterrit dans l’éditeur.
+
 ## 2026-08-22 — Moteur secret (graphe + champs)
 
 - Modèles de fiche par métier dans le Studio.

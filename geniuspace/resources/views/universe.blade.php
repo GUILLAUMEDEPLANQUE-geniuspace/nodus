@@ -22,8 +22,11 @@
 @php
   $forumThreads = $node->threads->where('kind', 'forum')->values();
   $journal = $node->threads->where('kind', 'blog')->values();
-  $living = $node->skin !== 'vera';
-  $defaultTab = $tab ?: ($living ? 'vivre' : 'maison');
+  $chrome = $chrome ?? ['theme' => (object)['hero'=>'','hero_video'=>'','dock'=>'bottom','logo'=>''], 'heroActions' => collect(), 'shopCardActions' => collect(), 'heroLayers' => collect()];
+  $theme = $chrome['theme'];
+  $living = $node->skin !== 'vera' || (string) $node->template !== '';
+  $homeKey = $tabs->first()->key ?? ($living ? 'vivre' : 'maison');
+  $defaultTab = $tab ?: $homeKey;
 @endphp
 <div x-data="{
   tab: @js($defaultTab),
@@ -45,15 +48,23 @@
 @include('partials.holo-forum')
 @else
 <div>
-@if($tab === 'vivre')
+@if($tab === 'vivre' || $tab === $homeKey)
 <section class="hero" style="min-height:78dvh">
-    <img class="bg" src="{{ $node->hero }}" alt="">
+    @if($theme->hero_video)
+      <video class="bg" src="{{ $theme->hero_video }}" muted loop autoplay playsinline poster="{{ $theme->hero ?: $node->hero }}"></video>
+    @else
+      <img class="bg" src="{{ $theme->hero ?: $node->hero }}" alt="">
+    @endif
     <div class="veil"></div>
+    @include('partials.scene-layers', ['layers' => $chrome['heroLayers'], 'node' => $node])
     <div class="copy wrap">
+        @if($theme->logo)
+          <img src="{{ $theme->logo }}" alt="" style="height:2.4rem;width:auto;margin-bottom:.6rem">
+        @endif
         @if($parents->first())
             <a class="kicker" href="/n/{{ $parents->first()->slug }}">Univers parent · {{ $parents->first()->title }}</a>
         @else
-            <p class="kicker">Lieu de vie · {{ $node->kind }}</p>
+            <p class="kicker">Lieu de vie · {{ \App\Support\Vocab::kind($node->kind) }}</p>
         @endif
         <h1>{{ $node->title }}</h1>
         <p>{{ $node->subtitle ?: $node->summary }}</p>
@@ -75,20 +86,12 @@
         @endif
         <div style="margin-top:1.1rem;display:flex;gap:0.5rem;flex-wrap:wrap">
             <form action="/n/{{ $node->slug }}/q"><input name="q" placeholder="Chercher dans le club" style="width:12rem"><button class="btn-line" type="submit">OK</button></form>
-            @php
-              $vsA = $children->firstWhere('slug','peugeot-205-gti-16') ?? $children[0] ?? null;
-              $vsB = $children->firstWhere('slug','peugeot-205-gti-19') ?? ($children[1] ?? null);
-            @endphp
-            @if($vsA && $vsB)
-              <a class="btn-line" href="/n/{{ $node->slug }}/vs/{{ $vsA->slug }}/{{ $vsB->slug }}">Comparer 1.6 vs 1.9</a>
-            @endif
-            <a class="btn-ghost" href="/n/{{ $node->slug }}/digest">Digest</a>
-            <a class="btn" href="/n/{{ $node->slug }}/forum">Forum</a>
-            <a class="btn-line" href="/n/{{ $node->slug }}/personnages">Les fiches</a>
-            <a class="btn-line" href="/n/{{ $node->slug }}/classifieds">Pièces</a>
-            <a class="btn-line" href="/studio/image?src={{ urlencode($node->hero) }}&target=hero&slug={{ $node->slug }}">Éditer le héros</a>
-            <a class="btn-ghost" href="/n/{{ $node->slug }}/studio">Studio</a>
-            <a class="btn-ghost" href="/atelier/{{ $node->slug }}">Modifier le club</a>
+            @foreach($chrome['heroActions'] as $a)
+              @include('partials.action-button', ['action'=>$a,'node'=>$node])
+            @endforeach
+            @auth
+              <a class="btn-ghost" href="/n/{{ $node->slug }}/monde">Éditer le monde</a>
+            @endauth
         </div>
     </div>
 </section>
@@ -222,16 +225,7 @@
                         <p class="primary" style="font-size:1.6rem;font-family:var(--display)">{{ $p->price }}</p>
                         <p class="stars">★★★★★ {{ $p->rating }}/5 · {{ $p->votes }} avis</p>
                         <p class="muted" style="font-size:0.8rem">{{ $p->stock }}</p>
-                        <div style="display:flex;gap:0.4rem;margin-top:0.7rem;flex-wrap:wrap">
-                            <form method="post" action="/cart">
-                                @csrf
-                                <input type="hidden" name="product_id" value="{{ $p->id }}">
-                                <button class="btn" type="submit">Panier</button>
-                            </form>
-                            <a class="btn-line" href="/n/{{ $node->slug }}/p/{{ $p->id }}">Fiche</a>
-                            <a class="btn-ghost" href="/studio/image?src={{ urlencode($p->image) }}&target=product&id={{ $p->id }}&slug={{ $node->slug }}">Éditer image</a>
-                            <a class="btn-ghost" href="https://twitter.com/intent/tweet?text={{ urlencode($p->title.' '.$p->price) }}&url={{ urlencode(url('/n/'.$node->slug.'/p/'.$p->id)) }}">Partager</a>
-                        </div>
+                        @include('partials.shop-actions', ['p' => $p, 'node' => $node, 'chrome' => $chrome])
                     </div>
                 </article>
             @empty
@@ -287,7 +281,7 @@
                     <h3 class="font-display" style="font-size:2rem">{{ $p->title }}</h3>
                     <p class="primary" style="font-size:2rem;font-family:var(--display)">{{ $p->price }}</p>
                     <p class="stars">★★★★★ {{ $p->rating }}/5</p>
-                    <a class="btn" href="/n/{{ $node->slug }}/p/{{ $p->id }}">Fiche complète SEO</a>
+                    @include('partials.shop-actions', ['p' => $p, 'node' => $node, 'chrome' => $chrome])
                 </div>
             </article>
         @empty
@@ -402,7 +396,7 @@
 </div>
 @endif
 
-<nav class="dock">
+<nav class="dock dock-{{ $theme->dock ?? 'bottom' }}">
     <template x-for="b in bubbles" :key="b.id"><span class="rise" x-text="b.name + ' vient de poster'"></span></template>
     @foreach($tabs as $t)
       <a href="/n/{{ $node->slug }}/{{ $t->key }}" class="{{ $tab === $t->key ? 'active' : '' }}">{{ $t->label }}</a>
@@ -451,8 +445,11 @@
                 <a class="chip" href="/n/{{ $node->slug }}/f/{{ $c->slug }}">{{ $c->title }}</a>
             @endforeach
         </div>
-        <p style="margin-top:1.2rem"><a class="btn" href="/n/{{ $node->slug }}/offres">Voir les offres</a>
-           <a class="btn-line" href="/n/{{ $node->slug }}/preuve">Passer un test</a></p>
+        <p style="margin-top:1.2rem">
+          @foreach($chrome['heroActions'] as $a)
+            @include('partials.action-button', ['action'=>$a,'node'=>$node])
+          @endforeach
+        </p>
     @endif
     @if($tab==='salon')
         <h2 class="font-display">Salon spatial</h2>
@@ -516,7 +513,7 @@
     @endif
 </div>
 @endif
-<nav class="dock">
+<nav class="dock dock-{{ $theme->dock ?? 'bottom' }}">
     @foreach($tabs as $t)
       <a href="/n/{{ $node->slug }}/{{ $t->key }}" class="{{ $tab === $t->key ? 'active' : '' }}">{{ $t->label }}</a>
     @endforeach

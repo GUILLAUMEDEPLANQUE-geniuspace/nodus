@@ -24,6 +24,27 @@
       a{color:inherit;text-decoration:none} button{cursor:pointer}
     </style>
     <link rel="stylesheet" href="/css/geniuspace.css">
+    @isset($node)
+      @php
+        $chromeTheme = $chromeTheme ?? ($chrome['theme'] ?? null);
+        if (! $chromeTheme && \Illuminate\Support\Facades\Schema::hasTable('node_theme')) {
+            $chromeTheme = \App\Support\Chrome::theme($node->id);
+        }
+      @endphp
+      @if(!empty($chromeTheme) && ($chromeTheme->primary ?? ''))
+        <style>
+          :root{
+            --primary: {{ $chromeTheme->primary }};
+            --bg: {{ $chromeTheme->bg }};
+            --fg: {{ $chromeTheme->fg }};
+            --muted: {{ $chromeTheme->muted }};
+          }
+        </style>
+        @if($chromeTheme->favicon ?? '')
+          <link rel="icon" href="{{ $chromeTheme->favicon }}">
+        @endif
+      @endif
+    @endisset
     @stack('jsonld')
     <script src="/js/preview-bridge.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.3/dist/cdn.min.js"></script>

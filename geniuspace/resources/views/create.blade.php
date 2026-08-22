@@ -16,7 +16,7 @@
 }">
   <p class="kicker">Création de monde</p>
   <h1 class="font-display" style="font-size:clamp(2rem,6vw,3.4rem);line-height:.95">Clique un template.<br>Le formulaire s’ouvre.</h1>
-  <p class="lede">Une carte = un moteur (schema + salles + curseur). Tu nommes, tu habilles.</p>
+  <p class="lede">Une carte = un moteur (schema + salles + curseur). Tu nommes — l’éditeur de monde s’ouvre.</p>
 
   <div class="rel" style="margin:1rem 0;flex-wrap:wrap">
     <button type="button" class="chip" @click="g='Tous'" :class="g==='Tous' && 'primary'">Tous</button>

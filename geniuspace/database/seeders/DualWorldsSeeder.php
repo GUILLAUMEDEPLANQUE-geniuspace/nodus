@@ -14,12 +14,13 @@ class DualWorldsSeeder extends Seeder
         DB::table('nodes')->update(['featured' => 0]);
         $this->vera();
         $this->lumen();
+        $this->chrome();
     }
 
     private function forgetClub205(): void
     {
         $id = 'club205';
-        foreach (['node_tabs', 'products', 'media', 'wiki_pages', 'articles', 'drive_files', 'cck_fields', 'node_arcs', 'quests', 'crowd_goals', 'node_seo', 'node_i18n'] as $t) {
+        foreach (['node_tabs', 'products', 'media', 'wiki_pages', 'articles', 'drive_files', 'cck_fields', 'node_arcs', 'quests', 'crowd_goals', 'node_seo', 'node_i18n', 'node_theme', 'node_actions', 'node_scene_layers'] as $t) {
             if (DB::getSchemaBuilder()->hasTable($t)) {
                 DB::table($t)->where('node_id', $id)->delete();
             }
@@ -287,6 +288,25 @@ class DualWorldsSeeder extends Seeder
         ]);
 
         $this->seedLumenPieces($id);
+    }
+
+    /** Presets chrome : Vera papier, Lumen galerie. Copy-on-write ensuite. */
+    private function chrome(): void
+    {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('node_theme')) {
+            return;
+        }
+        foreach (['node_theme', 'node_actions', 'node_scene_layers'] as $t) {
+            DB::table($t)->whereIn('node_id', ['vera', 'lumen'])->delete();
+        }
+        $v = \App\Models\GpNode::query()->find('vera');
+        if ($v) {
+            \App\Support\Chrome::applyPreset($v, 'vera');
+        }
+        $l = \App\Models\GpNode::query()->find('lumen');
+        if ($l) {
+            \App\Support\Chrome::applyPreset($l, 'merch');
+        }
     }
 
     private function templateForJob(array $j): string

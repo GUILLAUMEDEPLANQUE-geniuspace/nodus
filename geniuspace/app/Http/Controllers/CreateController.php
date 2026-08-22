@@ -56,12 +56,13 @@ class CreateController extends Controller
         } else {
             $tabs = [['vivre', 'Accueil'], ['forum', 'Forum'], ['journal', 'Magazine'], ['personnages', 'Fiches'], ['videos', 'Vidéos']];
             foreach ($tabs as $i => $row) {
-                DB::table('node_tabs')->insert(['node_id' => $id, 'key' => $row[0], 'label' => $row[1], 'icon' => 'spark', 'sort' => $i]);
+                DB::table('node_tabs')->insert(['node_id' => $id, 'key' => $row[0], 'label' => $row[1], 'icon' => 'spark', 'sort' => $i, 'enabled' => 1]);
             }
+            \App\Support\Chrome::ensure($id);
         }
         if (Auth::id()) {
             DB::table('node_staff')->insert(['node_id' => $id, 'user_id' => Auth::id(), 'role' => 'owner']);
         }
-        return redirect('/atelier/'.$slug)->with('ok', $t ? ('Template « '.$t['label'].' » posé. Tu habilles.') : 'On continue tout doux.');
+        return redirect('/n/'.$slug.'/monde')->with('ok', $t ? ('Template « '.$t['label'].' » posé. Habillage ouvert.') : 'Le lieu est né. Habillage ouvert.');
     }
 }

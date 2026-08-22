@@ -47,12 +47,12 @@ class UniverseController extends Controller
         return view('explore', compact('nodes', 'q'));
     }
 
-    public function show(Request $request, string $slug): View
+    public function show(Request $request, string $slug): View|\Illuminate\Http\RedirectResponse
     {
         return $this->page($request, $slug, $request->query('tab'));
     }
 
-    public function room(Request $request, string $slug, string $salle): View
+    public function room(Request $request, string $slug, string $salle): View|\Illuminate\Http\RedirectResponse
     {
         if (in_array($salle, ['journal', 'blog'], true)) {
             return app(MagazineController::class)->index($request, $slug);
@@ -60,13 +60,22 @@ class UniverseController extends Controller
         return $this->page($request, $slug, $salle);
     }
 
-    private function page(Request $request, string $slug, ?string $tab): View
+    private function page(Request $request, string $slug, ?string $tab): View|\Illuminate\Http\RedirectResponse
     {
         $node = GpNode::query()->where('slug', $slug)->firstOrFail();
         $node->load(['products', 'media', 'threads', 'wiki', 'quests', 'translations']);
         $node->localized($request->cookie('locale', 'fr'));
-        if ($node->slug === 'vera' || $node->skin === 'vera') {
+        if ($node->slug === 'vera') {
             return app(VeraController::class)->room($request, $node, $tab ?: 'home');
+        }
+        if ($node->kind === 'job' && \App\Support\VeraCatalog::job($node->slug)) {
+            return redirect('/n/vera/offres/'.$node->slug);
+        }
+        if ($node->kind === 'company' && str_starts_with((string) $node->id, 'vc-')) {
+            return redirect('/n/vera/maisons/'.preg_replace('/^maison-/', '', $node->slug));
+        }
+        if ($node->id === 'carnet-karim') {
+            return redirect('/n/vera/carnet');
         }
         $childIds = Edge::query()->where('from_id', $node->id)->pluck('to_id');
         $children = GpNode::query()->whereIn('id', $childIds)->get();
@@ -78,13 +87,13 @@ class UniverseController extends Controller
         $live = LiveMessage::query()->whereIn('thread_id', $tids)->get()->groupBy('thread_id');
         $files = DriveFile::query()->where('node_id', $node->id)->get();
         $guild = GuildMessage::query()->where('node_id', $node->id)->get();
-        $default = $node->skin === 'vera' ? 'maison' : 'vivre';
-        $tab = $tab ?: $default;
+        $tabs = \Illuminate\Support\Facades\DB::table('node_tabs')->where('node_id', $node->id)->where('enabled', 1)->orderBy('sort')->get();
+        $tab = $tab ?: ($tabs->first()->key ?? ($node->skin === 'vera' ? 'maison' : 'vivre'));
         $tid = $request->query('tid');
         $mode = $request->query('mode', 'legacy');
         $cck = \Illuminate\Support\Facades\DB::table('cck_fields')->where('node_id', $node->id)->get();
         $seoRow = \Illuminate\Support\Facades\DB::table('node_seo')->where('node_id', $node->id)->first();
-        $tabs = \Illuminate\Support\Facades\DB::table('node_tabs')->where('node_id', $node->id)->orderBy('sort')->get();
+        $chrome = \App\Support\Chrome::bag($node);
         $children = Spoiler::filterNodes($children, $node->id);
         $node->setRelation('products', $node->products->filter(fn ($p) => Spoiler::ok((int) ($p->appear_order ?? 0), $node->id))->values());
         $node->setRelation('threads', $node->threads->filter(fn ($t) => Spoiler::ok((int) ($t->appear_order ?? 0), $node->id))->values());
@@ -103,7 +112,7 @@ class UniverseController extends Controller
             'session' => substr($request->session()->getId(), 0, 16),
         ]);
         return view('universe', compact(
-            'node', 'children', 'parents', 'goal', 'replies', 'live', 'files', 'guild', 'tab', 'tid', 'mode', 'cck', 'seoRow', 'tabs', 'white', 'arcs', 'cursor', 'openBounties', 'tabMeta'
+            'node', 'children', 'parents', 'goal', 'replies', 'live', 'files', 'guild', 'tab', 'tid', 'mode', 'cck', 'seoRow', 'tabs', 'white', 'arcs', 'cursor', 'openBounties', 'tabMeta', 'chrome'
         ));
     }
 
@@ -132,7 +141,7 @@ class UniverseController extends Controller
     public function fiche(string $slug, string $fiche): View
     {
         $club = GpNode::query()->where('slug', $slug)->firstOrFail();
-        if ($club->slug === 'vera' || $club->skin === 'vera') {
+        if ($club->slug === 'vera') {
             return app(VeraController::class)->jobShow($fiche);
         }
         $node = GpNode::query()->where('slug', $fiche)->firstOrFail();
@@ -161,7 +170,8 @@ class UniverseController extends Controller
         $childIds = Edge::query()->where('from_id', $node->id)->pluck('to_id');
         $children = GpNode::query()->whereIn('id', $childIds)->get();
         $files = DriveFile::query()->where('node_id', $node->id)->get();
-        return view('video', compact('node', 'media', 'src', 'related', 'children', 'files'));
+        $chrome = \App\Support\Chrome::bag($node);
+        return view('video', compact('node', 'media', 'src', 'related', 'children', 'files', 'chrome'));
     }
 
     public function guide(string $slug, string $wid): View

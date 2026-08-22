@@ -5,7 +5,9 @@
 <main class="wrap" style="padding:2rem 1.25rem 6rem">
   <p class="kicker">Studio · rôle {{ $role ?: 'visiteur' }}</p>
   <h1 class="font-display" style="font-size:2.6rem">Configurer {{ $node->title }}</h1>
-  <p class="muted">SEO, champs de la fiche, onglets, étapes de recrutement. <a class="primary" href="/studio/image?src={{ urlencode($node->hero) }}&target=hero&slug={{ $node->slug }}">Éditer le héros</a></p>
+  <p class="muted">L’éditeur de monde habille le lieu (scène, boutons, salles). Ici : SEO, champs de fiche, étapes.</p>
+  <p><a class="btn" href="/n/{{ $node->slug }}/monde">Ouvrir l’éditeur de monde</a>
+     <a class="primary" href="/studio/image?src={{ urlencode($node->hero) }}&target=hero&slug={{ $node->slug }}">Éditer le héros</a></p>
 
   <h2 class="font-display">SEO (owner/admin)</h2>
   <form method="post" action="/n/{{ $node->slug }}/studio/seo" class="card" style="padding:1rem;max-width:36rem">

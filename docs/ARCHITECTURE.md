@@ -7,7 +7,22 @@
 
 Le graphe (`nodes` + `edges`) et les champs de fiche (`cck_fields`) sont **l’unique source de vérité métier**. Toute valeur produit (fiabilité, alignement, carnet, héritage, reco) en est dérivée. Aucune surface utilisateur n’expose Node, edge, CCK, parent_of ou « graphe » : elle affiche des lieux, des preuves et des décisions.
 
-Code : `geniuspace/app/Support/Engine.php`, `Vocab.php`, `FieldTemplates.php`.
+Code : `geniuspace/app/Support/Engine.php`, `Vocab.php`, `FieldTemplates.php`, `Chrome.php`.
+
+## Éditeur de monde
+
+Un univers se compose A→Z sans code : thème (tokens, logo, fond vidéo), calques de scène, boutons (hero, boutique, player, panier), plan des salles, presets de template.
+
+| Visible | Derrière |
+| --- | --- |
+| « Réserver le goodie » | `node_actions` scope `shop_card` |
+| Couleur de la maison | `node_theme.primary` |
+| Accroche sur le hero | `node_scene_layers` kind `text` |
+| Salon masqué | `node_tabs.enabled = 0` |
+
+Handlers figés : `addToCart`, unlock, grants, checkout. Custom = label, ordre, présence, style.
+
+UI : `/n/{slug}/monde` (Structure / Design / Action / Motion).
 
 | Visible | Derrière |
 | --- | --- |

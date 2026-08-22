@@ -16,7 +16,21 @@ class CartController extends Controller
     public function index(Request $request): View
     {
         $cart = $request->session()->get('cart', []);
-        return view('cart', compact('cart'));
+        $node = null;
+        $chrome = null;
+        if ($cart) {
+            $first = Product::query()->find(array_key_first($cart));
+            if ($first) {
+                $node = \App\Models\GpNode::query()->find($first->node_id);
+            }
+        }
+        if (! $node) {
+            $node = \App\Models\GpNode::query()->where('slug', 'lumen')->first();
+        }
+        if ($node) {
+            $chrome = \App\Support\Chrome::bag($node);
+        }
+        return view('cart', compact('cart', 'node', 'chrome'));
     }
 
     public function add(Request $request): RedirectResponse

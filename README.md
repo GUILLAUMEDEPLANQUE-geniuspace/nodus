@@ -38,6 +38,7 @@ Document root en prod (o2switch) : `geniuspace/public/`.
 | Test métier | Simulation de 6 minutes (consignation, circuit, soin, code) |
 | Délai de réponse | L’entreprise s’engage à une date. Si elle rate, ça se voit. |
 | Carnet de preuves | Les tests réussis, exportables en JSON |
+| Éditeur de monde | Structure, design, boutons, mouvement — le lieu entier, sans code |
 | Fiches | Guides métier liés aux offres |
 | Profils oubliés | Seniors à la journée, RSA, multi-activité… |
 | Candidat qualifié | Quelqu’un qui a réussi le test. L’entreprise ne paie que ça. |
