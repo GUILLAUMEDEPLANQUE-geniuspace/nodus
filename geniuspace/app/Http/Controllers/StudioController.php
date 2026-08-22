@@ -23,7 +23,9 @@ class StudioController extends Controller
         $bans = DB::table('forum_bans')->where('node_id', $node->id)->get();
         $cats = DB::table('forum_categories')->where('node_id', $node->id)->get();
         $role = Acl::role($node->id);
-        return view('studio', compact('node', 'tabs', 'cck', 'seo', 'steps', 'staff', 'pending', 'bans', 'cats', 'role'));
+        $products = $node->products;
+        $splits = DB::table('product_splits')->get()->groupBy('product_id');
+        return view('studio', compact('node', 'tabs', 'cck', 'seo', 'steps', 'staff', 'pending', 'bans', 'cats', 'role', 'products', 'splits'));
     }
 
     public function tab(Request $request, string $slug): RedirectResponse

@@ -11,7 +11,9 @@ use App\Models\LiveMessage;
 use App\Models\Product;
 use App\Models\Reply;
 use App\Support\SignedMedia;
+use App\Support\Spoiler;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class UniverseController extends Controller
@@ -69,6 +71,12 @@ class UniverseController extends Controller
         $cck = \Illuminate\Support\Facades\DB::table('cck_fields')->where('node_id', $node->id)->get();
         $seoRow = \Illuminate\Support\Facades\DB::table('node_seo')->where('node_id', $node->id)->first();
         $tabs = \Illuminate\Support\Facades\DB::table('node_tabs')->where('node_id', $node->id)->orderBy('sort')->get();
+        $children = Spoiler::filterNodes($children, $node->id);
+        $node->setRelation('products', $node->products->filter(fn ($p) => Spoiler::ok((int) ($p->appear_order ?? 0), $node->id))->values());
+        $node->setRelation('threads', $node->threads->filter(fn ($t) => Spoiler::ok((int) ($t->appear_order ?? 0), $node->id))->values());
+        $arcs = DB::table('node_arcs')->where('node_id', $node->id)->orderBy('ord')->get();
+        $cursor = Spoiler::cursor($node->id);
+        $openBounties = DB::table('bounties')->where('node_id', $node->id)->where('status', 'open')->count();
         $white = $request->is('w/*');
         \Illuminate\Support\Facades\DB::table('visits')->insert([
             'node_id' => $node->id,
@@ -76,7 +84,7 @@ class UniverseController extends Controller
             'session' => substr($request->session()->getId(), 0, 16),
         ]);
         return view('universe', compact(
-            'node', 'children', 'parents', 'goal', 'replies', 'live', 'files', 'guild', 'tab', 'tid', 'mode', 'cck', 'seoRow', 'tabs', 'white'
+            'node', 'children', 'parents', 'goal', 'replies', 'live', 'files', 'guild', 'tab', 'tid', 'mode', 'cck', 'seoRow', 'tabs', 'white', 'arcs', 'cursor', 'openBounties'
         ));
     }
 
@@ -105,6 +113,7 @@ class UniverseController extends Controller
         $club = GpNode::query()->where('slug', $slug)->firstOrFail();
         $node = GpNode::query()->where('slug', $fiche)->firstOrFail();
         abort_unless(Edge::query()->where('from_id', $club->id)->where('to_id', $node->id)->exists(), 404);
+        abort_unless(Spoiler::ok((int) ($node->appear_order ?? 0), $club->id), 403, 'Spoiler. Recule le curseur d’arc.');
         $cck = \Illuminate\Support\Facades\DB::table('cck_fields')->where('node_id', $node->id)->get();
         $parentIds = Edge::query()->where('to_id', $node->id)->pluck('from_id');
         $parents = GpNode::query()->whereIn('id', $parentIds)->get();

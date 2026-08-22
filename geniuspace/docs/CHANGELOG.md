@@ -23,3 +23,12 @@
 - Maillage aussi sur le feed forum, pas seulement la fiche sujet.
 - Digest : article + `Mail::raw` vers les owners (mailer `log` tant que SMTP n’est pas là).
 
+## 2026-08-22 — Cinq moats
+
+1. **Bounties SEO** — radar → quête guilde → `LlmJudge` → wiki + NodeCoins + titre.
+2. **Curseur anti-spoiler** — `appear_order` + arcs. Le graphe et la boutique se recroquevillent.
+3. **Citation @graphe** — mini-fiche in-chat, KOC 5 % si achat.
+4. **Sac à dos cross-node** — inventaire profil (relique / titre / épreuve).
+5. **Split paiement** — plusieurs créateurs, ledger (Stripe Connect en prod).
+
+

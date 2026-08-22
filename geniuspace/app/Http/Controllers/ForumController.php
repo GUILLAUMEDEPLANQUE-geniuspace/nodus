@@ -58,7 +58,18 @@ class ForumController extends Controller
             'media_path' => '',
         ]);
         Thread::query()->where('id', $tid)->increment('replies_count');
-        return redirect('/n/'.$slug.'?tab=forum&tid='.$tid)->with('ok', 'Réponse Legacy indexée.');
+        if (preg_match_all('/@([a-z0-9][a-z0-9\-]+)/i', $data['body'], $mm)) {
+            foreach (array_unique($mm[1]) as $key) {
+                $prod = \App\Models\Product::query()->where('node_id', $nodeId)->where('id', $key)->first();
+                DB::table('citations')->insert([
+                    'thread_id' => $tid,
+                    'target_slug' => $key,
+                    'product_id' => $prod->id ?? '',
+                    'user_id' => Auth::id(),
+                ]);
+            }
+        }
+        return redirect('/n/'.$slug.'/t/'.$tid)->with('ok', 'Réponse Legacy indexée.');
     }
 
     public function live(Request $request, string $slug, string $tid): RedirectResponse

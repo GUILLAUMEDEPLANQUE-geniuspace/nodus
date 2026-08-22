@@ -43,7 +43,7 @@
         @endforelse
         <form method="post" action="/n/{{ $node->slug }}/t/{{ $thread->id }}/reply">
             @csrf
-            <textarea name="body" required placeholder="Réponse structurée — Google lit ceci." style="width:100%;min-height:5rem"></textarea>
+            <textarea name="body" required placeholder="Réponse. @luffy ou @sp-op-1 injecte une mini-fiche (KOC si achat)." style="width:100%;min-height:5rem"></textarea>
             <button class="btn" type="submit" style="margin-top:0.5rem">Publier au Legacy</button>
         </form>
     </section>

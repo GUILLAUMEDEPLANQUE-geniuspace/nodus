@@ -30,7 +30,24 @@
   <p><a class="btn" href="/n/{{ $node->slug }}/radar">Radar SEO</a>
      <a class="btn-line" href="/n/{{ $node->slug }}/digest">Digest</a>
      <a class="btn-line" href="/n/{{ $node->slug }}/sitemap.xml">Sitemap club</a>
-     <a class="btn-line" href="/g/{{ $node->slug }}">Graphe public</a></p>
+     <a class="btn-line" href="/g/{{ $node->slug }}">Graphe public</a>
+     <a class="btn-line" href="/n/{{ $node->slug }}/bounties">Bounties SEO</a></p>
+  <p class="kicker">Split paiement (objet hybride, plusieurs créateurs)</p>
+  @foreach($products ?? [] as $p)
+    <div class="card" style="padding:.8rem;margin:.4rem 0;max-width:36rem">
+      <strong>{{ $p->title }}</strong>
+      @foreach(($splits[$p->id] ?? collect()) as $s)
+        <p class="muted">#{{ $s->user_id }} · {{ $s->percent }}%</p>
+      @endforeach
+      <form method="post" action="/n/{{ $node->slug }}/split">
+        @csrf
+        <input type="hidden" name="product_id" value="{{ $p->id }}">
+        <input name="email" placeholder="email créateur" required>
+        <input name="percent" type="number" min="1" max="99" placeholder="%" style="width:4rem">
+        <button class="btn" type="submit">Lier le split</button>
+      </form>
+    </div>
+  @endforeach
   <form method="post" action="/n/{{ $node->slug }}/host" class="card" style="padding:1rem;max-width:36rem;margin:1rem 0">
     @csrf
     <p class="kicker">Sous-domaine club</p>

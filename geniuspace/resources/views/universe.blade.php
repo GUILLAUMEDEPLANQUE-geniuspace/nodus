@@ -147,6 +147,22 @@
         @endif
         <h1>{{ $node->title }}</h1>
         <p>{{ $node->subtitle ?: $node->summary }}</p>
+        @if(isset($arcs) && $arcs->count())
+          <form method="post" action="/n/{{ $node->slug }}/cursor" class="rel" style="margin-top:.8rem">
+            @csrf
+            <label class="kicker">Anti-spoiler — j’en suis à
+              <select name="cursor" onchange="this.form.submit()">
+                <option value="99" {{ ($cursor??99)==99?'selected':'' }}>Tout vu</option>
+                @foreach($arcs as $a)
+                  <option value="{{ $a->ord }}" {{ ($cursor??99)==$a->ord?'selected':'' }}>{{ $a->label }}</option>
+                @endforeach
+              </select>
+            </label>
+          </form>
+        @endif
+        @if(!empty($openBounties))
+          <p class="kicker" style="margin-top:.6rem"><a class="primary" href="/n/{{ $node->slug }}/bounties">{{ $openBounties }} quête(s) SEO de guilde</a></p>
+        @endif
         <div style="margin-top:1.1rem;display:flex;gap:0.5rem;flex-wrap:wrap">
             <form action="/n/{{ $node->slug }}/q"><input name="q" placeholder="Chercher dans le club" style="width:12rem"><button class="btn-line" type="submit">OK</button></form>
             @if($children->count()>=2)

@@ -150,3 +150,6 @@ textarea { height: auto; border-radius: 1rem; padding: 0.75rem 1rem; }
 .room { background-color: color-mix(in srgb, var(--room-color, var(--primary)) 8%, var(--bg)); background-repeat: no-repeat; transition: background-color .4s; }
 .room-anim { animation: roomPulse 9s ease-in-out infinite; }
 @keyframes roomPulse { 0%,100% { filter: saturate(1); } 50% { filter: saturate(1.15); } }
+.cite-card { display:inline-flex; flex-direction:column; gap:.1rem; padding:.4rem .7rem; margin:.15rem; border:1px solid var(--border); border-radius:.6rem; vertical-align:middle; }
+.cite-card span { font-size:.7rem; color:var(--muted); }
+.cite-shop { border-color:var(--primary); }

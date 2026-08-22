@@ -55,6 +55,7 @@
                     <form method="post" action="/cart" style="margin-top:0.5rem">
                     @csrf
                     <input type="hidden" name="product_id" value="{{ $p->id }}">
+                    @if(request('koc'))<input type="hidden" name="koc" value="{{ request('koc') }}">@endif
                     <button class="btn" type="submit" style="width:100%;height:2.4rem">Chaudron</button>
                 </form>
             </article>

@@ -23,7 +23,14 @@
         <input name="bio" value="{{ $user->bio }}" placeholder="Bio">
         <button class="btn" type="submit">Sauver</button>
       </form>
-      <h2 class="font-display">Playlists</h2>
+      <p class="kicker">{{ $user->nodecoins ?? 0 }} NodeCoins</p>
+      <h2 class="font-display">Sac à dos (cross-node)</h2>
+      <p class="muted">Reliques, titres, épreuves — voyagent avec toi, sans blockchain.</p>
+      @forelse($pack ?? [] as $it)
+        <p class="card" style="padding:.7rem;margin:.3rem 0"><span class="kicker">{{ $it->kind }}</span> {{ $it->label }} <span class="muted">{{ $it->meta }}</span></p>
+      @empty
+        <p class="muted">Sac vide. Gagne une quête SEO ou achète une relique.</p>
+      @endforelse
       @foreach($playlists as $p)
         <p><a href="/pl/{{ $p->share_slug }}">{{ $p->title }}</a> — /pl/{{ $p->share_slug }}</p>
       @endforeach

@@ -19,7 +19,8 @@ class ProfileController extends Controller
         $playlists = DB::table('playlists')->where('user_id', $user->id)->get();
         $notifs = DB::table('notifications')->where('user_id', $user->id)->orderByDesc('id')->limit(20)->get();
         $dms = DB::table('dm_messages')->where('to_id', $user->id)->orWhere('from_id', $user->id)->orderByDesc('id')->limit(20)->get();
-        return view('profile', compact('user', 'playlists', 'notifs', 'dms'));
+        $pack = DB::table('inventory')->where('user_id', $user->id)->orderByDesc('id')->get();
+        return view('profile', compact('user', 'playlists', 'notifs', 'dms', 'pack'));
     }
 
     public function save(Request $request): RedirectResponse

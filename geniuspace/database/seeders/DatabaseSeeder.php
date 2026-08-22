@@ -12,5 +12,6 @@ class DatabaseSeeder extends Seeder
         $this->call(ForumVideoSeeder::class);
         $this->call(PlatformSeeder::class);
         $this->call(GodSeeder::class);
+        $this->call(MoatSeeder::class);
     }
 }
