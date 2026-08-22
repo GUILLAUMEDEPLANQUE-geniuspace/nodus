@@ -17,9 +17,10 @@
     .gdock button{height:2.5rem;border:0;background:transparent;color:var(--muted);padding:0 .7rem;font-size:.75rem;white-space:nowrap}
     .slide{position:absolute;top:0;right:0;z-index:30;width:min(26rem,100%);height:100%;background:rgba(7,8,12,.94);border-left:1px solid var(--border);transform:translateX(110%);transition:.35s;padding:1.1rem;overflow:auto}
     .slide.on{transform:none}
-    .palette{position:absolute;top:4.2rem;left:.7rem;z-index:15;width:13.5rem;max-height:70dvh;overflow:auto;background:rgba(7,8,12,.8);border:1px solid var(--border);border-radius:1rem;padding:.6rem;backdrop-filter:blur(10px)}
-    .palette button{display:block;width:100%;text-align:left;background:transparent;border:0;color:var(--muted);font-size:.72rem;padding:.28rem 0}
-    .palette button:hover{color:var(--primary)}
+    .palette{position:absolute;top:4.2rem;right:.7rem;left:auto;z-index:15;width:13.5rem;max-height:70dvh;overflow:auto;background:rgba(7,8,12,.88);border:1px solid var(--border);border-radius:1rem;padding:.6rem;backdrop-filter:blur(10px)}
+    .palette button{display:block;width:100%;text-align:left;background:transparent;border:0;color:var(--fg);font-size:.8rem;padding:.4rem .3rem;border-radius:.4rem;cursor:pointer}
+    .palette button:hover{color:var(--primary);background:rgba(201,163,106,.12)}
+    #gp-msg{position:absolute;top:3.6rem;left:50%;transform:translateX(-50%);z-index:40;background:var(--primary);color:var(--primary-fg);padding:.45rem .9rem;border-radius:999px;display:none;font-size:.85rem}
     .drop-hint{position:absolute;inset:0;z-index:8;display:none;place-items:center;border:2px dashed var(--primary);background:rgba(201,163,106,.08);pointer-events:none;font-family:var(--display);font-size:1.6rem}
     body.dragging .drop-hint{display:grid}
   </style>
@@ -35,8 +36,10 @@
   </div>
 </header>
 <div id="ideas" class="hud rel" style="top:3.4rem;left:50%;transform:translateX(-50%);z-index:16;max-width:90vw"></div>
-<aside class="palette" id="palette" style="{{ $fresh ? 'opacity:0' : '' }}">
-  <p class="kicker">CCK · 8 essentiels</p>
+<div id="gp-msg"></div>
+<aside class="palette" id="palette" style="{{ $fresh ? 'opacity:0;pointer-events:none' : '' }}">
+  <p class="kicker">Champs CCK</p>
+  <p class="muted" style="font-size:.7rem;margin:0 0 .4rem">Clic = coller sur l’astre (ou le noyau)</p>
   <button type="button" id="adv" class="chip">Mode avancé</button>
   @php $g=''; @endphp
   @foreach($catalog as $key => $meta)
@@ -85,7 +88,14 @@
     <input name="title" id="ptit" style="width:100%;margin:.3rem 0">
     <label class="muted">Description</label>
     <textarea name="summary" id="psum" style="width:100%"></textarea>
-    <label class="muted">Ajouter un champ CCK</label>
+    <label class="muted">Ou clique un type</label>
+    <div class="rel" style="margin:.4rem 0">
+      @foreach($catalog as $key => $meta)
+        @if(empty($meta['pro']))
+          <button type="button" class="chip" data-cck="{{ $key }}">{{ $meta['label'] }}</button>
+        @endif
+      @endforeach
+    </div>
     <select name="field_type" id="ftype" style="width:100%;margin:.3rem 0">
       @foreach($catalog as $key => $meta)
         <option value="{{ $key }}">{{ $meta['g'] }} · {{ $meta['label'] }}</option>
