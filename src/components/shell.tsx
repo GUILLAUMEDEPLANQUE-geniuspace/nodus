@@ -34,7 +34,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
             <span className="grid size-8 place-items-center rounded-full border border-primary/40 bg-bg/80">
               <span className="size-2 rounded-full bg-primary shadow-[0_0_12px_var(--color-primary)]" />
             </span>
-            <span className="font-display text-xl tracking-[0.18em] text-fg">NODUS</span>
+            <span className="font-display text-xl tracking-[0.18em] text-fg">Geniuspace</span>
           </Link>
 
           {!inUniverse ? (

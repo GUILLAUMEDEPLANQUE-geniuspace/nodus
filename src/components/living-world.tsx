@@ -16,6 +16,7 @@ import { UniverseDock } from "@/components/universe-dock";
 import { VideoStudio } from "@/components/video-studio";
 import { WikiGuide } from "@/components/wiki-guide";
 import { KIND_LABEL, type GraphNode, type NodeUniverse, type UniverseTab } from "@/lib/graph";
+import { readLocale } from "@/lib/i18n";
 import { heroOf, portraitOf } from "@/lib/skins";
 import { postGuildMessage } from "@/lib/graph-api";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
@@ -65,6 +66,9 @@ export function LivingWorld({ universe }: { universe: NodeUniverse }) {
     videoAssets,
     videoNews,
     seo,
+    atsSteps,
+    i18n,
+    relics,
   } = universe;
   const dockTabs = uniqueTabs(tabs.length ? tabs : FALLBACK_TABS);
   const [tab, setTab] = useState(dockTabs[0]?.key ?? "vivre");
@@ -73,17 +77,24 @@ export function LivingWorld({ universe }: { universe: NodeUniverse }) {
   useEffect(() => {
     if (tab !== "vivre") bodyRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, [tab]);
+  const loc = readLocale();
+  const tr = i18n.find((x) => x.locale === loc);
+  const displayTitle = tr?.title || node.title;
+  const displaySummary = tr?.summary || node.summary;
   const hero = heroUrl || heroOf(node);
   const souls = children.filter((c) => c.kind === "character" || c.kind === "group" || c.kind === "person");
   const markers = useMemo(
-    () =>
-      souls
+    () => {
+      const fromSouls = souls
         .map((c) => {
           const image = portraitOf(c.slug);
           return image ? { title: c.title, image } : null;
         })
-        .filter(Boolean) as { title: string; image: string }[],
-    [souls],
+        .filter(Boolean) as { title: string; image: string }[];
+      const fromRelics = relics.map((r) => ({ title: r.title, image: hero }));
+      return [...fromSouls, ...fromRelics];
+    },
+    [souls, relics, hero],
   );
   const forum = threads.filter((t) => t.kind === "forum");
   const journal = threads.filter((t) => t.kind === "blog");
@@ -133,8 +144,8 @@ export function LivingWorld({ universe }: { universe: NodeUniverse }) {
           ) : (
             <p className="text-xs tracking-[0.2em] text-primary uppercase">Lieu de vie · {KIND_LABEL[node.kind]}</p>
           )}
-          <h1 className="mt-2 max-w-3xl font-display text-5xl leading-[0.92] sm:text-7xl">{node.title}</h1>
-          <p className="mt-3 max-w-xl text-base text-fg/90">{node.subtitle || node.summary}</p>
+          <h1 className="mt-2 max-w-3xl font-display text-5xl leading-[0.92] sm:text-7xl">{displayTitle}</h1>
+          <p className="mt-3 max-w-xl text-base text-fg/90">{tr?.summary || node.subtitle || node.summary}</p>
           <div className="mt-5 flex flex-wrap gap-3 pb-3">
             <button
               type="button"
@@ -157,7 +168,7 @@ export function LivingWorld({ universe }: { universe: NodeUniverse }) {
       <div ref={bodyRef} className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
         {tab === "vivre" ? (
           <div className="space-y-12">
-            <p className="max-w-2xl text-lg leading-relaxed text-fg/90">{node.summary}</p>
+            <p className="max-w-2xl text-lg leading-relaxed text-fg/90">{displaySummary}</p>
             {node.body ? <p className="max-w-2xl text-sm leading-relaxed text-muted">{node.body}</p> : null}
             {cck.filter((f) => f.targetKind === "node" || f.targetKind === "").length > 0 ? (
               <CckPanel
@@ -203,7 +214,7 @@ export function LivingWorld({ universe }: { universe: NodeUniverse }) {
         ) : null}
 
         {tab === "studio" ? (
-          <StudioPanel slug={node.slug} tabs={dockTabs} staff={staff} files={files} cck={cck} seo={seo} />
+          <StudioPanel slug={node.slug} tabs={dockTabs} staff={staff} files={files} cck={cck} seo={seo} atsSteps={atsSteps} />
         ) : null}
       </div>
         </>

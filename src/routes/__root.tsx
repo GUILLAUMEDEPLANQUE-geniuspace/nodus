@@ -4,7 +4,7 @@ import { PreviewHostBridge } from "@/components/preview-host-bridge";
 import { Shell } from "@/components/shell";
 import appCss from "../styles.css?url";
 
-const APP_NAME = "NODUS";
+const APP_NAME = "Geniuspace";
 
 export const Route = createRootRoute({
   head: () => ({
@@ -12,7 +12,7 @@ export const Route = createRootRoute({
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: APP_NAME },
-      { name: "description", content: "Univers interconnectés — graphe parent / enfant, rôles, œuvres." },
+      { name: "description", content: "Geniuspace — univers interconnectés, graphe, boutique RWA, recrutement expérientiel." },
       { name: "theme-color", content: "#08090e" },
     ],
     links: [

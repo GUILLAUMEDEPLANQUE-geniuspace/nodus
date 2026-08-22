@@ -3,7 +3,7 @@
  * Paywall client = UX. Les URLs locked ne sont jamais dans le DOM public.
  * Prod : HLS à jetons + signed Drive. Ne pas copier un skin cyan/Orbitron.
  */
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   Box,
@@ -59,6 +59,7 @@ export function HoloPlayer({
   const [panel, setPanel] = useState<"console" | "graph" | "shop" | "desc" | null>(null);
   const [ctx, setCtx] = useState<"drive" | "live">("drive");
   const [drop, setDrop] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const { user } = useCurrentUserState();
   const wall = gated && !granted && t >= teaser;
   const poster = media.nodeId === "orion" ? "/realms/studio-hero.jpg" : "/realms/sea-hero.jpg";
@@ -72,12 +73,6 @@ export function HoloPlayer({
     setPlaying(false);
     setPanel(null);
   }, [media.id, assets, gated]);
-
-  useEffect(() => {
-    if (!playing || wall) return;
-    const id = window.setInterval(() => setT((x) => x + 1), 400);
-    return () => window.clearInterval(id);
-  }, [playing, wall]);
 
   useEffect(() => {
     if (granted && t >= 2 && t <= 6) setDrop(true);
@@ -113,11 +108,23 @@ export function HoloPlayer({
       <div className="flex min-h-0 flex-1">
         <div className="relative flex min-w-0 flex-1 flex-col">
           <div className="relative m-3 overflow-hidden rounded-2xl border border-border bg-black aspect-video max-h-[58vh]">
-            <img src={poster} alt="" className={`size-full object-cover ${wall ? "blur-md" : ""}`} />
+            <video
+              ref={videoRef}
+              src={media.url || "/media/teaser.mp4"}
+              poster={poster}
+              className={`size-full object-cover ${wall ? "blur-md" : ""}`}
+              onTimeUpdate={(e) => setT(e.currentTarget.currentTime)}
+              onPlay={() => setPlaying(true)}
+              onPause={() => setPlaying(false)}
+              playsInline
+            />
             {!playing && !wall ? (
               <button
                 type="button"
-                onClick={() => setPlaying(true)}
+                onClick={() => {
+                  setPlaying(true);
+                  void videoRef.current?.play();
+                }}
                 className="absolute top-1/2 left-1/2 grid size-16 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-primary text-primary-fg"
                 aria-label="Lecture"
               >

@@ -3,9 +3,10 @@
  * Chaque univers (manga, recruteur, série, business) se configure ici — pas un thème figé.
  */
 import { useState } from "react";
+import { AtsStudio } from "@/components/ats-studio";
 import { CckBuilder } from "@/components/cck-builder";
 import { SeoStudio } from "@/components/seo-studio";
-import type { CckField, DriveFile, NodeSeo, StaffMember, UniverseTab } from "@/lib/graph";
+import type { AtsStep, CckField, DriveFile, NodeSeo, StaffMember, UniverseTab } from "@/lib/graph";
 import { addStaffMember, addUniverseTab } from "@/lib/graph-api";
 
 export function StudioPanel({
@@ -15,6 +16,7 @@ export function StudioPanel({
   files,
   cck = [],
   seo = null,
+  atsSteps = [],
 }: {
   slug: string;
   tabs: UniverseTab[];
@@ -22,6 +24,7 @@ export function StudioPanel({
   files: DriveFile[];
   cck?: CckField[];
   seo?: NodeSeo | null;
+  atsSteps?: AtsStep[];
 }) {
   const [label, setLabel] = useState("");
   const [name, setName] = useState("");
@@ -144,6 +147,7 @@ export function StudioPanel({
         </ul>
       </section>
       <SeoStudio slug={slug} seo={seo} />
+      {atsSteps.length > 0 || slug.includes("orion") ? <AtsStudio slug={slug} steps={atsSteps} /> : null}
       <CckBuilder slug={slug} fields={cck} />
     </div>
   );

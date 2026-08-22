@@ -12,7 +12,7 @@ function Home() {
         <img src="/realms/sea-hero.jpg" alt="" className="absolute inset-0 size-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-bg via-bg/40 to-bg/10" />
         <div className="absolute inset-x-0 bottom-0 mx-auto max-w-6xl px-4 pb-12 sm:px-6">
-          <p className="text-[11px] tracking-[0.28em] text-primary uppercase">Un lieu de vie, pas un profil</p>
+          <p className="text-[11px] tracking-[0.28em] text-primary uppercase">Geniuspace — un lieu de vie</p>
           <h1 className="mt-3 max-w-3xl font-display text-5xl leading-[0.92] sm:text-7xl">
             Les fans bâtissent le monde.
             <br />

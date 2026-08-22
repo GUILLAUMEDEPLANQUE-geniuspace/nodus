@@ -35,6 +35,9 @@ export function ShopFloor({
           rating: "0",
           votes: 0,
           stock: "en stock",
+          rwa: false,
+          energy: 20,
+          imageUrl: "",
         },
       ]);
       setTitle("");

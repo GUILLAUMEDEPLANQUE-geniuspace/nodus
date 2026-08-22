@@ -2,6 +2,27 @@
 
 Format : ce qui est **dans le code**, pas la vision PDF.
 
+## 1.0.0 — 2026-08-22 — Geniuspace
+
+Rebrand. Command Center produit. Player HTML5 réel.
+
+### Produit / RWA
+- `/n/:slug/p/:id` = Command Center 3 colonnes (vidéo, galerie, chaudron)
+- Drag → panier + jauge énergie + loot Drive
+- Crowd-goal, toasts live, preview AR (CSS 3D)
+- JSON-LD `VisualArtwork` si `rwa`
+- Tokens or/encre (pas le cyan du mockup)
+
+### Vidéo
+- `<video>` + MP4 `/media/*.mp4` + `timeupdate` (paywall teaser, ads SEM)
+
+### Reco / i18n / ATS / 3D
+- `getMatches` : mêmes kinds que tes visites
+- `node_i18n` FR/EN/JA sur les fiches
+- 7 étapes ATS éditables (Studio)
+- Reliques 3D (`node_relics`) sur la carte
+- `semanticWeave` : Legacy → page wiki (maillage). Prod = LLM
+
 ## 0.9.1 — 2026-08-22
 
 ### SEO : public vs éditeur

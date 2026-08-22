@@ -37,7 +37,12 @@ import {
   type StaffMember,
   type Thread,
   type TimelineEvent,
+  type AdSlot,
+  type AtsStep,
+  type CrowdGoal,
   type NodeSeo,
+  type NodeI18n,
+  type Relic,
   type UniverseTab,
   type VideoAsset,
   type VideoNews,
@@ -516,11 +521,17 @@ export const getNodeUniverse = createServerFn({ method: "GET" })
       rating: string;
       votes: number;
       stock: string;
+      rwa: boolean;
+      energy: number;
+      image_url: string;
     }>(
       `select id, title, price, summary, kind,
               coalesce(rating, '0') as rating,
               coalesce(votes, 0) as votes,
-              coalesce(stock, '') as stock
+              coalesce(stock, '') as stock,
+              coalesce(rwa, false) as rwa,
+              coalesce(energy, 20) as energy,
+              coalesce(image_url, '') as image_url
        from shop_products where node_id = $1`,
       [bundle.node.id],
     );
@@ -595,6 +606,30 @@ export const getNodeUniverse = createServerFn({ method: "GET" })
           noindex: Boolean(seoRows[0].noindex),
         }
       : null;
+    const goalRows = await sql.query<{ target: number; current: number; reward: string }>(
+      `select target, current, reward from crowd_goals where node_id = $1`,
+      [bundle.node.id],
+    );
+    const adsRows = await sql.query<{
+      id: string;
+      title: string;
+      href: string;
+      image_url: string;
+      start_sec: number;
+      end_sec: number;
+    }>(`select id, title, href, image_url, start_sec, end_sec from ad_slots where node_id = $1`, [bundle.node.id]);
+    const atsRows = await sql.query<{ id: string; step: number; title: string; body: string }>(
+      `select id, step, title, body from ats_steps where node_id = $1 order by step`,
+      [bundle.node.id],
+    );
+    const relicRows = await sql.query<{ id: string; title: string; x: number; y: number }>(
+      `select id, title, x, y from node_relics where node_id = $1`,
+      [bundle.node.id],
+    );
+    const i18nRows = await sql.query<{ locale: string; title: string; summary: string; body: string }>(
+      `select locale, title, summary, body from node_i18n where node_id = $1`,
+      [bundle.node.id],
+    );
     return {
       ...bundle,
       folders: folders.map(
@@ -680,6 +715,9 @@ export const getNodeUniverse = createServerFn({ method: "GET" })
           rating: p.rating,
           votes: Number(p.votes),
           stock: p.stock,
+          rwa: Boolean(p.rwa),
+          energy: Number(p.energy),
+          imageUrl: p.image_url,
         }),
       ),
       playlists: lists.map(
@@ -735,6 +773,28 @@ export const getNodeUniverse = createServerFn({ method: "GET" })
         }),
       ),
       seo: seoRow,
+      crowdGoal: goalRows[0]
+        ? { target: Number(goalRows[0].target), current: Number(goalRows[0].current), reward: goalRows[0].reward }
+        : null,
+      ads: adsRows.map(
+        (a): AdSlot => ({
+          id: a.id,
+          title: a.title,
+          href: a.href,
+          imageUrl: a.image_url,
+          startSec: Number(a.start_sec),
+          endSec: Number(a.end_sec),
+        }),
+      ),
+      atsSteps: atsRows.map(
+        (s): AtsStep => ({ id: s.id, step: Number(s.step), title: s.title, body: s.body }),
+      ),
+      relics: relicRows.map(
+        (r): Relic => ({ id: r.id, title: r.title, x: Number(r.x), y: Number(r.y) }),
+      ),
+      i18n: i18nRows.map(
+        (t): NodeI18n => ({ locale: t.locale, title: t.title, summary: t.summary, body: t.body }),
+      ),
     };
   });
 

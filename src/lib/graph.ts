@@ -234,7 +234,16 @@ export type ShopProduct = {
   rating: string;
   votes: number;
   stock: string;
+  rwa: boolean;
+  energy: number;
+  imageUrl: string;
 };
+
+export type CrowdGoal = { target: number; current: number; reward: string };
+export type AdSlot = { id: string; title: string; href: string; imageUrl: string; startSec: number; endSec: number };
+export type AtsStep = { id: string; step: number; title: string; body: string };
+export type Relic = { id: string; title: string; x: number; y: number };
+export type NodeI18n = { locale: string; title: string; summary: string; body: string };
 
 export type Playlist = {
   id: string;
@@ -292,6 +301,11 @@ export type NodeUniverse = NodeBundle & {
   videoAssets: VideoAsset[];
   videoNews: VideoNews[];
   seo: NodeSeo | null;
+  crowdGoal: CrowdGoal | null;
+  ads: AdSlot[];
+  atsSteps: AtsStep[];
+  relics: Relic[];
+  i18n: NodeI18n[];
 };
 
 

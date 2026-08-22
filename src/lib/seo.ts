@@ -1,48 +1,48 @@
 /**
  * SEO / SEM / LLM — chaque Node a un titre, une description et un graphe JSON-LD uniques.
- * Ne jamais réutiliser le title global "NODUS" sur une fiche : Google et les LLM
+ * Ne jamais réutiliser le title global "Geniuspace" sur une fiche : Google et les LLM
  * doivent voir UN document par univers / offre / produit / perso.
  */
 import type { CckField, GraphNode, NodeSeo, NodeUniverse, ShopProduct, WikiPage } from "@/lib/graph";
 
 const KIND_SEO: Record<string, (n: GraphNode) => { title: string; description: string; ogType: string }> = {
   series: (n) => ({
-    title: `${n.title} — wiki, forum, personnages, guides | NODUS`,
+    title: `${n.title} — wiki, forum, personnages, guides | Geniuspace`,
     description: n.summary || `Univers ${n.title} : lore, guilde, reliques et fiches liées.`,
     ogType: "video.tv_show",
   }),
   franchise: (n) => ({
-    title: `${n.title} — franchise, univers interconnectés | NODUS`,
+    title: `${n.title} — franchise, univers interconnectés | Geniuspace`,
     description: n.summary,
     ogType: "website",
   }),
   character: (n) => ({
-    title: `${n.title} — fiche personnage, lore, univers | NODUS`,
+    title: `${n.title} — fiche personnage, lore, univers | Geniuspace`,
     description: n.summary || `Fiche ${n.title} : relations graphe, CCK, reliques.`,
     ogType: "profile",
   }),
   person: (n) => ({
-    title: `${n.title} — rôles, filmographie graphe | NODUS`,
+    title: `${n.title} — rôles, filmographie graphe | Geniuspace`,
     description: n.summary || `Tous les rôles de ${n.title} en parent/enfant.`,
     ogType: "profile",
   }),
   company: (n) => ({
-    title: `${n.title} — maison, salon RPG, offres, épreuves | NODUS`,
+    title: `${n.title} — maison, salon RPG, offres, épreuves | Geniuspace`,
     description: n.summary || `Recrutement expérientiel ${n.title} : quêtes, skill tree, salon.`,
     ogType: "website",
   }),
   job: (n) => ({
-    title: `${n.title} — offre, épreuve, CCK | NODUS`,
+    title: `${n.title} — offre, épreuve, CCK | Geniuspace`,
     description: n.summary || `Offre ${n.title} : compétences CCK, quêtes, Drive.`,
     ogType: "article",
   }),
   product: (n) => ({
-    title: `${n.title} — boutique du Node | NODUS`,
+    title: `${n.title} — boutique du Node | Geniuspace`,
     description: n.summary,
     ogType: "product",
   }),
   group: (n) => ({
-    title: `${n.title} — groupe, membres, univers | NODUS`,
+    title: `${n.title} — groupe, membres, univers | Geniuspace`,
     description: n.summary,
     ogType: "profile",
   }),
@@ -53,11 +53,11 @@ export function seoForNode(node: GraphNode, override?: NodeSeo | null) {
   const base = make
     ? make(node)
     : {
-        title: `${node.title} — ${node.kind} | NODUS`,
+        title: `${node.title} — ${node.kind} | Geniuspace`,
         description: node.summary || node.subtitle,
         ogType: "website",
       };
-  const keywords = [node.title, node.kind, node.subtitle, "NODUS", "univers", "graphe"]
+  const keywords = [node.title, node.kind, node.subtitle, "Geniuspace", "univers", "graphe"]
     .filter(Boolean)
     .join(", ");
   return {
@@ -78,7 +78,7 @@ export function jsonLdGraph(universe: NodeUniverse) {
     {
       "@type": "BreadcrumbList",
       itemListElement: [
-        { "@type": "ListItem", position: 1, name: "NODUS", item: "/" },
+        { "@type": "ListItem", position: 1, name: "Geniuspace", item: "/" },
         ...(parents[0]
           ? [{ "@type": "ListItem", position: 2, name: parents[0].title, item: `/n/${parents[0].slug}` }]
           : []),

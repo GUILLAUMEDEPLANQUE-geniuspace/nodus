@@ -40,7 +40,7 @@ function uniqueVera(tabs: UniverseTab[]) {
 }
 
 export function VeraHouse({ universe }: { universe: NodeUniverse }) {
-  const { node, children, threads, messages, files, folders, cck, wiki, tabs, staff, categories, replies, live, quests, rooms, products, media, videoAssets, videoNews, seo } =
+  const { node, children, threads, messages, files, folders, cck, wiki, tabs, staff, categories, replies, live, quests, rooms, products, media, videoAssets, videoNews, seo, atsSteps } =
     universe;
   const dockTabs = uniqueVera(tabs.length ? tabs : VERA_TABS);
   const [tab, setTab] = useState(node.kind === "job" ? "offres" : "maison");
@@ -165,7 +165,7 @@ export function VeraHouse({ universe }: { universe: NodeUniverse }) {
         {tab === "studio" ? (
           <div className="space-y-10">
             <PipelineBoard slug={node.slug} />
-            <StudioPanel slug={node.slug} tabs={dockTabs} staff={staff} files={files} cck={cck} seo={seo} />
+            <StudioPanel slug={node.slug} tabs={dockTabs} staff={staff} files={files} cck={cck} seo={seo} atsSteps={atsSteps} />
           </div>
         ) : null}
       </div>

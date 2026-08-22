@@ -171,3 +171,19 @@ html[data-theme="light"] {
   min-height: 280px;
   background-color: var(--color-surface);
 }
+
+.holo-floor {
+  background-image:
+    linear-gradient(rgba(201, 163, 106, 0.16) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(201, 163, 106, 0.16) 1px, transparent 1px);
+  background-size: 40px 40px;
+  transform: rotateX(70deg);
+  transform-origin: center bottom;
+}
+
+.ar-wall {
+  background: linear-gradient(180deg, var(--color-surface-2), var(--color-surface));
+  border: 1px solid var(--color-border);
+  border-radius: 1.25rem;
+  perspective: 800px;
+}

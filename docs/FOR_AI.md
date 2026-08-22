@@ -20,4 +20,4 @@ Tu travailles sur NODUS. Avant de coder :
 18. Plateforme 0.9 : ACL `src/lib/acl.ts`. Blobs locked hors payload public. Checkout démo ≠ Stripe.
 19. Panier / notifs / inbox / profil = `src/lib/platform-api.ts`.
 20. Quêtes ATS : `startOrAdvanceCandidate`. Ne pas re-stocker les choix en local uniquement.
-22. SEO : pages publiques. Éditeur meta = owner/admin (`SeoStudio`). Ne jamais noindex un univers publié.
+23. Marque = Geniuspace. Command Center = fiche produit (`command-center.tsx`). Player = `<video>` réel. Pas de cyan.

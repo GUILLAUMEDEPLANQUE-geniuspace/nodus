@@ -452,3 +452,96 @@ export const saveNodeSeo = createServerFn({ method: "POST" })
     );
     return { ok: true };
   });
+
+export const getMatches = createServerFn({ method: "GET" })
+  .middleware([authMiddleware])
+  .handler(async ({ context }) => {
+    const sql = await getSql();
+    const fromVisits = await sql.query<{ slug: string; title: string; kind: string }>(
+      `select n.slug, n.title, n.kind from nodes n
+       where n.kind in (
+         select n2.kind from node_visits v join nodes n2 on n2.id = v.node_id
+         where v.user_id = $1
+       )
+       order by n.featured desc, n.title
+       limit 6`,
+      [context.userId],
+    );
+    if (fromVisits.length) return fromVisits;
+    return sql.query<{ slug: string; title: string; kind: string }>(
+      `select slug, title, kind from nodes where featured = true order by title limit 6`,
+    );
+  });
+
+export const saveAtsStep = createServerFn({ method: "POST" })
+  .middleware([authMiddleware])
+  .validator(
+    z.object({
+      slug: z.string().min(1),
+      step: z.number().int().min(1).max(7),
+      title: z.string().trim().min(2).max(80),
+      body: z.string().trim().max(400),
+    }),
+  )
+  .handler(async ({ data, context }) => {
+    const { sql, node } = await nodeBySlug(data.slug);
+    if (!node) throw new Error("Maison introuvable");
+    await assertMinRole(sql, node.id, context.userId, "admin");
+    await sql.query(
+      `insert into ats_steps (id, node_id, step, title, body) values ($1, $2, $3, $4, $5)
+       on conflict (node_id, step) do update set title = $4, body = $5`,
+      [crypto.randomUUID(), node.id, data.step, data.title, data.body],
+    );
+    return { ok: true };
+  });
+
+export const semanticWeave = createServerFn({ method: "POST" })
+  .middleware([authMiddleware])
+  .validator(z.object({ slug: z.string().min(1), threadId: z.string().min(1) }))
+  .handler(async ({ data, context }) => {
+    const { sql, node } = await nodeBySlug(data.slug);
+    if (!node) throw new Error("Univers introuvable");
+    await assertMinRole(sql, node.id, context.userId, "mod");
+    const th = await sql.query<{ title: string; body: string }>(`select title, body from threads where id = $1`, [
+      data.threadId,
+    ]);
+    const t = th[0];
+    if (!t) throw new Error("Sujet introuvable");
+    const words = t.body
+      .toLowerCase()
+      .split(/[^\p{L}]+/u)
+      .filter((w) => w.length > 5)
+      .slice(0, 8);
+    await sql.query(`insert into wiki_pages (id, node_id, title, body, sort_order) values ($1, $2, $3, $4, 50)`, [
+      crypto.randomUUID(),
+      node.id,
+      `Maillage · ${t.title}`,
+      `Liens internes extraits du Legacy : ${words.join(", ")}. Source /n/${data.slug}/t/${data.threadId}`,
+    ]);
+    return { ok: true };
+  });
+
+export const placeRelic = createServerFn({ method: "POST" })
+  .middleware([authMiddleware])
+  .validator(
+    z.object({
+      slug: z.string().min(1),
+      title: z.string().trim().min(1).max(40),
+      x: z.number(),
+      y: z.number(),
+    }),
+  )
+  .handler(async ({ data, context }) => {
+    const { sql, node } = await nodeBySlug(data.slug);
+    if (!node) throw new Error("Univers introuvable");
+    await assertMinRole(sql, node.id, context.userId, "member");
+    const id = crypto.randomUUID();
+    await sql.query(`insert into node_relics (id, node_id, title, x, y) values ($1, $2, $3, $4, $5)`, [
+      id,
+      node.id,
+      data.title,
+      data.x,
+      data.y,
+    ]);
+    return { id };
+  });
