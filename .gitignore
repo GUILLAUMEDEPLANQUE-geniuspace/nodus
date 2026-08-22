@@ -16,3 +16,7 @@ screenshots
 .node_modules.lock
 AGENTS.md
 AGENTS.project.md
+.php/
+.php
+geniuspace/vendor
+geniuspace/.env

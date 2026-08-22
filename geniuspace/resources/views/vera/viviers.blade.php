@@ -6,8 +6,8 @@
 @section('content')
 <div class="vera-wrap" style="padding:2.4rem 0 4rem">
   <p class="vera-kicker">Profils oubliés</p>
-  <h1 style="font-size:clamp(2rem,5vw,3.2rem)">Viviers</h1>
-  <p class="vera-lead">Indeed ignore ces bassins. Vera les nomme : le frein, le créneau, le duo. Publication gratuite, paiement PPQC.</p>
+  <h1 style="font-size:clamp(2rem,5vw,3.2rem)">Seniors, RSA, reprise</h1>
+  <p class="vera-lead">Indeed ignore ces bassins. Ici on nomme le frein, le créneau, le duo. Publier est gratuit. On paie seulement un candidat qui a réussi le test.</p>
   <div class="vera-grid g2" style="margin-top:1.8rem">
     @foreach($viviers as $v)
       <a class="v-card" href="/n/vera/viviers/{{ $v['slug'] }}">

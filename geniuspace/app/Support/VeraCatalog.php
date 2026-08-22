@@ -175,10 +175,10 @@ class VeraCatalog
         }
         $euros = max(120, min(980, $euros));
         $why = $tension >= 75
-            ? "Geo-Tension {$tension}/100 — métier tendu à {$city}. Le profil qualifié coûte plus, le sourcing moins."
+            ? "Bassin tendu ({$tension}/100) à {$city}. Un profil qui réussit le test coûte plus, le sourcing moins."
             : ($tension >= 55
-                ? "Geo-Tension {$tension}/100. Prix de bassin, pas un CPM Indeed."
-                : "Geo-Tension {$tension}/100. Vivier plus large : le PPQC reste bas, le filtre (épreuve) fait le travail.");
+                ? "Tension du bassin {$tension}/100. Prix selon le lieu, pas un clic Indeed."
+                : "Tension {$tension}/100. Plus de candidats : le tarif reste bas, le test filtre.");
         return compact('euros', 'tension', 'why');
     }
 
@@ -220,10 +220,10 @@ class VeraCatalog
             default => 'Profil fréquent',
         };
         $why = match ($band) {
-            'penurie' => 'Peu de candidats tenables, compétences rares, conversion faible. Les entreprises sérieuses paient au-dessus du P75 et répondent vite — ou perdent.',
+            'penurie' => 'Peu de candidats tenables, compétences rares. Les entreprises sérieuses paient au-dessus du P75 et répondent vite — ou perdent.',
             'rare' => 'Le vivier est étroit. Un process long ou un salaire sous médiane tue l’offre.',
-            'tendu' => 'On trouve, mais pas en trois jours. Le pacte de réponse pèse plus que le sourcing.',
-            default => 'Beaucoup de CV. Le filtre Vera (épreuve, grille, brief) sert surtout à éviter le bruit.',
+            'tendu' => 'On trouve, mais pas en trois jours. Le délai de réponse pèse plus que le sourcing.',
+            default => 'Beaucoup de CV. Le filtre (test, grille, une page) sert surtout à éviter le bruit.',
         };
         return compact('score', 'band', 'label', 'why');
     }
@@ -236,18 +236,18 @@ class VeraCatalog
     public static function honorCaption(int $score, int $due): string
     {
         if ($due === 0) {
-            return 'Nouveau pacte';
+            return 'Nouveau';
         }
         if ($score >= 94) {
-            return 'Pacte tenu';
+            return 'Toujours à l’heure';
         }
         if ($score >= 82) {
-            return 'Pacte correct';
+            return 'Répond à l’heure';
         }
         if ($score >= 70) {
-            return 'Pacte fragile';
+            return 'Parfois en retard';
         }
-        return 'Pacte rompu';
+        return 'Rate les délais';
     }
 
     public static function payPosition(array $job): ?array
@@ -317,14 +317,34 @@ class VeraCatalog
     public const CONTRACT = ['cdi' => 'CDI', 'cdd' => 'CDD', 'freelance' => 'Freelance', 'stage' => 'Stage', 'alternance' => 'Alternance'];
     public const SENIORITY = ['junior' => 'Junior', 'mid' => 'Confirmé', 'senior' => 'Senior', 'staff' => 'Staff', 'lead' => 'Lead'];
 
+    /** Libellés d’interface : français d’abord. Les noms historiques restent dans le lexique. */
     public static function nav(): array
     {
         return [
-            ['to' => '/n/vera/offres', 'key' => 'offres', 'label' => 'Emplois'],
+            ['to' => '/n/vera/offres', 'key' => 'offres', 'label' => 'Offres'],
             ['to' => '/n/vera/europe', 'key' => 'europe', 'label' => 'Europe'],
-            ['to' => '/n/vera/preuve', 'key' => 'preuve', 'label' => 'Épreuve'],
-            ['to' => '/n/vera/passport', 'key' => 'passport', 'label' => 'Passeport'],
+            ['to' => '/n/vera/preuve', 'key' => 'preuve', 'label' => 'Tests métier'],
+            ['to' => '/n/vera/carnet', 'key' => 'passport', 'label' => 'Mon carnet'],
             ['to' => '/n/vera/entreprises', 'key' => 'entreprises', 'label' => 'Entreprises'],
         ];
+    }
+
+    /** @return array{word:string,plain:string} */
+    public static function say(string $key): array
+    {
+        return match ($key) {
+            'verdict' => ['word' => 'Conseil', 'plain' => 'Allez, demandez, ou passez — avant d’écrire une candidature.'],
+            'pacte' => ['word' => 'Délai de réponse', 'plain' => 'Une date écrite. Si l’entreprise rate, ça se voit.'],
+            'brief' => ['word' => 'Une page à la place du CV', 'plain' => 'Livré, refusé, suite. Pas quatre pages.'],
+            'ppqc' => ['word' => 'Candidat qualifié', 'plain' => 'L’entreprise ne paie que si quelqu’un a réussi le test.'],
+            'epreuve' => ['word' => 'Test métier', 'plain' => 'Simulation de 6 minutes. Les coordonnées après, pas avant.'],
+            'passport' => ['word' => 'Carnet de preuves', 'plain' => 'Les tests réussis, exportables. Pas un PDF LinkedIn.'],
+            'honneur' => ['word' => 'Fiabilité', 'plain' => 'Note publique : elles répondent à l’heure, ou pas.'],
+            'vivier' => ['word' => 'Profils oubliés', 'plain' => 'Seniors à la journée, RSA, multi-activité — pas un vivier CRM.'],
+            'savoirs' => ['word' => 'Fiches métier', 'plain' => 'Guides liés aux offres. Si le geste manque, on l’apprend ici.'],
+            'talent' => ['word' => 'Le geste', 'plain' => 'Ce que vous savez faire, pas le titre sur LinkedIn.'],
+            'scarcity' => ['word' => 'Pénurie', 'plain' => 'Est-ce que ce métier se trouve, ou pas, dans ce bassin.'],
+            default => ['word' => $key, 'plain' => ''],
+        };
     }
 }

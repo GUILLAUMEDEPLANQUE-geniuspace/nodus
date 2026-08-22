@@ -20,7 +20,7 @@
   </div>
   <div class="chips" style="margin:1rem 0">
     <span class="badge {{ $C::honorTone($c['honorScore']) }}">Honneur {{ $c['honorScore'] }} · {{ $C::honorCaption($c['honorScore'], $c['honorDue']??1) }}</span>
-    <span class="badge">SLA {{ $c['slaDays'] }} j</span>
+    <span class="badge">Réponse {{ $c['slaDays'] }} j</span>
     <span class="badge">{{ $c['industry'] }}</span>
     <span class="badge">{{ $c['hqCity'] }}, {{ $c['hqCountry'] }}</span>
     <span class="badge">fondée {{ $c['foundedYear'] }}</span>

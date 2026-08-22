@@ -1,21 +1,21 @@
 @extends('layouts.vera')
-@section('title', 'Pacte de réponse — l’honneur est public | Vera')
-@section('description', 'Publier sur Vera, c’est signer un Pacte : une date de réponse, écrite. Si l’entreprise manque, son honneur baisse. Public.')
-@section('canonical', url('/n/vera/pacte'))
+@section('title', 'Délai de réponse public | Vera')
+@section('description', 'Publier sur Vera, c’est s’engager à une date. Si l’entreprise rate, sa note de fiabilité baisse. Public.')
+@section('canonical', url('/n/vera/delais'))
 @php $league = \App\Support\VeraCatalog::honorLeague(); $C = \App\Support\VeraCatalog::class; @endphp
 @section('content')
 <section class="vera-hero">
   <div class="vera-wrap">
     <p class="vera-kicker">Ce que les autres cachent</p>
     <h1>Elles répondent,<br>ou ça se voit.</h1>
-    <p class="vera-lead">Publier sur Vera, c’est signer un Pacte : une date de réponse, écrite. Si l’entreprise manque, son honneur baisse. Public. Les professionnels viennent ici pour ça — pas pour une autre liste d’offres.</p>
+    <p class="vera-lead">Publier ici, c’est s’engager à une date. Si l’entreprise rate, sa note de fiabilité baisse. Public. Les professionnels viennent pour ça — pas pour une autre liste d’offres.</p>
   </div>
 </section>
 <section class="section">
   <div class="vera-wrap vera-grid g3">
     <article class="principle"><h3>Une date, pas une promesse</h3><p>Chaque offre porte un délai (7, 10, 14 ou 21 jours). Votre suivi affiche le compte à rebours. Indeed n’a jamais osé ça : trop d’annonceurs à ménager.</p></article>
-    <article class="principle"><h3>L’honneur est un chiffre</h3><p>Réponses à l’heure / dossiers clos. Atelier Nord : 98. Relais : 44. Ce n’est pas une note culture. C’est le respect du temps des gens.</p></article>
-    <article class="principle"><h3>Le Verdict dit de passer</h3><p>Avant de postuler, Vera calcule si l’offre mérite vos heures : ghost, honneur, fourchette, longueur du process. Un « Passez » est un service, pas un échec.</p></article>
+    <article class="principle"><h3>La fiabilité est un chiffre</h3><p>Réponses à l’heure / dossiers clos. Atelier Nord : 98. Relais : 44. Ce n’est pas une note « culture ». C’est le respect du temps des gens.</p></article>
+    <article class="principle"><h3>On dit aussi de passer</h3><p>Avant de postuler, Vera calcule si l’offre mérite vos heures : annonce fantôme, fiabilité, salaire, durée. Un « Passez » est un service, pas un échec.</p></article>
   </div>
 </section>
 <section class="section paper">
@@ -29,7 +29,7 @@
           <span class="mark">{{ mb_substr($h['name'],0,1) }}</span>
           <div style="flex:1">
             <a href="/n/vera/maisons/{{ $h['slug'] }}" style="font-weight:500">{{ $h['name'] }}</a>
-            <p style="font-size:.75rem;color:var(--muted);margin:0">{{ $h['industry'] }} · {{ $h['honorAnswered'] }}/{{ $h['honorDue'] }} à l’heure · SLA {{ $h['slaDays'] }} j</p>
+            <p style="font-size:.75rem;color:var(--muted);margin:0">{{ $h['industry'] }} · {{ $h['honorAnswered'] }}/{{ $h['honorDue'] }} à l’heure · {{ $h['slaDays'] }} j</p>
           </div>
           <div style="text-align:right">
             <div style="font-family:var(--display);font-size:1.8rem;line-height:1">{{ $h['honorScore'] }}</div>
@@ -38,7 +38,7 @@
         </li>
       @endforeach
     </ol>
-    <p style="margin-top:1.2rem"><a href="/n/vera/offres?pacte=solide" style="color:var(--primary)">Offres à pacte solide</a></p>
+    <p style="margin-top:1.2rem"><a href="/n/vera/offres?pacte=solide" style="color:var(--primary)">Offres à délai tenu</a></p>
   </div>
 </section>
 @endsection

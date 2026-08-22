@@ -85,7 +85,7 @@ class RoomCatalog
         return implode('|', array_merge(array_keys(self::all()), [
             'vivre', 'maison', 'salon', 'arbre', 'academie', 'blog', 'home',
             'savoirs', 'lexique', 'viviers', 'europe', 'passport', 'preuve',
-            'pacte', 'ppqc', 'marches', 'entreprises', 'maisons', 'metiers', 'apprendre',
+            'pacte', 'ppqc', 'tarif', 'delais', 'carnet', 'marches', 'entreprises', 'maisons', 'metiers', 'apprendre',
         ]));
     }
 }

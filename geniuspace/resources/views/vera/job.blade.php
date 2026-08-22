@@ -161,7 +161,7 @@
       @if(!empty($p['benefits']))
       <section style="margin-top:2rem">
         <p class="vera-kicker">Avantages concrets</p>
-        <div class="ppqc">
+        <div class="vera-grid g2">
           @foreach($p['benefits'] as $b)
             <article><strong>{{ $b['label'] }}</strong><p style="margin:.2rem 0 0;font-size:.9rem">{{ $b['why'] }}</p></article>
           @endforeach
@@ -218,8 +218,8 @@
               </template>
             </div>
           </template>
-          <p class="ok" x-show="verdict===true" x-cloak>Tenu. Score <span x-text="score"></span> — le PPQC peut partir.</p>
-          <p class="ko" x-show="verdict===false" x-cloak>Manqué. <span x-text="lesson"></span> Module 8 min, puis retry.</p>
+          <p class="ok" x-show="verdict===true" x-cloak>Tenu. Score <span x-text="score"></span> — le profil est qualifié.</p>
+          <p class="ko" x-show="verdict===false" x-cloak>Manqué. <span x-text="lesson"></span> Module 8 min, puis on rejoue.</p>
         </div>
       </section>
       @endif
@@ -238,30 +238,30 @@
     <aside class="side apply-box">
       <p class="vera-kicker">Candidater</p>
       <p class="salary">{{ $j['salaryLabel'] }}</p>
-      <p style="font-size:.85rem;color:var(--muted)">PPQC {{ $j['ppqc']['euros'] }} € · tension {{ $j['ppqc']['tension'] }}/100</p>
+      <p style="font-size:.85rem;color:var(--muted)">Facture entreprise si le test est réussi : {{ $j['ppqc']['euros'] }} €</p>
       <p style="font-size:.8rem;color:var(--muted)">{{ $j['ppqc']['why'] }}</p>
-      <p style="font-size:.8rem;margin-top:.6rem">Pacte : réponse sous {{ $co['slaDays'] }} jours. Honneur {{ $co['honorScore'] }}.</p>
+      <p style="font-size:.8rem;margin-top:.6rem">Réponse sous {{ $co['slaDays'] }} jours. Fiabilité {{ $co['honorScore'] }}.</p>
       <div class="stepper" style="margin-top:.8rem">
         <span :class="step>=1 && 'on'">1 Lire</span>
         <span :class="step>=2 && 'on'">2 Honnêteté</span>
         <span :class="step>=3 && 'on'">3 Semaine</span>
-        <span :class="step>=4 && 'on'">4 Épreuve</span>
+        <span :class="step>=4 && 'on'">4 Test</span>
         <span :class="step>=5 && 'on'">5 Grille</span>
         <span :class="step>=6 && 'on'">6 Brief</span>
         <span :class="step>=7 && 'on'">7 Envoi</span>
       </div>
       <div x-show="step<7">
-        <p style="font-size:.85rem" x-text="['','Lisez le salaire et le difficile.','Le difficile n’est pas un slogan.','La semaine est écrite.','Passez l’épreuve à gauche.','La grille est publique.','Trois faits, pas un CV.'][step]"></p>
+        <p style="font-size:.85rem" x-text="['','Lisez le salaire et le difficile.','Le difficile n’est pas un slogan.','La semaine est écrite.','Passez le test à gauche.','La grille est publique.','Trois faits, pas un CV.'][step]"></p>
         <button class="vera-btn" type="button" style="margin-top:.7rem;width:100%" @click="step=Math.min(7,step+1)">Continuer</button>
       </div>
       <form x-show="step>=7" x-cloak @submit.prevent="sent=true">
         <label style="font-size:.75rem;color:var(--muted)">Brief — livré, refusé, suite
           <textarea required rows="5" style="width:100%;margin-top:.3rem;border:1px solid var(--border);border-radius:.5rem;padding:.6rem;font:inherit;background:var(--bg)" placeholder="Trois faits. Pas quatre pages."></textarea>
         </label>
-        <button class="vera-btn" type="submit" style="margin-top:.7rem;width:100%" x-show="!sent">Envoyer — pacte {{ $co['slaDays'] }} j</button>
-        <p class="ok" x-show="sent" style="color:var(--good)">Candidature envoyée. Pacte {{ $co['slaDays'] }} jours. {{ ($j['simOk']??false) || 'true' }}</p>
+        <button class="vera-btn" type="submit" style="margin-top:.7rem;width:100%" x-show="!sent">Envoyer — réponse sous {{ $co['slaDays'] }} j</button>
+        <p class="ok" x-show="sent" style="color:var(--good)">Candidature envoyée. Réponse sous {{ $co['slaDays'] }} jours.</p>
       </form>
-      <p style="font-size:.75rem;color:var(--subtle);margin-top:.8rem">Coordonnées après l’épreuve, pas avant. Un 55 ouvre un module, pas un silence.</p>
+      <p style="font-size:.75rem;color:var(--subtle);margin-top:.8rem">Coordonnées après le test, pas avant. Un 55 ouvre un module, pas un silence.</p>
     </aside>
   </div>
 </div>

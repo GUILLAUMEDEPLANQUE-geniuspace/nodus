@@ -27,7 +27,7 @@
 </head>
 <body>
 <div id="webgl"></div>
-<div class="drop-hint">Déposez image / vidéo / audio — CCK + SEO auto</div>
+<div class="drop-hint">Déposez image / vidéo / audio — champ + SEO auto</div>
 <header class="hud" style="top:0;left:0;right:0;display:flex;justify-content:space-between;padding:.9rem 1.1rem">
   <a href="/n/{{ $node->slug }}" class="brand">Geniuspace <span class="primary">God Canvas</span></a>
   <div>
@@ -38,7 +38,7 @@
 <div id="ideas" class="hud rel" style="top:3.4rem;left:50%;transform:translateX(-50%);z-index:16;max-width:90vw"></div>
 <div id="gp-msg"></div>
 <aside class="palette" id="palette" style="{{ $fresh ? 'opacity:0;pointer-events:none' : '' }}">
-  <p class="kicker">Champs CCK</p>
+  <p class="kicker">Champs de la fiche</p>
   <p class="muted" style="font-size:.7rem;margin:0 0 .4rem">Clic = coller sur l’astre (ou le noyau)</p>
   <button type="button" id="adv" class="chip">Mode avancé</button>
   @php $g=''; @endphp

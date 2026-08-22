@@ -1,13 +1,12 @@
 # Changelog Geniuspace
 
-## 2026-08-22 — Vera cloné (repo GUILLAUMEDEPLANQUE-geniuspace/vera)
+## 2026-08-22 — Une stack, du français, des tests
 
-Clone fidèle du jobboard éditorial, pas un campus générique.
+- **Laravel seul.** Prototype React / TanStack retiré du dépôt. Source de vérité : `geniuspace/`.
+- **Jargon vulgarisé.** Offres, tests métier, carnet, délai de réponse, profils oubliés. URLs `/tarif` `/carnet` `/delais`. PPQC / Pacte / Passport restent dans le lexique, expliqués.
+- **Éditeur de champs** visuel dans le Studio (palette, aperçu de fiche, édition, suppression).
+- **Tests PHPUnit** : catalogue Vera (35 offres, salaire, honnêteté), pages SSR, Lumen, Club 205 parti, types de champs.
 
-- **Peau papier** Instrument Serif/Sans, tokens `#f2efe6 / #1b4332`, layout dédié (plus le chrome Geniuspace sombre).
-- **35 offres** seed-data.ts + 7 offres lues (offer-data.ts) : Relève, Kora, Lise, Mireille, Sable.
-- **Fiche offre** : bande P25–P90, honnêteté, semaine, carrière, visite + hotspots, voix + mp4, outils, PPQC, épreuve Alpine (machine/circuit/care/code), stepper 7 étapes, JobPosting JSON-LD.
-- **Surfaces** : Accueil, Emplois (filtres collections), Europe, Épreuve (lockout + AI Act), Passeport (export JSON), Fiches/Savoirs, Viviers, Lexique (30 termes), Pacte (honneur public), PPQC, Maisons, Drive, Marchés.
-- **Données** : `app/Support/vera/*.json` extraits du repo Vera. `VeraCatalog` = source de vérité.
+## 2026-08-22 — Clone Vera (repo vera)
 
-## 2026-08-22 — Levier leader (10)
+- Jobboard papier : 35 offres, P25–P90, honnêteté, visites, voix, tests métier, lexique, profils oubliés, Europe, carnet, fiches, délais publics.

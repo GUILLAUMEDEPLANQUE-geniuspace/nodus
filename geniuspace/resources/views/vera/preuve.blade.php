@@ -1,17 +1,17 @@
 @extends('layouts.vera')
-@section('title', 'Épreuve → module → retry | Vera')
-@section('description', 'Boucle Vera : épreuve métier 6 min. Si vous ratez, un module tagué, puis vous rejouez. Standards nommés, relecteurs métier, pas un QCM LinkedIn.')
+@section('title', 'Tests métier : ratez, apprenez, rejouez | Vera')
+@section('description', 'Test métier de 6 min. Si vous ratez, un module tagué, puis vous rejouez. Standards nommés, relecteurs métier, pas un QCM LinkedIn.')
 @section('canonical', url('/n/vera/preuve'))
 @php $arenas = \App\Support\VeraCatalog::json('arenas'); $cred = \App\Support\VeraCatalog::json('credibility'); @endphp
 @section('content')
 <div class="vera-wrap" style="padding:2.6rem 0 4rem;max-width:48rem" x-data="preuve(@js($arenas))">
   <p class="vera-kicker">La boucle</p>
   <h1 style="font-size:clamp(2rem,5vw,3.2rem)">Ratez, apprenez, rejouez. Pas un silence.</h1>
-  <p class="vera-lead">HackerRank s’arrête au portillon. Vera tague le geste manqué, ouvre un module de 8 min, puis vous laisse rejouer. Le passeport ne tamponne qu’un tenu.</p>
+  <p class="vera-lead">Les tests en ligne s’arrêtent au portillon. Ici on tague le geste manqué, on ouvre un module de 8 min, puis on rejoue. Le carnet ne tamponne qu’un test tenu.</p>
   <ol class="vera-grid g3" style="margin-top:1.8rem;padding:0;list-style:none">
-    <li class="v-card"><p class="vera-kicker">1</p><h3>Épreuve</h3><p>Geste, 6 min, seuil 70.</p></li>
-    <li class="v-card"><p class="vera-kicker">2</p><h3>Module</h3><p>Seulement le tag loupé.</p></li>
-    <li class="v-card"><p class="vera-kicker">3</p><h3>Retry + tampon</h3><p>Passport, puis candidature.</p></li>
+    <li class="v-card"><p class="vera-kicker">1</p><h3>Test métier</h3><p>Un geste, 6 min, seuil 70.</p></li>
+    <li class="v-card"><p class="vera-kicker">2</p><h3>Module</h3><p>Seulement ce qui a été loupé.</p></li>
+    <li class="v-card"><p class="vera-kicker">3</p><h3>On rejoue</h3><p>Tampon sur le carnet, puis candidature.</p></li>
   </ol>
 
   <h2 style="margin-top:2.6rem">Passez-en une</h2>
@@ -54,7 +54,7 @@
       @endforeach
     </ul>
   </section>
-  <p><a href="/n/vera/passport" style="color:var(--primary)">Ouvrir le passport</a> · <a href="/n/vera/europe" style="color:var(--primary)">Europe</a></p>
+  <p><a href="/n/vera/carnet" style="color:var(--primary)">Ouvrir le carnet</a> · <a href="/n/vera/europe" style="color:var(--primary)">Europe</a></p>
 </div>
 <script>
 function preuve(arenas){

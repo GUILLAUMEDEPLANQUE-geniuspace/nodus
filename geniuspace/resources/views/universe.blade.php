@@ -445,14 +445,14 @@
 </section>
 <div class="wrap" style="padding:1.5rem 1.25rem 6rem">
     @if($tab==='maison')
-        <p class="lede" style="max-width:40rem">Quêtes, pas des CV. Salon, arbre, 7 étapes, Passport.</p>
+        <p class="lede" style="max-width:40rem">Quêtes, pas des CV. Salon, arbre, 7 étapes, carnet de preuves.</p>
         <div class="rel" style="margin-top:1rem">
             @foreach($children as $c)
                 <a class="chip" href="/n/{{ $node->slug }}/f/{{ $c->slug }}">{{ $c->title }}</a>
             @endforeach
         </div>
         <p style="margin-top:1.2rem"><a class="btn" href="/n/{{ $node->slug }}/offres">Voir les offres</a>
-           <a class="btn-line" href="/n/{{ $node->slug }}/epreuve">Commencer l’épreuve</a></p>
+           <a class="btn-line" href="/n/{{ $node->slug }}/preuve">Passer un test</a></p>
     @endif
     @if($tab==='salon')
         <h2 class="font-display">Salon spatial</h2>

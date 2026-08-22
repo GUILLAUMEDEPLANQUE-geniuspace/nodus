@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>@yield('title', 'Vera — l’emploi enfin lisible')</title>
-  <meta name="description" content="@yield('description', 'Jobboard indépendant. Verdict avant candidature, pacte de réponse public, brief à la place du CV. Pas de pubs, pas de ghost cachés.')">
+  <meta name="description" content="@yield('description', 'Offres d’emploi à salaire publié. Un test de 6 minutes avant le CV. Un délai de réponse écrit. Pas de pubs.')">
   <meta name="robots" content="@yield('robots', 'index,follow,max-image-preview:large')">
   <link rel="canonical" href="@yield('canonical', url()->current())">
   <meta property="og:title" content="@yield('og_title', trim($__env->yieldContent('title')))">
@@ -35,7 +35,6 @@
         @endforeach
       </nav>
       <div class="vera-actions">
-        <a class="vera-btn ghost" href="/n/vera/preuve" style="display:none" class="hidden lg:inline-flex">Épreuve</a>
         <a class="vera-btn ghost" href="/login">Connexion</a>
         <button type="button" class="vera-burger" @click="open=!open" aria-label="Menu">☰</button>
       </div>
@@ -44,10 +43,10 @@
       @foreach($nav as $n)
         <a href="{{ $n['to'] }}" @click="open=false">{{ $n['label'] }}</a>
       @endforeach
-      <a href="/n/vera/savoirs" @click="open=false">Fiches</a>
-      <a href="/n/vera/viviers" @click="open=false">Viviers</a>
+      <a href="/n/vera/savoirs" @click="open=false">Fiches métier</a>
+      <a href="/n/vera/viviers" @click="open=false">Profils oubliés</a>
       <a href="/n/vera/lexique" @click="open=false">Lexique</a>
-      <a href="/n/vera/pacte" @click="open=false">Pacte</a>
+      <a href="/n/vera/delais" @click="open=false">Délais de réponse</a>
       <a href="/n/vera/offres" @click="open=false">Toutes les offres</a>
     </nav>
   </header>
@@ -58,14 +57,14 @@
     <div class="vera-wrap cols">
       <div>
         <div class="vera-brand">Vera</div>
-        <p style="max-width:28rem;margin:.4rem 0 0">L’épreuve avant le CV. Échec → module → retry. Un passeport exportable. Europe, pas une traduction.</p>
+        <p style="max-width:28rem;margin:.4rem 0 0">Un test de 6 minutes avant le CV. Si ça rate, un module, puis on rejoue. Un carnet de preuves exportable. L’Europe, pas une traduction.</p>
       </div>
       <div class="chips" style="align-items:flex-end">
         <a href="/n/vera/europe">Europe</a>
-        <a href="/n/vera/preuve">Épreuve</a>
-        <a href="/n/vera/passport">Passeport</a>
-        <a href="/n/vera/pacte">Pacte</a>
-        <a href="/n/vera/offres">Emplois</a>
+        <a href="/n/vera/preuve">Tests métier</a>
+        <a href="/n/vera/carnet">Mon carnet</a>
+        <a href="/n/vera/delais">Délais de réponse</a>
+        <a href="/n/vera/offres">Offres</a>
         <a href="/n/vera/lexique">Lexique</a>
         <a href="/n/lumen">Lumen</a>
         <a href="/">Geniuspace</a>

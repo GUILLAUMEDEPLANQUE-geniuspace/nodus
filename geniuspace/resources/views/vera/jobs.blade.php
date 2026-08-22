@@ -8,7 +8,7 @@
   $col = collect($cols)->firstWhere('slug', $q['collection'] ?? '');
 @endphp
 @section('title', $col ? $col['label'].' — offres d’emploi 2026 | Vera' : 'Offres d’emploi à salaire publié | Vera')
-@section('description', $col ? $col['blurb'].' Salaire, pacte, grille publique.' : 'Toutes les offres Vera : salaire publié, pacte de réponse, scarcity score, Schema JobPosting. Classées par signal, jamais par budget pub.')
+@section('description', $col ? $col['blurb'].' Salaire publié, délai de réponse, grille publique.' : 'Toutes les offres Vera : salaire publié, délai de réponse, Schema JobPosting. Classées par adéquation, jamais par budget pub.')
 @section('canonical', url('/n/vera/offres'))
 @push('jsonld')
 <script type="application/ld+json">
@@ -18,7 +18,7 @@
 @section('content')
 <div class="vera-wrap" style="padding:2.4rem 0 4rem">
   <h1 style="font-size:clamp(2rem,5vw,3rem)">{{ $col['label'] ?? 'Toutes les offres' }}</h1>
-  <p class="vera-lead">{{ $col['blurb'] ?? 'Classées par signal — adéquation, honneur, radar ghost. Jamais par budget pub.' }}</p>
+  <p class="vera-lead">{{ $col['blurb'] ?? 'Classées par adéquation, fiabilité, annonces fantômes. Jamais par budget pub.' }}</p>
   <form class="vera-search" method="get">
     <input name="q" value="{{ $q['q'] ?? '' }}" placeholder="Métier, ville, geste">
     <button class="vera-btn" type="submit">Filtrer</button>
@@ -39,13 +39,13 @@
     </select>
     <select name="sort" onchange="this.form.submit()">
       <option value="signal" @selected(($q['sort']??'signal')==='signal')>Signal</option>
-      <option value="honneur" @selected(($q['sort']??'')==='honneur')>Honneur</option>
+      <option value="honneur" @selected(($q['sort']??'')==='honneur')>Fiabilité</option>
       <option value="recent" @selected(($q['sort']??'')==='recent')>Récent</option>
       <option value="salary" @selected(($q['sort']??'')==='salary')>Salaire</option>
     </select>
   </form>
   <div class="chips" style="margin-bottom:1.2rem">
-    <a class="badge {{ ($q['pacte']??'')==='solide'?'primary':'' }}" href="/n/vera/offres?{{ http_build_query(array_filter($q+['pacte'=>($q['pacte']??'')==='solide'?'':'solide'])) }}">Pacte solide</a>
+    <a class="badge {{ ($q['pacte']??'')==='solide'?'primary':'' }}" href="/n/vera/offres?{{ http_build_query(array_filter($q+['pacte'=>($q['pacte']??'')==='solide'?'':'solide'])) }}">Répondent à l’heure</a>
     @foreach($cols as $c)
       <a class="badge {{ ($q['collection']??'')===$c['slug']?'primary':'' }}" href="/n/vera/offres?collection={{ $c['slug'] }}">{{ $c['label'] }}</a>
     @endforeach

@@ -1,58 +1,40 @@
-# Architecture NODUS
+# Architecture Geniuspace
 
-> Pour les développeurs humains et les IA. Ne pas inventer un 9e produit : étendre le Node.
+> Une stack : **Laravel 11 + Blade + Alpine**, dans `geniuspace/`.
+> Un **univers** (Node) = un lieu indexable (club, jobboard, galerie). Les **liens** relient parent → enfant.
 
-## Principe
+## Source de vérité
 
-Un **Node** = micro-univers indexable (personne, personnage, série, offre, produit…).
-Les **edges** relient parent → enfant (`parent_of`, `portrays`, `features`, …).
+| Couche | Où |
+| --- | --- |
+| HTTP, vues, SEO | `geniuspace/app/Http`, `geniuspace/resources/views` |
+| Graphe | tables `nodes` + `edges` |
+| Vera (offres, tests, fiches) | `geniuspace/app/Support/VeraCatalog.php` + JSON `Support/vera/` |
+| Lumen (galerie) | seeder `DualWorldsSeeder` + vues living |
+| Champs personnalisés | table `cck_fields`, builder dans le Studio |
 
-Exemple canon :
-
-```
-richard-dean-anderson  --parent_of-->  jack-oneill
-richard-dean-anderson  --parent_of-->  angus-macgyver
-one-piece              --parent_of-->  monkey-d-luffy
-maison-orion           --parent_of-->  lead-game-designer
-```
+Il n’y a plus d’app TanStack / React dans ce dépôt.
 
 ## Fichiers clés
 
 | Fichier | Rôle |
-|---|---|
-| `src/lib/graph.ts` | Types du graphe + CCK + habitat |
-| `src/lib/graph-api.ts` | Server functions (lire/écrire PGLite) |
-| `src/lib/cck.ts` | Contrat CCK — **lire avant d’ajouter un champ métier** |
-| `src/lib/skins.ts` | Quelle peau (living / vera / cinema) selon le kind |
-| `src/components/living-world.tsx` | Lieu de vie fans |
-| `src/components/vera-house.tsx` | Job board recruteur |
-| `src/components/cck-builder.tsx` | Builder visuel de champs |
-| `src/components/salon-map.tsx` | Salon 2D recruteur (Gather-like) |
-| `src/components/quest-path.tsx` | Quêtes à la place du CV |
-| `src/components/skill-tree.tsx` | Arbre de talents / offres |
-| `src/components/holo-player.tsx` | Cockpit VOD sécurisé (modes) |
-| `src/lib/video-mode.ts` | Copy formation / jeu / shop / entretien |
-| `src/lib/platform-api.ts` | Panier, blobs, ATS, notifs, DM, profil |
-| `src/lib/acl.ts` | Rôles owner/admin/mod |
-| `src/lib/i18n.ts` | FR/EN/JA chrome |
-| `migrations/*.sql` | Schéma + seed. Ne jamais editer une migration déjà appliquée : en ajouter une. |
+| --- | --- |
+| `geniuspace/routes/web.php` | Routes SSR |
+| `geniuspace/app/Http/Controllers/UniverseController.php` | Univers living (Lumen, clubs) |
+| `geniuspace/app/Http/Controllers/VeraController.php` | Jobboard Vera |
+| `geniuspace/app/Support/VeraCatalog.php` | 35 offres, lexique, tests, entreprises |
+| `geniuspace/app/Support/RoomCatalog.php` | Salles = pages indexables |
+| `geniuspace/resources/views/layouts/vera.blade.php` | Peau papier Vera |
+| `geniuspace/resources/views/layouts/app.blade.php` | Peau Geniuspace / Lumen |
+| `geniuspace/database/migrations/` | Schéma PHP. Ne pas réécrire une migration déjà poussée : en ajouter une. |
 
 ## Peaux
 
-`skinOf(node)` :
+- `skin = vera` → layout papier, jobboard
+- sinon → lieu de vie (hero + dock)
 
-- `company` / `job` → VeraHouse
-- sinon → LivingWorld (hero + dock)
-
-Les onglets ne sont **pas** hardcodés dans le JSX principal. Ils viennent de `node_tabs`.
-Fallbacks : `FALLBACK_TABS` / `VERA_TABS` si la table est vide.
+Les onglets d’un univers viennent de la table des onglets (pas hardcodés dans le layout living).
 
 ## Auth
 
-Écritures (forum, Drive, onglets, CCK, boutique) : `authMiddleware`.
-En démo, tout membre connecté peut contribuer aux univers seed (owner_id null).
-**Prod :** filtrer sur `node_staff.role ∈ (owner, admin, mod)`.
-
-## 3D
-
-`RealmCanvas` charge `three` en dynamic import (SSR-safe). Les sprites sont les portraits `/public/realms/*`.
+Lectures publiques (SEO). Écritures (forum, Drive, studio) : utilisateur connecté. Prod : `node_staff`.

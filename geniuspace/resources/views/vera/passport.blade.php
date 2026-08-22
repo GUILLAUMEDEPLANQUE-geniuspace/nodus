@@ -1,15 +1,15 @@
 @extends('layouts.vera')
-@section('title', 'Passeport | Vera')
-@section('description', 'Registre de preuves Vera : épreuves tenues, modules, scores. Export JSON. Pas un CV généré par IA.')
-@section('canonical', url('/n/vera/passport'))
+@section('title', 'Mon carnet de preuves | Vera')
+@section('description', 'Les tests réussis, les modules, les scores. Export JSON. Pas un CV généré par IA.')
+@section('canonical', url('/n/vera/carnet'))
 @section('content')
 <div class="vera-wrap" style="padding:2.6rem 0 4rem;max-width:44rem" x-data="passport()">
-  <p class="vera-kicker">Passeport</p>
+  <p class="vera-kicker">Carnet de preuves</p>
   <h1 style="font-size:clamp(2rem,5vw,3.2rem)">Une preuve que vous emportez</h1>
-  <p class="vera-lead">Pas un PDF LinkedIn. Un registre d’épreuves tenues, de modules, de scores. Les entreprises paient ce dossier — les CV IA restent sur Indeed.</p>
+  <p class="vera-lead">Pas un PDF LinkedIn. Un registre de tests tenus, de modules, de scores. Les entreprises paient ce dossier — les CV générés restent sur Indeed.</p>
   <div class="v-card" style="margin-top:1.6rem">
     <p class="vera-kicker">Preuves tenues</p>
-    <p x-show="held.length===0" style="color:var(--muted)">Aucune encore. Passez une épreuve. <a href="/n/vera/preuve" style="color:var(--primary)">/preuve</a></p>
+    <p x-show="held.length===0" style="color:var(--muted)">Aucune encore. Passez un test. <a href="/n/vera/preuve" style="color:var(--primary)">Tests métier</a></p>
     <ul style="list-style:none;padding:0;margin:.8rem 0">
       <template x-for="r in held" :key="r.at">
         <li style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding:.7rem 0">
@@ -23,7 +23,7 @@
     </ul>
     <div class="chips">
       <button class="vera-btn" type="button" @click="download()" :disabled="held.length===0">Exporter JSON</button>
-      <a class="vera-btn ghost" href="/n/vera/preuve">Ajouter une épreuve</a>
+      <a class="vera-btn ghost" href="/n/vera/preuve">Ajouter un test</a>
     </div>
   </div>
   <aside class="v-card" style="margin-top:1.4rem;background:var(--paper)">

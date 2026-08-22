@@ -22,7 +22,7 @@
         <p>{{ $c['industry'] }} · {{ $c['hqCity'] }} · {{ $c['sizeBand'] }}</p>
         <div class="chips">
           <span class="badge">Honneur {{ $c['honorScore'] }}</span>
-          <span class="badge">SLA {{ $c['slaDays'] }} j</span>
+          <span class="badge">Réponse {{ $c['slaDays'] }} j</span>
           <span class="badge">{{ $n }} offres</span>
         </div>
       </a>

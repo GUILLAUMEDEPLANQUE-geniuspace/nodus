@@ -50,6 +50,8 @@ Route::post('/studio/image', [ImageStudioController::class, 'save']);
 Route::get('/n/{slug}/studio', [StudioController::class, 'show']);
 Route::post('/n/{slug}/studio/tab', [StudioController::class, 'tab']);
 Route::post('/n/{slug}/studio/cck', [StudioController::class, 'cck']);
+Route::post('/n/{slug}/studio/cck/{id}', [StudioController::class, 'cckUpdate']);
+Route::post('/n/{slug}/studio/cck/{id}/delete', [StudioController::class, 'cckDelete']);
 Route::post('/n/{slug}/studio/seo', [StudioController::class, 'seo']);
 Route::post('/n/{slug}/studio/seo-compile', [StudioController::class, 'seoCompile']);
 Route::post('/n/{slug}/studio/ats', [StudioController::class, 'ats']);

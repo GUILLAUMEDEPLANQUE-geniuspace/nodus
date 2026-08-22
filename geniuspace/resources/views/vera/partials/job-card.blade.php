@@ -9,7 +9,7 @@
       <div class="chips" style="margin-top:.7rem">
         <span class="salary">{{ $j['salaryLabel'] }}</span>
         @if(!empty($j['equity']))<span class="badge">Equity</span>@endif
-        @if(!empty($j['full']))<span class="badge primary">Offre lue · épreuve</span>@endif
+        @if(!empty($j['full']))<span class="badge primary">Offre lue · test</span>@endif
         @if(($j['scarcity']['band']??'')==='penurie' || ($j['scarcity']['band']??'')==='rare')
           <span class="badge primary">{{ $j['scarcity']['label'] }} {{ $j['scarcity']['score'] }}</span>
         @endif

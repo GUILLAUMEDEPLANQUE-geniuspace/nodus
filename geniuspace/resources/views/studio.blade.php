@@ -5,7 +5,7 @@
 <main class="wrap" style="padding:2rem 1.25rem 6rem">
   <p class="kicker">Studio · rôle {{ $role ?: 'visiteur' }}</p>
   <h1 class="font-display" style="font-size:2.6rem">Configurer {{ $node->title }}</h1>
-  <p class="muted">Owner / admin : SEO, CCK, onglets, ATS. Modo : file d’attente, bans. <a class="primary" href="/studio/image?src={{ urlencode($node->hero) }}&target=hero&slug={{ $node->slug }}">Éditer le héros</a></p>
+  <p class="muted">SEO, champs de la fiche, onglets, étapes de recrutement. <a class="primary" href="/studio/image?src={{ urlencode($node->hero) }}&target=hero&slug={{ $node->slug }}">Éditer le héros</a></p>
 
   <h2 class="font-display">SEO (owner/admin)</h2>
   <form method="post" action="/n/{{ $node->slug }}/studio/seo" class="card" style="padding:1rem;max-width:36rem">
@@ -60,32 +60,10 @@
     <p class="muted">→ 205.geniuspace.com (DNS vers ce serveur). Aperçu : <a class="primary" href="/w/{{ $node->slug }}">/w/{{ $node->slug }}</a></p>
     <button class="btn" type="submit">Enregistrer</button>
   </form>
-  <h2 class="font-display">CCK (8 essentiels — avancé pour les pro)</h2>
-  @foreach($cck as $f)
-    <p class="card" style="padding:0.7rem;margin:0.3rem 0">{{ $f->name }} · {{ $f->type }} = {{ $f->value }}</p>
-  @endforeach
-  <form method="post" action="/n/{{ $node->slug }}/studio/cck">
-    @csrf
-    <input name="name" placeholder="Nom" required>
-    <select name="type" id="cck-type">
-      <optgroup label="Essentiel">
-        @foreach(\App\Llm\CckCatalog::simple() as $k=>$m)
-          <option value="{{ $k }}">{{ $m['label'] }}</option>
-        @endforeach
-      </optgroup>
-      <optgroup label="Avancé (pro)" id="cck-pro" disabled>
-        @foreach(\App\Llm\CckCatalog::all() as $k=>$m)
-          @if(!empty($m['pro']))<option value="{{ $k }}">{{ $m['label'] }}</option>@endif
-        @endforeach
-      </optgroup>
-    </select>
-    <label class="muted"><input type="checkbox" onchange="document.getElementById('cck-pro').disabled=!this.checked"> Mode avancé</label>
-    <input name="value" placeholder="Valeur">
-    <button class="btn" type="submit">Champ</button>
-  </form>
+  @include('partials.cck-builder')
   <p><a class="btn-line" href="/atelier/{{ $node->slug }}">Atelier simple</a> <a class="btn-ghost" href="/builder/{{ $node->slug }}">3D pro</a></p>
 
-  <h2 class="font-display">ATS (7 étapes)</h2>
+  <h2 class="font-display">Étapes de recrutement</h2>
   @foreach($steps as $s)
     <p class="step">{{ $s->step }}. {{ $s->title }} — {{ $s->prompt }}</p>
   @endforeach

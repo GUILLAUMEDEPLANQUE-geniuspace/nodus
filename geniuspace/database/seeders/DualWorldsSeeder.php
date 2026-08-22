@@ -52,26 +52,26 @@ class DualWorldsSeeder extends Seeder
         $this->node([
             'id' => $id, 'slug' => 'vera', 'kind' => 'company', 'title' => 'Vera',
             'subtitle' => 'L’emploi, enfin lisible',
-            'summary' => 'Jobboard indépendant. Verdict avant candidature, pacte de réponse public, brief à la place du CV, épreuve métier, PPQC, Passport. Indeed n’a aucun intérêt à faire ça.',
+            'summary' => 'Jobboard indépendant. Conseil avant candidature, délai de réponse public, une page à la place du CV, test métier. Indeed n’a aucun intérêt à faire ça.',
             'hero' => '/offer/releve-atelier.jpg', 'skin' => 'vera', 'featured' => 1, 'template' => 'vera-tech',
         ]);
         $this->tabs($id, [
             ['home', 'Accueil', '#1b4332', 'Vera', 'L’emploi, enfin lisible.'],
-            ['offres', 'Emplois', '#1b4332', 'Offres', 'Salaire publié, PPQC, épreuve, JobPosting.'],
-            ['europe', 'Europe', '#1b4332', 'Europe', 'Preuve avant le titre, remote ±2h.'],
-            ['preuve', 'Épreuve', '#1b4332', 'Épreuve', 'Geste 6 min, module, retry.'],
-            ['passport', 'Passeport', '#1b4332', 'Passeport', 'Registre Open Badge, pas un CV IA.'],
-            ['savoirs', 'Fiches', '#1b4332', 'Savoirs', 'Hub métier lié aux offres.'],
-            ['viviers', 'Viviers', '#1b4332', 'Viviers', 'RSA, seniors, slashers, reprise.'],
-            ['lexique', 'Lexique', '#1b4332', 'Lexique', 'Verdict, Pacte, Brief, PPQC.'],
-            ['pacte', 'Pacte', '#1b4332', 'Pacte', 'L’honneur est public.'],
-            ['ppqc', 'PPQC', '#1b4332', 'PPQC', 'Payer le qualifié, pas le clic.'],
+            ['offres', 'Offres', '#1b4332', 'Offres', 'Salaire publié, test métier.'],
+            ['europe', 'Europe', '#1b4332', 'Europe', 'La preuve avant le titre, aussi hors de France.'],
+            ['preuve', 'Tests métier', '#1b4332', 'Tests', 'Geste 6 min, module si ça rate, on rejoue.'],
+            ['carnet', 'Mon carnet', '#1b4332', 'Carnet', 'Preuves exportables, pas un CV généré.'],
+            ['savoirs', 'Fiches', '#1b4332', 'Fiches', 'Guides métier liés aux offres.'],
+            ['viviers', 'Profils oubliés', '#1b4332', 'Profils', 'Seniors, RSA, reprise.'],
+            ['lexique', 'Lexique', '#1b4332', 'Lexique', 'Les mots, dits simplement.'],
+            ['delais', 'Délais', '#1b4332', 'Délais', 'Elles répondent, ou ça se voit.'],
+            ['tarif', 'Tarif entreprise', '#1b4332', 'Tarif', 'On paie un candidat qualifié, pas un clic.'],
             ['journal', 'Journal', '#1b4332', 'Journal', 'Carnets d’entreprises.'],
             ['reliques', 'Drive', '#1b4332', 'Drive', 'Visites et modes opératoires.'],
         ]);
         DB::table('node_seo')->updateOrInsert(['node_id' => $id], [
             'title' => 'Vera — l’emploi enfin lisible | Offres à salaire publié',
-            'description' => 'Jobboard indépendant. Verdict, pacte, brief, épreuve métier, PPQC. Pas de pubs, pas de ghost cachés.',
+            'description' => 'Offres d’emploi à salaire publié. Un test de 6 minutes avant le CV. Un délai de réponse écrit. Pas de pubs.',
         ]);
 
         foreach (['vera-gd', 'vera-fe', 'vera-pm', 'vera-ops'] as $old) {
@@ -136,7 +136,7 @@ class DualWorldsSeeder extends Seeder
             'definition_term' => 'Verdict Vera',
             'definition' => 'Score public avant candidature : ghost, honneur, salaire, durée du process. Trois issues : Allez, Demandez, Passez.',
             'toc' => "Pourquoi le CV ment\nLe Pacte\nPPQC\nFAQ",
-            'longtail' => "jobboard salaire publié|Vera\nrecrutement par épreuve|Preuve\nppqc|Modèle",
+            'longtail' => "jobboard salaire publié|Vera\nrecrutement par test métier|Preuve\ntarif candidat qualifié|Modèle",
             'faq' => "C’est du gamification gadget ?||Non. Chaque étape alimente le JobPosting et le PPQC.\nLinkedIn peut importer le Passport ?||Non. JSON Open Badge, pas un PDF.",
             'cover' => '/offer/releve-atelier.jpg', 'video_path' => 'offer/v/karim.mp4',
             'author' => 'Observatoire Vera', 'author_role' => 'Éditorial', 'reading_min' => 8, 'views' => 240,

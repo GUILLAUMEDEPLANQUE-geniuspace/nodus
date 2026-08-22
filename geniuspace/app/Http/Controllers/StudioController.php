@@ -64,7 +64,27 @@ class StudioController extends Controller
             'options' => '',
             'seo_title' => $data['name'],
         ]);
-        return back()->with('ok', 'Champ CCK créé.');
+        return back()->with('ok', 'Champ créé.');
+    }
+
+    public function cckUpdate(Request $request, string $slug, int $id): RedirectResponse
+    {
+        $node = Acl::nodeOfSlug($slug);
+        abort_unless(Acl::atLeast($node->id, 'admin'), 403);
+        $data = $request->validate(['name' => 'required', 'value' => 'nullable']);
+        DB::table('cck_fields')->where('node_id', $node->id)->where('id', $id)->update([
+            'name' => $data['name'],
+            'value' => $data['value'] ?? '',
+        ]);
+        return back()->with('ok', 'Champ enregistré.');
+    }
+
+    public function cckDelete(Request $request, string $slug, int $id): RedirectResponse
+    {
+        $node = Acl::nodeOfSlug($slug);
+        abort_unless(Acl::atLeast($node->id, 'admin'), 403);
+        DB::table('cck_fields')->where('node_id', $node->id)->where('id', $id)->delete();
+        return back()->with('ok', 'Champ retiré.');
     }
 
     public function seo(Request $request, string $slug): RedirectResponse

@@ -1,6 +1,6 @@
 @extends('layouts.vera')
 @section('title', 'Vera — l’emploi enfin lisible | Offres à salaire publié')
-@section('description', 'Jobboard indépendant. Verdict avant candidature, pacte de réponse public, brief à la place du CV, grilles d’évaluation visibles. Pas de pubs, pas de ghost cachés.')
+@section('description', 'Jobboard indépendant. Salaire publié. Un délai de réponse écrit. Un test de 6 minutes avant le CV. Pas de pubs, pas d’annonces fantômes cachées.')
 @section('canonical', url('/n/vera'))
 @php
   $C = \App\Support\VeraCatalog::class;
@@ -22,20 +22,20 @@
   <div class="vera-wrap">
     <p class="vera-kicker">Jobboard indépendant</p>
     <h1>L’emploi,<br>enfin lisible.</h1>
-    <p class="vera-lead">Vera dit aux professionnels quand passer leur chemin. <a href="/n/vera/lexique#verdict">Verdict</a> avant candidature, <a href="/n/vera/pacte">pacte</a> de réponse public, <a href="/n/vera/lexique#brief">brief</a> à la place du CV. Indeed n’a aucun intérêt à faire ça.</p>
+    <p class="vera-lead">Vera dit clairement si une offre mérite vos heures. Salaire publié. Délai de réponse écrit. Un test de 6 minutes à la place du CV. Indeed n’a aucun intérêt à faire ça.</p>
     <form class="vera-search" action="/n/vera/offres" method="get">
       <input name="q" placeholder="Métier, ville, geste — pas un mot-clé RH" aria-label="Recherche">
       <button class="vera-btn" type="submit">Chercher</button>
     </form>
     <div class="chips" style="margin-top:1rem">
-      <a href="/n/vera/preuve" style="color:var(--primary);font-weight:500">Passer une épreuve d’abord</a>
+      <a href="/n/vera/preuve" style="color:var(--primary);font-weight:500">Passer un test d’abord</a>
       <a href="/n/vera/europe" class="muted">Europe</a>
-      <a href="/n/vera/passport">Passeport</a>
+      <a href="/n/vera/carnet">Mon carnet</a>
     </div>
     <dl class="vera-stats">
       <div><dt>Offres actives</dt><dd>{{ $pulse['activeJobs'] }}</dd></div>
       <div><dt>Salaires publiés</dt><dd>{{ $pulse['salaryPublishedPct'] }}&nbsp;%</dd></div>
-      <div><dt>Ghost signalés</dt><dd>{{ $pulse['ghostFlagged'] }}</dd></div>
+      <div><dt>Annonces fantômes</dt><dd>{{ $pulse['ghostFlagged'] }}</dd></div>
       <div><dt>Médiane haute</dt><dd>{{ $pulse['medianLabel'] }}</dd></div>
     </dl>
   </div>
@@ -45,7 +45,7 @@
   <div class="vera-wrap vera-grid g3">
     <a class="v-card" href="/n/vera/journal"><p class="vera-kicker">Journal</p><h3>Blogs entreprises & journaux</h3><p>Relève, Northline, Kora écrivent le geste. Malik et Hélène tiennent un carnet. Pas un LinkedIn.</p></a>
     <a class="v-card" href="/n/vera/savoirs"><p class="vera-kicker">Fiches</p><h3>Catégories que vous créez</h3><p>Marché, droit, robotique — et les vôtres. L’opérateur ajoute un rayon en trente secondes.</p></a>
-    <a class="v-card" href="/n/vera/ppqc"><p class="vera-kicker">PPQC</p><h3>Payer le qualifié, pas l’annonce</h3><p>Publication gratuite. Facture seulement si l’épreuve est tenue et la grille ≥ 55.</p></a>
+    <a class="v-card" href="/n/vera/tarif"><p class="vera-kicker">Pour les entreprises</p><h3>Vous ne payez que si quelqu’un réussit le test</h3><p>Publier est gratuit. Facture seulement quand un candidat a tenu le test métier (note ≥ 55).</p></a>
   </div>
 </section>
 
@@ -53,10 +53,10 @@
   <div class="vera-wrap">
     <h2 style="font-size:2rem">Pourquoi les pros viennent ici</h2>
     <div class="vera-grid g4" style="margin-top:1.8rem">
-      <article class="principle"><p class="n">01</p><h3>Le Verdict</h3><p>Avant de postuler, on calcule si l’offre mérite vos heures : ghost, honneur, fourchette, longueur du process. Un « Passez » est le produit. Pas un bug.</p><a href="/n/vera/offres" style="color:var(--primary)">Lire une offre</a></article>
-      <article class="principle"><p class="n">02</p><h3>Le Pacte</h3><p>L’entreprise s’engage à une date. Si elle manque, son honneur baisse — public, pas négociable. Les entreprises sérieuses viennent pour le filtre. Les autres restent sur LinkedIn.</p><a href="/n/vera/pacte" style="color:var(--primary)">Voir le classement</a></article>
-      <article class="principle"><p class="n">03</p><h3>Le Brief</h3><p>Une page : livré, refusé, suite. Pas un PDF de quatre pages. Les recruteurs lisent moins, et mieux. Vous n’avez plus à vous déguiser.</p><a href="/n/vera/passport" style="color:var(--primary)">Écrire le vôtre</a></article>
-      <article class="principle"><p class="n">04</p><h3>L’épreuve avant le CV</h3><p>Épreuve métier 6 min. Échec → module tagué de 8 min → retry. Les coordonnées après, pas avant. Le passeport ne tamponne qu’un tenu.</p><a href="/n/vera/preuve" style="color:var(--primary)">Passer une épreuve</a></article>
+      <article class="principle"><p class="n">01</p><h3>Faut-il postuler ?</h3><p>Avant d’écrire, on dit Allez, Demandez ou Passez : annonce fantôme, fiabilité, salaire, durée du process. Un « Passez » est le produit. Pas un bug.</p><a href="/n/vera/offres" style="color:var(--primary)">Lire une offre</a></article>
+      <article class="principle"><p class="n">02</p><h3>Elles répondent, ou ça se voit</h3><p>L’entreprise s’engage à une date. Si elle rate, sa note de fiabilité baisse — public. Les entreprises sérieuses viennent pour ce filtre. Les autres restent sur LinkedIn.</p><a href="/n/vera/delais" style="color:var(--primary)">Voir le classement</a></article>
+      <article class="principle"><p class="n">03</p><h3>Une page, pas un CV</h3><p>Livré, refusé, suite. Pas un PDF de quatre pages. Les recruteurs lisent moins, et mieux. Vous n’avez plus à vous déguiser.</p><a href="/n/vera/carnet" style="color:var(--primary)">Écrire la vôtre</a></article>
+      <article class="principle"><p class="n">04</p><h3>Un test avant le CV</h3><p>6 minutes, un geste réel. Si ça rate : un module de 8 min, puis on rejoue. Les coordonnées après, pas avant. Le carnet ne tamponne qu’un test tenu.</p><a href="/n/vera/preuve" style="color:var(--primary)">Passer un test</a></article>
     </div>
   </div>
 </section>
@@ -65,19 +65,19 @@
   <div class="vera-wrap">
     <p class="vera-kicker">Europe</p>
     <h2 style="font-size:clamp(1.8rem,4vw,2.4rem);max-width:22ch">La preuve avant le titre — aussi hors de France.</h2>
-    <p style="max-width:36rem;margin-top:.8rem">Remote ±2h, bandes salariales UE, épreuve créditée, module si ça rate, Passeport exportable. Pas une traduction : des normes (AI Act, FHIR, LOTO) et des relecteurs métier.</p>
+    <p style="max-width:36rem;margin-top:.8rem">Télétravail Europe, salaires publiés, un test métier crédité, un module si ça rate, un carnet exportable. Pas une traduction : des normes (AI Act, FHIR, consignation) et des relecteurs de métier.</p>
     <div class="chips" style="margin-top:1.4rem">
       <a class="vera-btn" href="/n/vera/europe" style="background:var(--bg);color:var(--ink)">Voir l’Europe</a>
-      <a class="vera-btn line" href="/n/vera/preuve" style="border-color:color-mix(in srgb, var(--primary-fg) 30%, transparent);color:var(--primary-fg)">Passer une épreuve</a>
+      <a class="vera-btn line" href="/n/vera/preuve" style="border-color:color-mix(in srgb, var(--primary-fg) 30%, transparent);color:var(--primary-fg)">Passer un test</a>
     </div>
   </div>
 </section>
 
 <section class="section">
   <div class="vera-wrap">
-    <p class="vera-kicker">L’offre augmentée</p>
-    <h2 style="font-size:clamp(1.8rem,4vw,2.4rem);max-width:24ch">Lire un poste comme on lit un outil — pas une fiche.</h2>
-    <p class="vera-lead">Salaire contre le marché. Semaine réelle. Carrière en trois nœuds. Visite du lieu. Collègues au téléphone. Une épreuve avant le CV. Indeed ne peut pas faire ça : ses clients paient pour le volume.</p>
+    <p class="vera-kicker">L’offre, lue</p>
+    <h2 style="font-size:clamp(1.8rem,4vw,2.4rem);max-width:24ch">Lire un poste comme on lit un outil — pas une fiche Pôle emploi.</h2>
+    <p class="vera-lead">Salaire contre le marché. Semaine réelle. Carrière en trois nœuds. Visite du lieu. Collègues au téléphone. Un test avant le CV. Indeed ne peut pas : ses clients paient pour le volume.</p>
     <div class="vera-grid g4" style="margin-top:1.6rem">
       @foreach(array_slice($featured, 0, 4) as $f)
         <a class="v-card" href="/n/vera/offres/{{ $f['slug'] }}">
@@ -95,7 +95,7 @@
   <div class="vera-wrap">
     <p class="vera-kicker">Fiches métier</p>
     <h2>Fiches : le métier s’écrit, puis mène à l’offre.</h2>
-    <p class="vera-lead">Robotique, droit, compta, terrain, fit culturel. Si le geste manque, vous suivez un module 8 min, puis vous tenez l’épreuve. Les fichiers portent la visite et le mode opératoire.</p>
+    <p class="vera-lead">Robotique, droit, paie, terrain. Si un geste manque, un module de 8 min, puis le test. Les fichiers portent la visite et le mode opératoire.</p>
     <div class="chips" style="margin-top:1.2rem">
       <a href="/n/vera/savoirs" style="color:var(--primary);font-weight:500">Entrer dans les fiches →</a>
       <a href="/n/vera/reliques" style="color:var(--primary)">Ouvrir les fichiers →</a>
@@ -140,10 +140,10 @@
   <div class="vera-wrap">
     <div style="display:flex;justify-content:space-between;align-items:end;gap:1rem;flex-wrap:wrap">
       <div>
-        <p class="vera-kicker">Honneur</p>
+        <p class="vera-kicker">Fiabilité</p>
         <h2>Qui répond à l’heure</h2>
       </div>
-      <a href="/n/vera/pacte" style="color:var(--primary)">Classement public</a>
+      <a href="/n/vera/delais" style="color:var(--primary)">Classement public</a>
     </div>
     <ol style="margin:1.4rem 0 0;padding:0;list-style:none;border:1px solid var(--border);border-radius:1rem;overflow:hidden;background:var(--surface)">
       @foreach($league as $i => $h)
@@ -152,7 +152,7 @@
           <span class="mark">{{ mb_substr($h['name'],0,1) }}</span>
           <div style="flex:1">
             <a href="/n/vera/maisons/{{ $h['slug'] }}" style="font-weight:500">{{ $h['name'] }}</a>
-            <p style="font-size:.75rem;color:var(--muted);margin:0">{{ $h['industry'] }} · SLA {{ $h['slaDays'] }} j</p>
+            <p style="font-size:.75rem;color:var(--muted);margin:0">{{ $h['industry'] }} · {{ $h['slaDays'] }} j</p>
           </div>
           <div style="text-align:right">
             <div style="font-family:var(--display);font-size:1.8rem;line-height:1">{{ $h['honorScore'] }}</div>
@@ -167,11 +167,11 @@
 <section class="section paper">
   <div class="vera-wrap">
     <p class="vera-kicker">Lexique</p>
-    <h2>Les mots portent un !</h2>
-    <p class="vera-lead">Verdict, Pacte, Brief, PPQC, épreuve. Chaque terme a une fiche candidat et une fiche entreprise.</p>
+    <h2>Les mots, dits simplement</h2>
+    <p class="vera-lead">Conseil, délai de réponse, une page à la place du CV, test métier. Chaque terme a une fiche candidat et une fiche entreprise.</p>
     <div class="chips" style="margin-top:1rem">
       @foreach($glossary as $g)
-        <a class="badge" href="/n/vera/lexique#{{ $g['key'] }}">{{ $g['label'] }} <span class="term-bang">!</span></a>
+        <a class="badge" href="/n/vera/lexique#{{ $g['key'] }}">{{ $C::say($g['key'])['word'] }}</a>
       @endforeach
     </div>
   </div>

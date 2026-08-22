@@ -9,7 +9,7 @@ use Illuminate\View\View;
 
 /**
  * Vera — jobboard éditorial, clone de github.com/GUILLAUMEDEPLANQUE-geniuspace/vera
- * Surfaces : offres (salaire, PPQC, épreuve), lexique, viviers, Europe, Preuve, Passport, Savoirs, Drive, Pacte.
+ * Surfaces publiques : offres, tests métier, carnet, fiches, délais, tarif entreprise.
  */
 class VeraController extends Controller
 {
@@ -23,11 +23,11 @@ class VeraController extends Controller
             'lexique' => view('vera.lexique', ['node' => $node, 'tab' => 'lexique']),
             'viviers' => view('vera.viviers', ['node' => $node, 'tab' => 'viviers']),
             'europe' => view('vera.europe', ['node' => $node, 'tab' => 'europe']),
-            'guilde', 'passport' => view('vera.passport', ['node' => $node, 'tab' => 'passport']),
+            'guilde', 'passport', 'carnet' => view('vera.passport', ['node' => $node, 'tab' => 'passport']),
             'journal', 'blog' => app(MagazineController::class)->index($request, $node->slug),
             'reliques', 'drive' => view('vera.drive', ['node' => $node, 'tab' => 'reliques']),
-            'pacte' => view('vera.pacte', ['node' => $node, 'tab' => 'pacte']),
-            'ppqc' => view('vera.ppqc', ['node' => $node, 'tab' => 'ppqc']),
+            'pacte', 'delais' => view('vera.pacte', ['node' => $node, 'tab' => 'pacte']),
+            'ppqc', 'tarif' => view('vera.ppqc', ['node' => $node, 'tab' => 'ppqc']),
             'entreprises', 'maisons' => view('vera.companies', ['node' => $node, 'tab' => 'entreprises']),
             'marches' => view('vera.marches', ['node' => $node, 'tab' => 'marches']),
             default => view('vera.home', ['node' => $node, 'tab' => 'home']),

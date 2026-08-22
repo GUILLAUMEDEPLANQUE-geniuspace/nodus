@@ -1,0 +1,5 @@
+scripts/** linguist-vendored
+public/__grok/** linguist-vendored
+geniuspace/public/__grok/** linguist-vendored
+package.json linguist-vendored
+*.php linguist-detectable

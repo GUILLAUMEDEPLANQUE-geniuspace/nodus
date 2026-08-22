@@ -1,24 +1,17 @@
 # Geniuspace (Laravel)
 
-Blade + Tailwind tokens (CSS maison) + Alpine. HTML serveur = SEO.
+**C’est ici que vit le produit.** Blade + CSS + Alpine. HTML serveur = SEO.
+
+Le dépôt n’a plus d’app React / TanStack. Voir le [README racine](../README.md).
 
 ## Médias (souverain, pas YouTube)
 
 - Démo : `storage/app/media/*.mp4` + jetons HMAC (`SignedMedia`).
-- Prod : disque `r2` (Cloudflare R2, egress 0 €) — mêmes chemins.
-- VPS (Hetzner/Scaleway/OVH) : monter le disque, même contrat.
-- PeerTube / IPFS : plus tard, en source alternative du player — pas le cœur.
-
-## o2switch
-
-PHP 8.3 + SQLite (ou MySQL). Document root = `public/`. Les MP4 restent **hors** mutualisé (R2).
+- Prod : disque `r2` (Cloudflare R2). Les MP4 restent **hors** mutualisé o2switch.
 
 ```
 composer install --no-dev
 php artisan migrate --force
 php artisan db:seed --force
+php artisan test
 ```
-
-## Local sandbox
-
-`php artisan serve --host=0.0.0.0 --port=8080`
