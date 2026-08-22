@@ -23,11 +23,9 @@ class GhostTest extends TestCase
 
     public function test_lumen_ghost_is_merchant_profile(): void
     {
-        $this->getJson('/n/lumen/ghost')
-            ->assertOk()
-            ->assertJsonPath('profile', 'marchand')
-            ->assertJsonFragment(['reply' => null] === false ? [] : [])
-            ->assertSee('Lumen', false);
+        $res = $this->getJson('/n/lumen/ghost');
+        $res->assertOk()->assertJsonPath('profile', 'marchand');
+        $this->assertStringContainsString('Lumen', $res->json('reply'));
     }
 
     public function test_vera_ghost_is_rh_profile(): void
@@ -57,12 +55,12 @@ class GhostTest extends TestCase
         $res->assertOk();
         $reply = mb_strtolower($res->json('reply'));
         $this->assertTrue(
-            str_contains($reply, 'teaser') || str_contains($reply, 'coffre') || str_contains($reply, 'débloque') || str_contains($reply, 'vidéo')
+            str_contains($reply, 'teaser') || str_contains($reply, 'coffre') || str_contains($reply, 'débloque') || str_contains($reply, 'vidéo') || str_contains($reply, 'video')
         );
         $this->assertStringNotContainsString('granted=true', $reply);
     }
 
-    public function test_context_endpoint_hides_engine_jargon_keys_in_public_strings(): void
+    public function test_context_endpoint_hides_engine_jargon(): void
     {
         $res = $this->getJson('/n/lumen/ghost/context');
         $res->assertOk();
