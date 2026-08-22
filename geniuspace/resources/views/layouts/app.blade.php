@@ -11,6 +11,12 @@
       @if($gsc)<meta name="google-site-verification" content="{{ $gsc }}">@endif
     @endisset
     <link rel="canonical" href="@yield('canonical', url()->current())">
+    <meta property="og:title" content="@yield('og_title', trim($__env->yieldContent('title')))">
+    <meta property="og:description" content="@yield('og_description', trim($__env->yieldContent('description')))">
+    <meta property="og:url" content="@yield('canonical', url()->current())">
+    <meta property="og:type" content="@yield('og_type', 'website')">
+    <meta property="og:image" content="@yield('og_image', url('/realms/205-garage.jpg'))">
+    <meta name="twitter:card" content="summary_large_image">
     <link rel="icon" href="/favicon.svg">
     <style>
       :root{--bg:#07080c;--fg:#f3eadc;--primary:#c9a36a;--muted:#8d8794;--border:#2a2c38;--font:system-ui,sans-serif;--display:Georgia,serif}

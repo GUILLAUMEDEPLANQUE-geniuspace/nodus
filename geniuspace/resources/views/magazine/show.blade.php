@@ -1,7 +1,10 @@
 @extends('layouts.app')
 @section('title', $article->title.' | '.$node->title)
 @section('description', \Illuminate\Support\Str::limit($article->resume, 160))
-@section('canonical', url('/n/'.$node->slug.'/blog/'.$article->urlSlug()))
+@section('og_title', $article->title)
+@section('og_description', \Illuminate\Support\Str::limit($article->resume, 160))
+@section('og_type', 'article')
+@section('og_image', url($article->cover ?: $node->hero))
 @push('jsonld')
 <script type="application/ld+json">{!! json_encode([
   '@'.'context' => 'https://schema.org',
@@ -16,6 +19,12 @@
       '@'.'type' => $article->video_path ? 'VideoObject' : 'BlogPosting',
       'headline' => $article->title,
       'description' => $article->resume,
+      'articleSection' => $article->theme,
+      'wordCount' => str_word_count(strip_tags($article->body.' '.$article->resume)),
+      'keywords' => implode(', ', array_column($article->tails(), 'q')),
+      'speakable' => ['@'.'type'=>'SpeakableSpecification','cssSelector'=>['.lede', '.mag-def']],
+      'timeRequired' => 'PT'.((int)$article->reading_min).'M',
+      'mainEntityOfPage' => url('/n/'.$node->slug.'/blog/'.$article->urlSlug()),
       'datePublished' => optional($article->published_at)->toAtomString(),
       'dateModified' => optional($article->updated_at)->toAtomString(),
       'author' => ['@'.'type'=>'Person','name'=>$article->author],
@@ -32,10 +41,11 @@
 ], JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) !!}</script>
 @endpush
 @section('content')
-<article class="mag {{ $node->kind==='auto'?'skin-auto':'' }}">
+<article class="mag {{ $node->kind==='auto'?'skin-auto':'' }}" x-data="{ p:0 }" @scroll.window="p = Math.min(100, (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100)">
+  <div class="mag-progress" :style="'width:'+p+'%'"></div>
   @if($article->cover || $node->hero)
     <header class="mag-hero">
-      <img src="{{ $article->cover ?: $node->hero }}" alt="">
+      <img src="{{ $article->cover ?: $node->hero }}" alt="{{ $article->title }}">
       <div class="veil"></div>
       <div class="copy wrap">
         <p class="kicker">{{ $article->dossier }} · {{ $article->theme }}</p>
@@ -44,13 +54,23 @@
       </div>
     </header>
   @endif
-  <div class="wrap mag-body">
+  <div class="mag-shell wrap">
+    @if($article->tocItems())
+      <nav class="mag-toc mag-toc-sticky">
+        <p class="kicker">Sommaire</p>
+        <ol>@foreach($article->tocItems() as $i => $h)<li><a href="#s{{ $i }}">{{ $h }}</a></li>@endforeach</ol>
+        <p class="muted" style="font-size:.75rem;margin-top:1rem">Partager</p>
+        <a class="chip" href="https://twitter.com/intent/tweet?url={{ urlencode(url('/n/'.$node->slug.'/blog/'.$article->urlSlug())) }}&text={{ urlencode($article->title) }}">X</a>
+        <a class="chip" href="https://www.linkedin.com/sharing/share-offsite/?url={{ urlencode(url('/n/'.$node->slug.'/blog/'.$article->urlSlug())) }}">LinkedIn</a>
+      </nav>
+    @endif
+    <div class="mag-body">
     <section class="mag-box">
       <p class="kicker">Résumé opérationnel</p>
       <p class="lede">{{ $article->resume }}</p>
     </section>
     @if($article->tocItems())
-      <nav class="mag-toc">
+      <nav class="mag-toc mag-toc-mobile">
         <p class="kicker">Sommaire</p>
         <ol>@foreach($article->tocItems() as $i => $h)<li><a href="#s{{ $i }}">{{ $h }}</a></li>@endforeach</ol>
       </nav>
@@ -101,6 +121,7 @@
       </section>
     @endif
     <p style="margin-top:2rem"><a class="btn-line" href="/n/{{ $node->slug }}/blog">← Magazine</a></p>
+    </div>
   </div>
 </article>
 @isset($tabs)

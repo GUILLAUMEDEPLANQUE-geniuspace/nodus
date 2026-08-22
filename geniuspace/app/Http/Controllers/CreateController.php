@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\GpNode;
+use App\Support\WorldTemplates;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,17 +15,22 @@ class CreateController extends Controller
 {
     public function form(): View
     {
-        return view('create');
+        $groups = WorldTemplates::groups();
+        $count = count(WorldTemplates::all());
+        return view('create', compact('groups', 'count'));
     }
 
     public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([
             'title' => 'required|string|max:120',
-            'kind' => 'required|string',
-            'skin' => 'required|in:living,vera',
+            'kind' => 'nullable|string',
+            'skin' => 'nullable|in:living,vera',
             'summary' => 'nullable|string',
+            'template' => 'nullable|string|max:40',
         ]);
+        $tpl = $data['template'] ?? '';
+        $t = $tpl ? WorldTemplates::get($tpl) : null;
         $base = Str::slug($data['title']) ?: 'club';
         $slug = $base;
         $n = 2;
@@ -32,25 +38,30 @@ class CreateController extends Controller
             $slug = $base.'-'.$n++;
         }
         $id = substr(md5($slug.microtime()), 0, 12);
-        GpNode::query()->create([
+        $node = GpNode::query()->create([
             'id' => $id,
             'slug' => $slug,
-            'kind' => $data['kind'],
+            'kind' => $t['kind'] ?? ($data['kind'] ?? 'series'),
             'title' => $data['title'],
-            'subtitle' => '',
+            'subtitle' => $t['pitch'] ?? '',
             'summary' => $data['summary'] ?? '',
             'body' => '',
-            'hero' => $data['skin'] === 'vera' ? '/realms/studio-hero.jpg' : '/realms/sea-hero.jpg',
-            'skin' => $data['skin'],
+            'hero' => $t['hero'] ?? '/realms/sea-hero.jpg',
+            'skin' => $t['skin'] ?? ($data['skin'] ?? 'living'),
+            'template' => $tpl,
             'featured' => false,
         ]);
-        $tabs = [['vivre', 'Accueil'], ['forum', 'Parler'], ['personnages', 'Fiches'], ['videos', 'Vidéos']];
-        foreach ($tabs as $i => $t) {
-            DB::table('node_tabs')->insert(['node_id' => $id, 'key' => $t[0], 'label' => $t[1], 'icon' => 'spark', 'sort' => $i]);
+        if ($t) {
+            WorldTemplates::apply($node, $tpl);
+        } else {
+            $tabs = [['vivre', 'Accueil'], ['forum', 'Forum'], ['journal', 'Magazine'], ['personnages', 'Fiches'], ['videos', 'Vidéos']];
+            foreach ($tabs as $i => $row) {
+                DB::table('node_tabs')->insert(['node_id' => $id, 'key' => $row[0], 'label' => $row[1], 'icon' => 'spark', 'sort' => $i]);
+            }
         }
         if (Auth::id()) {
             DB::table('node_staff')->insert(['node_id' => $id, 'user_id' => Auth::id(), 'role' => 'owner']);
         }
-        return redirect('/atelier/'.$slug)->with('ok', 'On continue tout doux.');
+        return redirect('/atelier/'.$slug)->with('ok', $t ? ('Template « '.$t['label'].' » posé. Tu habilles.') : 'On continue tout doux.');
     }
 }

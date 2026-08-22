@@ -19,6 +19,7 @@ class ShowcaseSeeder extends Seeder
             'subtitle' => 'Le garage. Indexé. Habité.',
             'summary' => 'Fiches 205, forum d’entraide, pièces à Reims, meets, guides. Chaque vis, chaque voiture, une page que Google lit.',
             'body' => 'Pas un groupe Facebook. Un lieu de vie : tu parles, tu documentes, tu vends, tu compares deux GTI côte à côte.',
+            'template' => 'club-auto',
         ]);
 
         $rooms = [

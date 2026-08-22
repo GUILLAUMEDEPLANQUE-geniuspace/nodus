@@ -68,6 +68,11 @@ Le dock dit **Forum** (plus « Parler »). Split héros / pane claire. Réponse 
 
 `/n/{club}/blog` + `/blog/{slug}`. Résumé, sommaire, définition, longue traîne, FAQPage, auteur, cluster, vidéo. Les membres publient. Club 205 : 3 articles.
 
+## 2026-08-22 — 50 templates d’univers + magazine éditorial
+
+Catalogue `/create` : manga, Vera, jeux, pays, formation, annonces… Chaque id = schema + salles + curseur + CCK vide. Magazine : TOC sticky, OG, speakable, barre de lecture, drop cap, responsive.
+
+
 
 
 
