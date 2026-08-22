@@ -15,4 +15,11 @@
 - **Sitemap club** : `/n/{club}/sitemap.xml` (salles, fiches, sujets, produits, vidéos).
 - **Recherche interne** : `/n/{club}/q?q=` — score titre > corps, fiches + sujets + pièces + vidéos.
 
-SEM : toujours plus tard. LLM : ouvrier (maillage, meta, radar), pas démiurge.
+## 2026-08-22 — SSR réel (trou n°1)
+
+- Salles : plus de `<template x-if>` / `x-show` pour le living. `/n/{club}/forum` ne sert **que** le forum (Blade `@if`). Dock = vrais `<a href>`.
+- Fiches nested : `/n/{club}/f/{slug}` + JSON-LD Person/CreativeWork + graphe.
+- Vidéos au slug : `/n/{club}/v/volonté-du-d` (id encore accepté).
+- Maillage aussi sur le feed forum, pas seulement la fiche sujet.
+- Digest : article + `Mail::raw` vers les owners (mailer `log` tant que SMTP n’est pas là).
+

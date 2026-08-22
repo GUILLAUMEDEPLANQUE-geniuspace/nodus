@@ -41,7 +41,7 @@
 
 @if($living)
 {{-- ========== LIVING WORLD ========== --}}
-<template x-if="tab === 'forum'">
+@if($tab === 'forum')
 <div>
   <div class="forum-split" :class="openId && 'is-open'">
     <div class="snap">
@@ -56,7 +56,7 @@
                 Sujet · {{ $t->author }}
               </p>
               <h2 class="font-display" style="font-size:clamp(2rem,6vw,3.4rem);margin:0.3rem 0;line-height:0.95">{{ $t->title }}</h2>
-              <p>{{ $t->body }}</p>
+              <p>{!! \App\Support\Linker::html($node, $t->body) !!}</p>
               <p class="muted" style="font-size:0.8rem">{{ $t->views }} vues · {{ $t->fires }} feux · {{ $t->replies_count }} réponses</p>
             </div>
             <div class="side-btns">
@@ -134,9 +134,7 @@
     </aside>
   </div>
 </div>
-</template>
-
-<template x-if="tab !== 'forum'">
+@else
 <div>
 <section class="hero" style="min-height:70dvh">
     <img class="bg" src="{{ $node->hero }}" alt="">
@@ -165,7 +163,8 @@
 </section>
 
 <div class="wrap" style="padding-top:2rem">
-    <div x-show="tab==='vivre'">
+    @if($tab==='vivre')
+    <div>
         <p style="max-width:40rem;font-size:1.1rem">{{ $node->summary }}</p>
         @if($node->body)<p class="muted" style="max-width:40rem">{{ $node->body }}</p>@endif
         @isset($cck)
@@ -180,7 +179,7 @@
             <h2 class="font-display" style="font-size:2rem">Âmes liées</h2>
             <div class="grid-3">
                 @foreach($children as $c)
-                    <a class="card" href="/n/{{ $c->slug }}">
+                    <a class="card" href="/n/{{ $node->slug }}/f/{{ $c->slug }}">
                         <img src="{{ $c->hero }}" alt="{{ $c->title }}">
                         <div class="pad">
                             <p class="kicker">{{ $c->kind }}</p>
@@ -192,12 +191,14 @@
             </div>
         @endif
     </div>
+    @endif
 
-    <div x-show="tab==='personnages'">
+    @if($tab==='personnages')
+    <div>
         <h2 class="font-display" style="font-size:2.4rem">Personnages</h2>
         <div class="grid-3">
             @forelse($children as $c)
-                <a class="card" href="/n/{{ $c->slug }}">
+                <a class="card" href="/n/{{ $node->slug }}/f/{{ $c->slug }}">
                     <img src="{{ $c->hero }}" alt="">
                     <div class="pad">
                         <p class="kicker">{{ $c->kind }} · enfant du graphe</p>
@@ -218,7 +219,9 @@
         @endif
     </div>
 
-    <div x-show="tab==='journal'">
+    @endif
+    @if($tab==='journal')
+    <div>
         <h2 class="font-display" style="font-size:2.4rem">Journal</h2>
         @forelse($journal as $j)
             <article class="card" style="padding:1.25rem;margin:0.75rem 0">
@@ -231,7 +234,9 @@
         @endforelse
     </div>
 
-    <div x-show="tab==='guilde'">
+    @endif
+    @if($tab==='guilde')
+    <div>
         <h2 class="font-display" style="font-size:2.4rem">Guilde</h2>
         <p class="muted">Canal Telegram-like. Une bulle monte dans le dock à chaque post.</p>
         <div class="card" style="padding:1rem;max-width:36rem">
@@ -248,7 +253,9 @@
         </div>
     </div>
 
-    <div x-show="tab==='guides'">
+    @endif
+    @if($tab==='guides')
+    <div>
         <h2 class="font-display" style="font-size:2.4rem">Guides / wiki</h2>
         @forelse($node->wiki as $w)
             <article class="card" style="padding:1.25rem;margin:0.5rem 0">
@@ -260,7 +267,9 @@
         @endforelse
     </div>
 
-    <div x-show="tab==='boutique'">
+    @endif
+    @if($tab==='boutique')
+    <div>
         <h2 class="font-display" style="font-size:2.4rem">Boutique</h2>
         <div class="grid-3">
             @forelse($node->products as $p)
@@ -290,10 +299,12 @@
         </div>
     </div>
 
-    <div x-show="tab==='videos'">
+    @endif
+    @if($tab==='videos')
+    <div>
         <h2 class="font-display" style="font-size:2.4rem">Studio vidéo</h2>
         @forelse($node->media as $m)
-            <a class="card" href="/n/{{ $node->slug }}/v/{{ $m->id }}" style="display:grid;grid-template-columns:160px 1fr;gap:1rem;padding:0.75rem;margin:0.6rem 0">
+            <a class="card" href="/n/{{ $node->slug }}/v/{{ \Illuminate\Support\Str::slug($m->title) }}" style="display:grid;grid-template-columns:160px 1fr;gap:1rem;padding:0.75rem;margin:0.6rem 0">
                 <video src="/{{ ltrim($m->path,'/') }}" muted style="width:160px;height:90px;object-fit:cover;border-radius:0.6rem"></video>
                 <div>
                     <p class="kicker">{{ $m->mode }} · {{ $m->access }} · {{ $m->views }} vues</p>
@@ -307,7 +318,9 @@
         @endforelse
     </div>
 
-    <div x-show="tab==='reliques'">
+    @endif
+    @if($tab==='reliques')
+    <div>
         <h2 class="font-display" style="font-size:2.4rem">Drive / reliques</h2>
         <p class="muted">Fichiers sur le disque du serveur (mutu / VPS). <a class="primary" href="/drive">Uploader</a></p>
         @forelse($files as $f)
@@ -320,7 +333,9 @@
         @endforelse
     </div>
 
-    <div x-show="tab==='boutique_expert'">
+    @endif
+    @if($tab==='boutique_expert')
+    <div>
         <p class="kicker">Boutique expert</p>
         <h2 class="font-display" style="font-size:2.6rem;color:var(--room-color,#c9a36a)">Vitrine</h2>
         @forelse($node->products as $p)
@@ -338,13 +353,17 @@
             <p class="muted">Pas encore de pièce en vitrine.</p>
         @endforelse
     </div>
-    <div x-show="tab==='classifieds' || tab==='merch'">
+    @endif
+    @if(in_array($tab, ['classifieds','merch']))
+    <div>
         <h2 class="font-display">{{ $tab === 'merch' ? 'Merch' : 'Petites annonces' }}</h2>
         @foreach($node->products as $p)
             <p class="card" style="padding:1rem;margin:.4rem 0"><a href="/n/{{ $node->slug }}/p/{{ $p->id }}">{{ $p->title }}</a> <span class="primary">{{ $p->price }}</span></p>
         @endforeach
     </div>
-    <div x-show="tab==='gallery'">
+    @endif
+    @if($tab==='gallery')
+    <div>
         <h2 class="font-display">Galerie</h2>
         <div class="grid-3">
             @foreach($files->where('kind','image') as $f)
@@ -352,19 +371,25 @@
             @endforeach
         </div>
     </div>
-    <div x-show="tab==='audio'">
+    @endif
+    @if($tab==='audio')
+    <div>
         <h2 class="font-display">Podcasts</h2>
         @foreach($node->media->where('kind','audio') as $m)
             <article class="card" style="padding:1rem;margin:.5rem 0"><h3>{{ $m->title }}</h3><audio src="/{{ ltrim($m->path,'/') }}" controls></audio></article>
         @endforeach
     </div>
-    <div x-show="tab==='agenda'">
+    @endif
+    @if($tab==='agenda')
+    <div>
         <h2 class="font-display">Agenda</h2>
         @forelse($journal as $j)
             <article class="card" style="padding:1rem;margin:.5rem 0"><p class="kicker">Date</p><h3>{{ $j->title }}</h3><p>{{ $j->body }}</p></article>
         @empty<p class="muted">Pas de sortie annoncée.</p>@endforelse
     </div>
-    <div x-show="tab==='stories'">
+    @endif
+    @if($tab==='stories')
+    <div>
         <h2 class="font-display">Stories</h2>
         <div class="snap" style="min-height:60dvh">
             @foreach($node->media as $m)
@@ -372,39 +397,47 @@
             @endforeach
         </div>
     </div>
-    <div x-show="tab==='carte'">
+    @endif
+    @if($tab==='carte')
+    <div>
         <h2 class="font-display">Carte du club</h2>
         @foreach($cck->where('type','geo') as $f)
             @include('partials.cck-render', ['f'=>$f])
         @endforeach
         <p class="muted">Ajoute un champ Lieu dans l’atelier / Studio.</p>
     </div>
-    <div x-show="tab==='collections'">
+    @endif
+    @if($tab==='collections')
+    <div>
         <h2 class="font-display">Collections</h2>
         @foreach($children as $c)
-            <a class="card" href="/n/{{ $c->slug }}" style="display:block;padding:1rem;margin:.4rem 0">{{ $c->title }}</a>
+            <a class="card" href="/n/{{ $node->slug }}/f/{{ $c->slug }}" style="display:block;padding:1rem;margin:.4rem 0">{{ $c->title }}</a>
         @endforeach
     </div>
-    <div x-show="tab==='reviews'">
+    @endif
+    @if($tab==='reviews')
+    <div>
         <h2 class="font-display">Essais & avis</h2>
         @foreach($journal as $j)
             <article class="card" style="padding:1rem;margin:.5rem 0"><h3>{{ $j->title }}</h3><p>{{ $j->body }}</p></article>
         @endforeach
     </div>
-    <div x-show="tab==='offres' || tab==='epreuve'">
+    @endif
+    @if(in_array($tab, ['offres','epreuve']))
+    <div>
         <h2 class="font-display">{{ $tab === 'epreuve' ? 'Quêtes' : 'Offres' }}</h2>
         @foreach($node->quests as $q)
             <article class="step"><p class="kicker">{{ $q->skill }}</p><h3>{{ $q->title }}</h3><p>{{ $q->prompt }}</p></article>
         @endforeach
     </div>
+    @endif
 </div>
-</div>
-</template>
+@endif
 
 <nav class="dock">
     <template x-for="b in bubbles" :key="b.id"><span class="rise" x-text="b.name + ' vient de poster'"></span></template>
     @foreach($tabs as $t)
-      <button type="button" :class="tab==='{{ $t->key }}' && 'active'" @click="tab='{{ $t->key }}'; history.replaceState(null,'','/n/{{ $node->slug }}/{{ $t->key }}')">{{ $t->label }}</button>
+      <a href="/n/{{ $node->slug }}/{{ $t->key }}" class="{{ $tab === $t->key ? 'active' : '' }}">{{ $t->label }}</a>
     @endforeach
 </nav>
 

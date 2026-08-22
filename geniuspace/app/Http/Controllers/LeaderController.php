@@ -80,7 +80,18 @@ class LeaderController extends Controller
             'cover' => $node->hero,
             'author' => 'Legacy',
         ]);
-        return redirect('/n/'.$slug.'/t/'.$id)->with('ok', 'Digest publié (indexable).');
+        try {
+            $uids = DB::table('node_staff')->where('node_id', $node->id)->pluck('user_id');
+            $emails = \App\Models\User::query()->whereIn('id', $uids)->pluck('email');
+            foreach ($emails as $to) {
+                \Illuminate\Support\Facades\Mail::raw($body, function ($m) use ($to, $node) {
+                    $m->to($to)->subject('Digest Legacy — '.$node->title);
+                });
+            }
+        } catch (\Throwable $e) {
+            report($e);
+        }
+        return redirect('/n/'.$slug.'/t/'.$id)->with('ok', 'Digest publié (indexable) et mail loggué (SMTP à brancher).');
     }
 
     public function compare(string $slug, string $a, string $b): View

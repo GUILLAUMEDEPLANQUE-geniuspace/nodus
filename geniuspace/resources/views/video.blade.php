@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('title', $media->title.' | '.$node->title)
 @section('description', $media->transcript)
-@section('canonical', url('/n/'.$node->slug.'/v/'.$media->id))
+@section('canonical', url('/n/'.$node->slug.'/v/'.\Illuminate\Support\Str::slug($media->title)))
 @push('jsonld')
 <script type="application/ld+json">
 {!! json_encode([

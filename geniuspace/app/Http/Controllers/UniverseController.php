@@ -100,11 +100,26 @@ class UniverseController extends Controller
         return view('command-center', compact('node', 'product', 'products', 'media', 'src', 'goal'));
     }
 
-    public function video(string $slug, int $vid): View
+    public function fiche(string $slug, string $fiche): View
+    {
+        $club = GpNode::query()->where('slug', $slug)->firstOrFail();
+        $node = GpNode::query()->where('slug', $fiche)->firstOrFail();
+        abort_unless(Edge::query()->where('from_id', $club->id)->where('to_id', $node->id)->exists(), 404);
+        $cck = \Illuminate\Support\Facades\DB::table('cck_fields')->where('node_id', $node->id)->get();
+        $parentIds = Edge::query()->where('to_id', $node->id)->pluck('from_id');
+        $parents = GpNode::query()->whereIn('id', $parentIds)->get();
+        $childIds = Edge::query()->where('from_id', $node->id)->pluck('to_id');
+        $children = GpNode::query()->whereIn('id', $childIds)->get();
+        $sibs = GpNode::query()->whereIn('id', Edge::query()->where('from_id', $club->id)->pluck('to_id'))->get();
+        return view('fiche', compact('club', 'node', 'cck', 'parents', 'children', 'sibs'));
+    }
+
+    public function video(string $slug, string $vid): View
     {
         $node = GpNode::query()->where('slug', $slug)->firstOrFail();
         $node->load(['products', 'media']);
-        $media = $node->media()->where('id', $vid)->firstOrFail();
+        $media = $node->media->first(fn ($m) => (string) $m->id === $vid || \Illuminate\Support\Str::slug($m->title) === $vid);
+        abort_unless($media, 404);
         $src = SignedMedia::url($media);
         $related = $node->media->where('id', '!=', $media->id);
         $childIds = Edge::query()->where('from_id', $node->id)->pluck('to_id');

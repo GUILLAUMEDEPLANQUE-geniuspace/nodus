@@ -70,8 +70,8 @@ img, video { max-width: 100%; display: block; }
   background: color-mix(in srgb, var(--bg) 75%, transparent);
   border: 1px solid var(--border); border-radius: 999px; backdrop-filter: blur(12px);
 }
-.dock button { height: 2.5rem; padding: 0 0.9rem; border: 0; border-radius: 999px; background: transparent; color: var(--muted); font-size: 0.8rem; }
-.dock button.active { background: var(--primary); color: var(--primary-fg); }
+.dock button, .dock a { height: 2.5rem; padding: 0 0.9rem; border: 0; border-radius: 999px; background: transparent; color: var(--muted); font-size: 0.8rem; display: inline-flex; align-items: center; }
+.dock button.active, .dock a.active { background: var(--primary); color: var(--primary-fg); }
 .panel { display: none; padding: 2.5rem 0 7rem; }
 .panel.active { display: block; }
 .forum-card { position: relative; min-height: 70dvh; display: flex; align-items: flex-end; border-radius: 1.5rem; overflow: hidden; margin-bottom: 0.75rem; }
