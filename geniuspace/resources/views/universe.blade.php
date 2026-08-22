@@ -37,7 +37,7 @@
     this.bubbles.push({ id, name });
     setTimeout(() => { this.bubbles = this.bubbles.filter(b => b.id !== id) }, 3200);
   }
-}" class="pb-28 room" :style="skins[tab] || ''" :class="anims[tab] && 'room-anim'">
+}" class="pb-28 room {{ $node->kind === 'auto' ? 'skin-auto' : '' }}" :style="skins[tab] || ''" :class="anims[tab] && 'room-anim'">
 
 @if($living)
 {{-- ========== LIVING WORLD ========== --}}
@@ -76,9 +76,10 @@
           <input name="title" required placeholder="Titre du débat" style="width:100%;margin:0.5rem 0">
           <select name="category" style="width:100%;margin-bottom:.4rem">
             <option value="">Catégorie</option>
-            <option>Lore</option>
-            <option>Théories</option>
-            <option>Quêtes</option>
+            <option>Technique</option>
+            <option>Meets</option>
+            <option>Pièces</option>
+            <option>Annonces</option>
           </select>
           <textarea name="body" required placeholder="Accroche Legacy" style="width:100%;min-height:6rem"></textarea>
           <button class="btn" type="submit" style="margin-top:0.75rem">Publier le sujet</button>
@@ -169,8 +170,9 @@
               <a class="btn-line" href="/n/{{ $node->slug }}/vs/{{ $children[0]->slug }}/{{ $children[1]->slug }}">Comparer 2 fiches</a>
             @endif
             <a class="btn-ghost" href="/n/{{ $node->slug }}/digest">Digest</a>
-            <button class="btn" type="button" @click="tab='personnages'">Rejoindre l'équipage</button>
-            <button class="btn-line" type="button" @click="tab='guilde'">Entrer dans la guilde</button>
+            <a class="btn" href="/n/{{ $node->slug }}/forum">Parler</a>
+            <a class="btn-line" href="/n/{{ $node->slug }}/personnages">Les fiches</a>
+            <a class="btn-line" href="/n/{{ $node->slug }}/classifieds">Pièces</a>
             <a class="btn-line" href="/studio/image?src={{ urlencode($node->hero) }}&target=hero&slug={{ $node->slug }}">Éditer le héros</a>
             <a class="btn-ghost" href="/n/{{ $node->slug }}/studio">Studio</a>
             <a class="btn-ghost" href="/atelier/{{ $node->slug }}">Modifier le club</a>
@@ -181,31 +183,33 @@
 <div class="wrap" style="padding-top:2rem">
     @if($tab==='vivre')
     <div>
-        <p style="max-width:40rem;font-size:1.1rem">{{ $node->summary }}</p>
+        <p class="lede">{{ $node->summary }}</p>
         @if($node->body)<p class="muted" style="max-width:40rem">{{ $node->body }}</p>@endif
-        @isset($cck)
-          @if($cck->count())
-            <p class="kicker">CCK</p>
-            @foreach($cck as $f)
-              @include('partials.cck-render', ['f' => $f])
-            @endforeach
-          @endif
-        @endisset
-        @if($children->count())
-            <h2 class="font-display" style="font-size:2rem">Âmes liées</h2>
-            <div class="grid-3">
-                @foreach($children as $c)
-                    <a class="card" href="/n/{{ $node->slug }}/f/{{ $c->slug }}">
-                        <img src="{{ $c->hero }}" alt="{{ $c->title }}">
-                        <div class="pad">
-                            <p class="kicker">{{ $c->kind }}</p>
-                            <h3 class="font-display">{{ $c->title }}</h3>
-                            <p class="muted">{{ $c->subtitle }}</p>
-                        </div>
-                    </a>
-                @endforeach
-            </div>
+        <div class="pulse">
+          <a href="/n/{{ $node->slug }}/personnages"><strong>{{ $children->count() }}</strong><span>fiches</span></a>
+          <a href="/n/{{ $node->slug }}/forum"><strong>{{ $forumThreads->count() }}</strong><span>sujets</span></a>
+          <a href="/n/{{ $node->slug }}/classifieds"><strong>{{ $node->products->count() }}</strong><span>pièces</span></a>
+          <a href="/n/{{ $node->slug }}/bounties"><strong>{{ $openBounties ?? 0 }}</strong><span>quêtes SEO</span></a>
+        </div>
+        @if($goal)
+          <p class="kicker">Quête club · {{ $goal->current }} / {{ $goal->target }} € · {{ $goal->reward }}</p>
+          <div class="bar"><span style="width:{{ min(100,(int)round($goal->current/max(1,$goal->target)*100)) }}%"></span></div>
         @endif
+        <h2 class="font-display" style="font-size:2.2rem;margin-top:2rem">Sur le pont</h2>
+        <div class="grid-3">
+            @foreach($children->take(6) as $c)
+                <a class="card card-film" href="/n/{{ $node->slug }}/f/{{ $c->slug }}">
+                    <img src="{{ $c->hero }}" alt="{{ $c->title }}">
+                    <div class="pad">
+                        <p class="kicker">{{ $c->kind }}</p>
+                        <h3 class="font-display">{{ $c->title }}</h3>
+                        <p class="muted">{{ $c->subtitle }}</p>
+                    </div>
+                </a>
+            @endforeach
+        </div>
+        <p><a class="btn-line" href="/n/{{ $node->slug }}/personnages">Toutes les fiches</a>
+           <a class="btn-ghost" href="/g/{{ $node->slug }}">Graphe public</a></p>
     </div>
     @endif
 
@@ -372,10 +376,24 @@
     @endif
     @if(in_array($tab, ['classifieds','merch']))
     <div>
-        <h2 class="font-display">{{ $tab === 'merch' ? 'Merch' : 'Petites annonces' }}</h2>
-        @foreach($node->products as $p)
-            <p class="card" style="padding:1rem;margin:.4rem 0"><a href="/n/{{ $node->slug }}/p/{{ $p->id }}">{{ $p->title }}</a> <span class="primary">{{ $p->price }}</span></p>
-        @endforeach
+        <h2 class="font-display" style="font-size:2.4rem">{{ $tab === 'merch' ? 'Merch' : 'Pièces & annonces' }}</h2>
+        <p class="muted">Offer + ville. Pas Leboncoin : chaque pièce a une URL, un graphe, un share.</p>
+        <div class="grid-3">
+        @forelse($node->products as $p)
+            <article class="card card-film">
+                <img src="{{ $p->image }}" alt="{{ $p->title }}">
+                <div class="pad">
+                    <p class="kicker">{{ $p->kind }} · {{ $p->city ?: 'club' }}</p>
+                    <h3 class="font-display">{{ $p->title }}</h3>
+                    <p class="primary" style="font-size:1.8rem;font-family:var(--display)">{{ $p->price }}</p>
+                    <p class="muted">{{ $p->summary }}</p>
+                    <a class="btn" href="/n/{{ $node->slug }}/p/{{ $p->id }}">Fiche SEO</a>
+                </div>
+            </article>
+        @empty
+            <p class="muted">Pas encore d’annonce.</p>
+        @endforelse
+        </div>
     </div>
     @endif
     @if($tab==='gallery')
@@ -417,10 +435,18 @@
     @if($tab==='carte')
     <div>
         <h2 class="font-display">Carte du club</h2>
-        @foreach($cck->where('type','geo') as $f)
-            @include('partials.cck-render', ['f'=>$f])
+        <p class="muted">Pièces et meets géolocalisés — Offer + geo, pas un post Facebook.</p>
+        <iframe title="Reims" src="https://www.openstreetmap.org/export/embed.html?bbox=4.00,49.22,4.08,49.28&layer=mapnik" style="width:100%;height:18rem;border:0;border-radius:1rem;margin:.8rem 0"></iframe>
+        @foreach($node->products->where('city','!=','') as $p)
+          <p class="card" style="padding:1rem;margin:.4rem 0">
+            <a href="/n/{{ $node->slug }}/p/{{ $p->id }}">{{ $p->title }}</a>
+            <span class="primary">{{ $p->price }}</span>
+            <span class="muted"> · {{ $p->city }}</span>
+          </p>
         @endforeach
-        <p class="muted">Ajoute un champ Lieu dans l’atelier / Studio.</p>
+        @foreach($children->where('kind','event') as $c)
+          <p class="card" style="padding:1rem;margin:.4rem 0"><a href="/n/{{ $node->slug }}/f/{{ $c->slug }}">{{ $c->title }}</a></p>
+        @endforeach
     </div>
     @endif
     @if($tab==='collections')

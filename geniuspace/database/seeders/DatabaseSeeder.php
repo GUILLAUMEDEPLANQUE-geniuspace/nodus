@@ -14,5 +14,6 @@ class DatabaseSeeder extends Seeder
         $this->call(GodSeeder::class);
         $this->call(MoatSeeder::class);
         $this->call(PilotSeeder::class);
+        $this->call(ShowcaseSeeder::class);
     }
 }

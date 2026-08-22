@@ -69,6 +69,7 @@ img, video { max-width: 100%; display: block; }
   z-index: 50; display: flex; gap: 0.25rem; padding: 0.4rem;
   background: color-mix(in srgb, var(--bg) 75%, transparent);
   border: 1px solid var(--border); border-radius: 999px; backdrop-filter: blur(12px);
+  max-width: calc(100vw - 1.5rem); overflow-x: auto;
 }
 .dock button, .dock a { height: 2.5rem; padding: 0 0.9rem; border: 0; border-radius: 999px; background: transparent; color: var(--muted); font-size: 0.8rem; display: inline-flex; align-items: center; }
 .dock button.active, .dock a.active { background: var(--primary); color: var(--primary-fg); }
@@ -153,3 +154,13 @@ textarea { height: auto; border-radius: 1rem; padding: 0.75rem 1rem; }
 .cite-card { display:inline-flex; flex-direction:column; gap:.1rem; padding:.4rem .7rem; margin:.15rem; border:1px solid var(--border); border-radius:.6rem; vertical-align:middle; }
 .cite-card span { font-size:.7rem; color:var(--muted); }
 .cite-shop { border-color:var(--primary); }
+.skin-auto { --primary:#e85d04; --primary-fg:#1a0c04; --bg:#0c0a08; --surface:#16110d; --border:#3a2a1c; }
+.lede { max-width:40rem; font-size:1.2rem; line-height:1.45; }
+.pulse { display:grid; grid-template-columns:repeat(4,1fr); gap:.6rem; margin:1.5rem 0; }
+.pulse a { background:var(--surface); border-radius:1rem; padding:1rem; text-align:center; border:1px solid var(--border); }
+.pulse strong { display:block; font-family:var(--display); font-size:2rem; color:var(--primary); }
+.pulse span { font-size:.7rem; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); }
+.card-film img { filter: saturate(1.05) contrast(1.05); }
+.bar { height:.35rem; background:var(--border); border-radius:99px; overflow:hidden; max-width:24rem; }
+.bar span { display:block; height:100%; background:var(--primary); }
+@media (max-width:700px){ .pulse { grid-template-columns:1fr 1fr; } }

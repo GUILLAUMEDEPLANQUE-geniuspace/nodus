@@ -44,5 +44,10 @@
 - HLS documenté (`Hls.php`) — Bunny/R2 plus tard, pas sur mutu.
 - API `/api/v1/g/{slug}` version 1.0 + `rel` + headers Link.
 
+## 2026-08-22 — Club 205 univers complet
+
+Le pilote n’est plus 3 salles vides. Garage ciné, 14 salles, graphe 1.9→pièces, holo-forum, pièces geo Reims, guides, meets, Drive, quêtes SEO, pulse sur l’accueil.
+
+
 
 
