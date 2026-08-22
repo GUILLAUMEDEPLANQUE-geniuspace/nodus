@@ -515,6 +515,13 @@ class DualWorldsSeeder extends Seeder
                 'matiere' => $p[7],
                 'prix' => $p[8],
             ]);
+            if ($p[0] === 'lu-print') {
+                \App\Support\FieldTemplates::apply($p[0], 'commande-print');
+                if (\Illuminate\Support\Facades\Schema::hasColumn('cck_fields', 'audience')) {
+                    DB::table('cck_fields')->where('node_id', 'lu-print')->where('audience', 'commande')
+                        ->update(['target_kind' => 'product', 'target_id' => 'p-lu-2']);
+                }
+            }
         }
     }
 }

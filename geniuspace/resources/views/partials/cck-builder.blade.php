@@ -49,6 +49,12 @@
           <option value="thread">Sur un sujet</option>
           <option value="media">Sur une vidéo</option>
         </select>
+        <select name="audience">
+          <option value="fiche">Sur la fiche (vendeur)</option>
+          <option value="commande">À la commande (acheteur)</option>
+        </select>
+        <input name="options" placeholder="Choix : S|M|L  ou  Sans:+0|Oui:+5">
+        <input name="target_id" placeholder="Id produit (si « sur un produit »)">
         <button class="btn" type="submit">Poser sur la fiche</button>
       </form>
     </div>

@@ -14,9 +14,19 @@ use Illuminate\Support\Facades\DB;
 class Engine
 {
     /** @return array<string, object> keyed by field_key */
-    public static function fields(string $nodeId): array
+    public static function fields(string $nodeId, ?string $audience = 'fiche'): array
     {
-        $rows = DB::table('cck_fields')->where('node_id', $nodeId)->orderBy('sort')->get();
+        $q = DB::table('cck_fields')->where('node_id', $nodeId)->orderBy('sort');
+        if ($audience !== null && \Illuminate\Support\Facades\Schema::hasColumn('cck_fields', 'audience')) {
+            if ($audience === 'fiche') {
+                $q->where(function ($w) {
+                    $w->where('audience', 'fiche')->orWhere('audience', '')->orWhereNull('audience');
+                });
+            } else {
+                $q->where('audience', $audience);
+            }
+        }
+        $rows = $q->get();
         $out = [];
         foreach ($rows as $r) {
             $key = $r->field_key !== '' ? $r->field_key : \Illuminate\Support\Str::slug($r->name);

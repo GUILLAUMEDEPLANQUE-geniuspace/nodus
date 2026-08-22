@@ -6,9 +6,10 @@
   $href = \App\Support\Chrome::href($node, $action, $product);
 @endphp
 @if($action->action_key === 'add_cart' && $product)
-  <form method="post" action="/cart" style="display:inline">
+  <form method="post" action="/cart" enctype="multipart/form-data" style="display:grid;gap:.4rem">
     @csrf
     <input type="hidden" name="product_id" value="{{ $product->id }}">
+    @include('partials.order-fields', ['p' => $product])
     <button class="{{ $class }}" type="submit">{{ $action->label }}</button>
   </form>
 @elseif(in_array($action->action_key, ['play', 'unlock'], true))

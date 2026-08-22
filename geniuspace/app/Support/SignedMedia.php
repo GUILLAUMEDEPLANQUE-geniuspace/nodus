@@ -24,14 +24,12 @@ class SignedMedia
         if (! $gated && ! str_starts_with($path, 'private/')) {
             return '/'.$path;
         }
-        if ($preview && $gated && ! Grantor::canSeeMedia($media)) {
-            return self::sign($path, 900, true, 'media:'.$media->id);
-        }
-        if ($gated && ! Grantor::canSeeMedia($media) && ! $preview) {
-            return self::sign($path, 900, true, 'media:'.$media->id);
+        if (Grantor::canSeeMedia($media)) {
+            return self::sign($path, 900, false, 'media:'.$media->id);
         }
 
-        return self::sign($path, 900, false, 'media:'.$media->id);
+        // Sans droit : teaser public. Jamais le MP4 privé, même signé.
+        return '/media/teaser.mp4';
     }
 
     public static function sign(string $path, int $ttl = 900, bool $preview = false, string $ref = ''): string

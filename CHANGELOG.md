@@ -2,6 +2,13 @@
 
 Format : ce qui est **dans le code**, pas la vision PDF.
 
+## 2026-08-22 — Grant réel, coffre, options d’achat
+
+- **Plus de bandeau.** Sans preuve en base, le player sert le teaser public. L’URL signée du full → 403. `preview=1` ne livre plus le MP4 privé.
+- **Drive locké.** Certificat, brief : `/play` 15 min, grant / rôle / achat. Le making-of n’ouvre pas le certificat.
+- **Calque → preuve.** Clic sur un calque (Cristal, Karim) tamponne « a visité » dans le carnet.
+- **Options d’achat.** Taille, gravure, dos +5 €, logo — champs « à la commande » sur le print Lumen. Pas un formulaire Shopify collé : mêmes champs que le reste du moteur.
+
 ## 2026-08-22 — Médias = preuves = lieux
 
 - **Grant serveur.** Débloquer une vidéo écrit une preuve en base (user/session × média). Plus de `granted=true` en JS.

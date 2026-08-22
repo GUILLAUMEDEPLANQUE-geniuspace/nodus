@@ -6,7 +6,16 @@
   <p class="kicker">Chaudron</p>
   <h1 class="font-display">Panier</h1>
   @forelse($cart as $id => $row)
-    <p class="card" style="padding:1rem;margin:.4rem 0"><strong>{{ $row['title'] }}</strong> <span class="primary">{{ $row['price'] }}</span></p>
+    <article class="card" style="padding:1rem;margin:.4rem 0">
+      <p><strong>{{ $row['title'] }}</strong> <span class="primary">{{ $row['price'] }}</span></p>
+      @if(!empty($row['options']))
+        <p class="muted" style="margin:.3rem 0 0;font-size:.85rem">
+          @foreach($row['options'] as $k => $v)
+            <span class="chip">{{ $k }} · {{ $v }}</span>
+          @endforeach
+        </p>
+      @endif
+    </article>
   @empty
     <p class="muted">Vide. Une œuvre Lumen ?</p>
     <p><a class="btn" href="/n/lumen/boutique_expert">Voir la vitrine Lumen</a></p>

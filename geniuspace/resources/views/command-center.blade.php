@@ -61,10 +61,11 @@
                 <h2 class="font-display" style="margin:0.2rem 0;font-size:1.2rem">{{ $p->title }}</h2>
                 <p class="primary" style="font-family:ui-monospace,monospace">{{ $p->price }}</p>
                 <p class="muted" style="font-size:0.75rem">{{ $p->rating }}/5 · {{ $p->votes }} avis</p>
-                    <form method="post" action="/cart" style="margin-top:0.5rem">
+                    <form method="post" action="/cart" enctype="multipart/form-data" style="margin-top:0.5rem">
                     @csrf
                     <input type="hidden" name="product_id" value="{{ $p->id }}">
                     @if(request('koc'))<input type="hidden" name="koc" value="{{ request('koc') }}">@endif
+                    @include('partials.order-fields', ['p' => $p])
                     <button class="btn" type="submit" style="width:100%;height:2.4rem">Chaudron</button>
                 </form>
             </article>

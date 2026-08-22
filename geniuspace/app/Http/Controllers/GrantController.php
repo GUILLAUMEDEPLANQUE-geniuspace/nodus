@@ -51,6 +51,17 @@ class GrantController extends Controller
         return response()->json(Grantor::drop($media, $door));
     }
 
+    public function visit(Request $request, string $slug): JsonResponse
+    {
+        $node = GpNode::query()->where('slug', $slug)->firstOrFail();
+        $data = $request->validate([
+            'target' => 'nullable|string|max:80',
+            'label' => 'nullable|string|max:120',
+        ]);
+
+        return response()->json(Grantor::visit($node->id, (string) ($data['target'] ?? ''), (string) ($data['label'] ?? '')));
+    }
+
     public function carnet(Request $request, string $slug): View
     {
         $node = GpNode::query()->where('slug', $slug)->firstOrFail();

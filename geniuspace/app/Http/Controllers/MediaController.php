@@ -39,15 +39,13 @@ class MediaController extends Controller
 
     private function authorizeRef(string $path, bool $preview, string $ref): void
     {
+        $path = ltrim($path, '/');
+        $private = str_starts_with($path, 'private/');
+
         if (str_starts_with($ref, 'media:')) {
             $media = Media::query()->find(substr($ref, 6));
-            if (! $media) {
-                return;
-            }
-            if (Grantor::canSeeMedia($media)) {
-                return;
-            }
-            abort_unless($preview && Grantor::isGated($media), 403, 'Cette suite s’ouvre après l’étape.');
+            abort_unless($media, 403, 'Média inconnu.');
+            abort_unless(Grantor::canSeeMedia($media), 403, 'Cette suite s’ouvre après l’étape.');
 
             return;
         }
@@ -59,16 +57,16 @@ class MediaController extends Controller
         }
         $media = Media::query()->where('path', $path)->orWhere('path', '/'.$path)->first();
         if ($media) {
-            if (Grantor::canSeeMedia($media)) {
-                return;
-            }
-            abort_unless($preview && Grantor::isGated($media), 403, 'Cette suite s’ouvre après l’étape.');
+            abort_unless(Grantor::canSeeMedia($media), 403, 'Cette suite s’ouvre après l’étape.');
 
             return;
         }
-        $file = DriveFile::query()->where('path', $path)->orWhere('path', '/'.$path)->orWhere('path', '/'.ltrim($path, '/'))->first();
+        $file = DriveFile::query()->where('path', $path)->orWhere('path', '/'.$path)->first();
         if ($file) {
             abort_unless(Grantor::canSeeFile($file), 403, 'Ce fichier se mérite.');
+
+            return;
         }
+        abort_if($private || $preview, 403, 'Lien invalide.');
     }
 }

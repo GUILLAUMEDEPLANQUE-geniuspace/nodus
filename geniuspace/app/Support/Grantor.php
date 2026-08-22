@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\DriveFile;
+use App\Models\Edge;
 use App\Models\GpNode;
 use App\Models\Media;
 use Illuminate\Support\Facades\Auth;
@@ -133,6 +134,7 @@ class Grantor
         if (in_array($reason, ['quest', 'ats', 'teaser'], true) && in_array($media->mode, ['interview', 'quest'], true)) {
             self::give('proof', $media->node_id, 'quest', $media->node_id, $media->title, ['media_id' => $media->id]);
             self::unlockFiles($media->node_id, ['quest', 'ats']);
+            self::validateFromDoors($media);
         }
         if ($reason === 'purchase') {
             self::unlockFiles($media->node_id, ['purchase']);
@@ -292,6 +294,7 @@ class Grantor
                 'relic' => 'Relique',
                 'product' => 'Œuvre acquise',
                 'proof' => 'Étape tenue',
+                'visit' => 'A visité',
                 default => 'Preuve',
             };
             $href = $node ? Engine::href($node) : '/';
@@ -330,5 +333,55 @@ class Grantor
         }
 
         return SignedMedia::sign(ltrim($file->path, '/'), 900, false, 'file:'.$file->id);
+    }
+
+    /** Clic calque → « a visité » dans le carnet. */
+    public static function visit(string $nodeId, string $target, string $label): array
+    {
+        $cible = $target !== ''
+            ? GpNode::query()->where('slug', $target)->orWhere('id', $target)->first()
+            : null;
+        $titre = $label ?: ($cible->title ?? 'Lieu visité');
+        $id = 'visit-'.($cible->id ?? $target ?: $nodeId);
+        self::give('visit', $id, 'visit', $nodeId, $titre, ['target' => $target]);
+        if ($cible) {
+            self::give('visit', $cible->id, 'visit', $cible->id, $cible->title, ['from' => $nodeId]);
+        }
+
+        return [
+            'ok' => true,
+            'preuve' => [
+                'titre' => $titre,
+                'maison' => (GpNode::query()->find($nodeId)->title ?? ''),
+                'quoi' => 'A visité',
+                'href' => $cible ? Engine::href($cible) : '/n/'.(GpNode::query()->find($nodeId)->slug ?? ''),
+            ],
+        ];
+    }
+
+    /** Fin d’épreuve → arête validated vers l’offre liée (si elle existe). */
+    private static function validateFromDoors(Media $media): void
+    {
+        $from = 'carnet-karim';
+        if (Auth::id()) {
+            $from = 'carnet-'.Auth::id();
+        }
+        if (! GpNode::query()->where('id', $from)->exists()) {
+            return;
+        }
+        foreach (self::doors($media) as $d) {
+            if (($d['kind'] ?? '') !== 'door' || empty($d['href'])) {
+                continue;
+            }
+            $slug = basename(parse_url($d['href'], PHP_URL_PATH) ?: '');
+            $job = GpNode::query()->where('slug', $slug)->orWhere('kind', 'job')->where('slug', $slug)->first();
+            if (! $job || $job->kind !== 'job') {
+                continue;
+            }
+            $exists = Edge::query()->where('from_id', $from)->where('to_id', $job->id)->where('kind', 'validated')->exists();
+            if (! $exists) {
+                Edge::query()->insert(['from_id' => $from, 'to_id' => $job->id, 'kind' => 'validated', 'label' => 'Épreuve validée']);
+            }
+        }
     }
 }

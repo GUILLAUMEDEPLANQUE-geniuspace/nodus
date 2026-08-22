@@ -54,6 +54,17 @@ class FieldTemplates
                     ['key' => 'prix', 'name' => 'Prix', 'type' => 'digits', 'unit' => '€'],
                 ],
             ],
+            'commande-print' => [
+                'label' => 'Options d’achat (print)',
+                'for' => 'product',
+                'plain' => 'Taille, gravure, dos imprimé, logo — à la commande.',
+                'fields' => [
+                    ['key' => 'taille', 'name' => 'Taille', 'type' => 'select', 'unit' => '', 'options' => 'S|M|L|XL', 'audience' => 'commande'],
+                    ['key' => 'gravure', 'name' => 'Gravure', 'type' => 'text', 'unit' => '', 'audience' => 'commande'],
+                    ['key' => 'dos', 'name' => 'Dos imprimé', 'type' => 'select', 'unit' => '', 'options' => 'Sans:+0|Oui:+5', 'audience' => 'commande'],
+                    ['key' => 'logo', 'name' => 'Logo client', 'type' => 'file', 'unit' => '', 'audience' => 'commande'],
+                ],
+            ],
             'maison' => [
                 'label' => 'Maison',
                 'for' => 'company',
@@ -88,13 +99,13 @@ class FieldTemplates
                 continue;
             }
             $sort++;
-            DB::table('cck_fields')->insert([
+            $row = [
                 'node_id' => $nodeId,
                 'name' => $f['name'],
                 'type' => $f['type'],
                 'value' => $f['value'] ?? '',
-                'target_kind' => 'node',
-                'target_id' => '',
+                'target_kind' => $f['target_kind'] ?? 'node',
+                'target_id' => $f['target_id'] ?? '',
                 'sort' => $sort,
                 'options' => $f['options'] ?? '',
                 'seo_title' => $f['name'],
@@ -103,7 +114,11 @@ class FieldTemplates
                 'min_val' => $f['min'] ?? null,
                 'max_val' => $f['max'] ?? null,
                 'schema_version' => 1,
-            ]);
+            ];
+            if (\Illuminate\Support\Facades\Schema::hasColumn('cck_fields', 'audience')) {
+                $row['audience'] = $f['audience'] ?? 'fiche';
+            }
+            DB::table('cck_fields')->insert($row);
             $n++;
         }
 

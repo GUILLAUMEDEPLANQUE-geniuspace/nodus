@@ -30,3 +30,5 @@ Tu travailles sur **Geniuspace**. Stack unique : Laravel dans `geniuspace/`.
 26. **Médias = portes, pas des fichiers.** Unlock = ligne `grants` (user/session × média), jamais `granted=true` en JS. JSON-LD gated : pas de `contentUrl`. Fichiers lockés dans `storage/app/private`, servis par `/play` si grant ou staff.
 27. **Carnet = déblocages + export JSON.** Relique d’un chapitre, brief d’épreuve, certificat d’achat : même coffre. Surface : « tenu », jamais « grant ».
 28. Un calque image / un chapitre `@slug` ouvre un lieu. Pas un timecode mort.
+29. **Unlock = grant en base, sinon 403.** Le teaser est un fichier public distinct. Jamais le MP4 privé en `preview=1`. Fichier Drive locké = `/play` signé 15 min, jamais d’URL permanente.
+30. **Options d’achat** = champs `audience=commande` (taille, gravure, extra, logo). Pas une colonne SQL `size`. Le checkout pose les choix dans le carnet / l’inventaire.

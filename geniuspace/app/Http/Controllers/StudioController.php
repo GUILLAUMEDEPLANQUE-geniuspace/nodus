@@ -54,20 +54,27 @@ class StudioController extends Controller
             'type' => 'required',
             'value' => 'nullable',
             'target_kind' => 'nullable',
+            'audience' => 'nullable|in:fiche,commande',
+            'options' => 'nullable|string',
+            'target_id' => 'nullable|string',
         ]);
-        DB::table('cck_fields')->insert([
+        $row = [
             'node_id' => $node->id,
             'name' => $data['name'],
             'type' => $data['type'],
             'value' => $data['value'] ?? '',
             'target_kind' => $data['target_kind'] ?? 'node',
-            'target_id' => '',
+            'target_id' => $data['target_id'] ?? '',
             'sort' => 0,
-            'options' => '',
+            'options' => $data['options'] ?? '',
             'seo_title' => $data['name'],
             'field_key' => \Illuminate\Support\Str::slug($data['name']),
             'schema_version' => 1,
-        ]);
+        ];
+        if (\Illuminate\Support\Facades\Schema::hasColumn('cck_fields', 'audience')) {
+            $row['audience'] = $data['audience'] ?? 'fiche';
+        }
+        DB::table('cck_fields')->insert($row);
         return back()->with('ok', 'Champ créé.');
     }
 

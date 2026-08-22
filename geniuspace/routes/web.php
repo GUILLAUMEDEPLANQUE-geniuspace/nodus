@@ -152,6 +152,7 @@ Route::get('/n/{slug}/p/{pid}', [UniverseController::class, 'product'])->name('p
 Route::get('/n/{slug}/v/{vid}', [UniverseController::class, 'video'])->name('video.show');
 Route::post('/n/{slug}/v/{vid}/unlock', [GrantController::class, 'unlock']);
 Route::post('/n/{slug}/v/{vid}/drop', [GrantController::class, 'drop']);
+Route::post('/n/{slug}/visite', [GrantController::class, 'visit']);
 Route::get('/n/{slug}/carnet.json', [GrantController::class, 'export']);
 Route::get('/embed/{slug}', [EmbedController::class, 'show']);
 Route::get('/play', [MediaController::class, 'play'])->name('media.play');

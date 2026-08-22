@@ -65,7 +65,11 @@ class GrantTest extends TestCase
         $this->get($full)->assertForbidden();
 
         $preview = SignedMedia::sign($media->path, 900, true, 'media:'.$media->id);
-        $this->get($preview)->assertOk();
+        $this->get($preview)->assertForbidden();
+
+        $this->get('/n/lumen/v/'.$media->id)
+            ->assertOk()
+            ->assertSee('/media/teaser.mp4', false);
 
         $this->postGrant('/n/lumen/v/'.$media->id.'/unlock')->assertOk();
         $this->get($full)->assertOk();
@@ -130,6 +134,29 @@ class GrantTest extends TestCase
             ->assertOk()
             ->assertSee('Cristal Lumen', false)
             ->assertSee('Ouvrir', false);
+    }
+
+    public function test_layer_click_writes_a_visit_proof(): void
+    {
+        $this->postGrant('/n/lumen/visite', ['target' => 'cristal-lumen-01', 'label' => 'Cristal'])
+            ->assertOk()
+            ->assertJsonPath('preuve.quoi', 'A visité');
+        $this->get('/n/lumen/carnet')
+            ->assertOk()
+            ->assertSee('A visité', false)
+            ->assertSee('Cristal', false);
+    }
+
+    public function test_locked_file_signed_url_needs_grant(): void
+    {
+        $file = DriveFile::query()->where('title', 'Certificat RWA.pdf')->first();
+        $this->assertNotNull($file);
+        $this->assertTrue((bool) $file->locked);
+        $url = \App\Support\Grantor::fileHref($file);
+        $this->get($url)->assertForbidden();
+        $this->postGrant('/n/lumen/v/'.Media::query()->where('node_id', 'lumen')->value('id').'/unlock');
+        // making-of unlock does not open purchase files
+        $this->get($url)->assertForbidden();
     }
 
     public function test_locked_drive_path_is_not_guessable_in_ui(): void
