@@ -27,6 +27,35 @@ User
 
 Le LLM n’est **jamais** le coffre.
 
+## V2 livrée — boucle de croissance (pas plus de documents)
+
+```
+données → expériences → observations → mémoires
+      → hypothèses → actions → résultats → feedback
+      → nouvelles capacités
+```
+
+Ce qui est **dans le code** :
+
+| Pièce | Fichier | Contrat |
+| --- | --- | --- |
+| Faits structurés | `GhostMemory` + `ghost_facts` | conversation → (sujet, prédicat, objet, confiance, source, statut) |
+| Cycle de vie | `GhostLearn::promote` | unknown → observed → supported → verified → trusted · contradicted → stale → revoked |
+| Hiérarchie de confiance | `GhostLearn::mayRemember` | hallucination / hypothèse **n’entrent pas** |
+| Erreurs | `ghost_failures` | task, skill, error_type, correction |
+| Règles | `ghost_rules` | une erreur répétée devient une règle (R-crawl, R-act…) |
+| Skills | `GhostSkills` + `ghost_skill_stats` | catalogue versionné + taux |
+| Candidats | `ghost_skill_candidates` | pattern détecté → **validation humaine** avant prod |
+| Gym | `GhostGym` · `/n/{slug}/ghost/gym` | 12 épreuves, niveaux 1–8 |
+| Maturité | `GhostMaturity` · `/n/{slug}/ghost/maturity` | 8 jauges. Autonomie **plafonnée à 54** |
+
+Pas dans V2 (volontaire) :
+
+- embeddings / vector DB (le pack du lieu + le graphe suffisent)
+- crawl web « pour nourrir » (interdit)
+- auto-écriture de skills en production (candidat seulement)
+- ACT autonome
+
 ## Contrat
 
 | Niveau | Outils | Ghost peut ? |

@@ -2,6 +2,16 @@
 
 Format : ce qui est **dans le code**, pas la vision PDF.
 
+## 2026-08-22 — Ghost croissance (V2)
+
+- **Boucle.** Chaque tour laisse un fait, une expérience, parfois une erreur. Pas un dump de chat.
+- **Cycle de vie.** unknown → observed → supported → verified → trusted. contradicted → stale → revoked. `GhostLearn::promote`.
+- **Confiance.** Une hallucination n’entre pas en mémoire (`mayRemember`).
+- **Erreurs / règles.** Tables `ghost_failures`, `ghost_rules`. Wikipedia → R-crawl. « je débloque » → R-act.
+- **Skills qui grandissent.** Stats `ghost_skill_stats`. Candidat `verified_job_matching` après assez de match_job — **validation humaine** (`POST /n/{slug}/ghost/skills`).
+- **Gym.** 12 épreuves, 8 niveaux. Page `/n/{slug}/ghost/gym`. JSON maturité `/n/{slug}/ghost/maturity`. Autonomie plafonnée à 54.
+- **Pas de vector DB.** Le graphe + le pack du lieu. Pas de crawl.
+
 ## 2026-08-22 — Ghost cognitif (V1)
 
 - **Orchestrateur.** `Ghost::reply` = mémoire → planner → multi-outils → compose → vérificateur. Plus `intent → 1 tool`.

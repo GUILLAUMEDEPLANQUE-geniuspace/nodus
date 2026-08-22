@@ -68,7 +68,7 @@ class GhostMemory
             $working['constraints']['max_price'] = $n;
         }
 
-        if (preg_match('/(?:je préfère|plutôt|j.?aime)\s+(?:les? |l[ae] )?(sombre|clair|simple|vintage|minimal|dark|classique)/u', $m, $hit)) {
+        if (preg_match('/(?:je préfère|plutôt|j.?aime)\s+(?:les? |l[ae] )?(?:choses )?(sombre|clair|simple|vintage|minimal|dark|classique)/u', $m, $hit)) {
             $style = $hit[1] === 'dark' ? 'sombre' : $hit[1];
             self::remember($node, 'visitor', 'prefers_style', $style, 0.91, 'explicit', self::KNOWN);
             $working['constraints']['style'] = $style;

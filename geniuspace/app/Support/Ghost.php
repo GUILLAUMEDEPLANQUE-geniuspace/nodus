@@ -190,6 +190,27 @@ class Ghost
         $working = GhostMemory::load($node);
         GhostMemory::ingest($node, $message, $working);
 
+        if (preg_match('/wikip[eé]dia|fandom\.|google\.com|internet entier|wiki pirate|chatgpt/u', mb_strtolower($message))) {
+            $blocked = [
+                'reply' => 'Je n’ai pas cette preuve dans le coffre. Je ne sors pas du pack de ce lieu — pas de crawl, pas de wiki.',
+                'citations' => [['label' => 'Pack du lieu', 'url' => '/n/'.$node->slug]],
+                'tools' => [],
+                'actions' => [['label' => 'Fiches du lieu', 'href' => '/n/'.$node->slug]],
+                'profile' => self::profile($node),
+                'mode' => 'grounded',
+                'goal' => 'verify_claim',
+                'skill' => 'verify_claim',
+                'plan' => [],
+                'verify' => ['valid' => true, 'status' => 'known'],
+                'memory' => GhostMemory::publicFacts($node),
+                'permission' => GhostSkills::OBSERVE,
+                'maturity' => GhostMaturity::of($node),
+            ];
+            GhostLearn::afterTurn($node, $message, ['skill' => 'verify_claim'], ['tools' => []], ['valid' => true], 'grounded');
+
+            return $blocked;
+        }
+
         $plan = GhostPlanner::plan($node, $message, $ctx, $working);
         $exec = GhostExecutor::run($node, $plan, $message, $ctx, $working);
         $ctx = GhostExecutor::merge($ctx, $exec);
@@ -213,6 +234,7 @@ class Ghost
         }
 
         GhostMemory::rememberTurn($node, $plan, $exec, $check);
+        GhostLearn::afterTurn($node, $message, $plan, $exec, $check, $mode);
         self::logTurn($node, $message, $grounded['reply'], $exec['tools'] ?? [], $mode);
 
         $citations = array_values(array_unique(array_merge($exec['citations'] ?? [], $grounded['citations'] ?? []), SORT_REGULAR));
@@ -234,6 +256,7 @@ class Ghost
             'verify' => ['valid' => $check['valid'], 'status' => $check['status']],
             'memory' => GhostMemory::publicFacts($node),
             'permission' => $exec['ceiling'] ?? GhostSkills::OBSERVE,
+            'maturity' => GhostMaturity::of($node),
         ];
     }
 
@@ -261,7 +284,8 @@ class Ghost
         }
         if (($plan['goal'] ?? '') === 'find_product') {
             $prix = $pick['prix'] ?? '';
-            $note = $max ? " sous {$max} €" : '';
+            $list = (int) round((float) preg_replace('/[^\d.,]/', '', (string) $prix));
+            $note = ($max && (int) $max <= ($list ?: (int) $max)) ? " sous {$max} €" : '';
             $grounded['reply'] = $prefix."Parmi ce qui est dans le coffre{$note} : « {$title} »".($prix ? " — {$prix}" : '').'. '.$grounded['reply'];
             if (! empty($pick['url'])) {
                 array_unshift($grounded['actions'], ['label' => $title, 'href' => $pick['url']]);

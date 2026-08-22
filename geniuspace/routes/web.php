@@ -148,6 +148,10 @@ Route::get('/n/{slug}/llms.txt', function (string $slug) {
 // Ghost OS — agent ancré par lieu (avant les routes catch-all /n/{slug}/…)
 Route::get('/n/{slug}/ghost', [GhostController::class, 'hello']);
 Route::get('/n/{slug}/ghost/context', [GhostController::class, 'context']);
+Route::get('/n/{slug}/ghost/gym', [GhostController::class, 'gym']);
+Route::post('/n/{slug}/ghost/gym', [GhostController::class, 'gymRun']);
+Route::get('/n/{slug}/ghost/maturity', [GhostController::class, 'maturity']);
+Route::post('/n/{slug}/ghost/skills', [GhostController::class, 'approveSkill']);
 Route::post('/n/{slug}/ghost', [GhostController::class, 'chat']);
 
 Route::get('/n/vera/offres/{job}', [VeraController::class, 'jobShow']);
