@@ -51,6 +51,23 @@ class GrantController extends Controller
         return response()->json(Grantor::drop($media, $door));
     }
 
+    public function omni(Request $request, string $slug, string $vid): JsonResponse
+    {
+        $media = $this->media($slug, $vid);
+        $kind = (string) $request->input('kind', 'labo');
+        $label = (string) $request->input('label', 'Cadre tenu');
+        Grantor::give('proof', 'omni-'.$media->id.'-'.$kind, 'omni', (string) $media->node_id, $label, [
+            'kind' => $kind,
+            'at' => (int) $request->input('at', 0),
+        ]);
+
+        return response()->json([
+            'ok' => true,
+            'quoi' => $label.' · tenu',
+            'kind' => $kind,
+        ]);
+    }
+
     public function visit(Request $request, string $slug): JsonResponse
     {
         $node = GpNode::query()->where('slug', $slug)->firstOrFail();

@@ -37,7 +37,7 @@ Démo jouable (seed) : `/n/coffre-celeste`, `/n/terrain-midgar`, `/n/table-aop`,
 
 ## 1. Le Coffre — boutique physique / reliques
 
-**Innovation.** L’hôte est l’avatar permanent du vendeur. Canvas infini, scroll narratif, hotspots = champs, checkout intra-page.
+**Innovation.** L’hôte est l’avatar permanent du vendeur. Canvas infini, scroll narratif, hotspots = champs, checkout intra-page. Négociation → **paiement au prix tenu** (Stripe en prod, ledger en démo).
 
 **Mécanique.** Relique au centre. Un passage (voisin) aspire vers l’auteur / l’univers. L’hôte négocie dans le plancher (`prix_plancher`). Une mise corrige une métadonnée.
 
@@ -53,7 +53,7 @@ Patch = curseur d’arc. Build = épreuve. Loot = relique. VOD → pause → lab
 
 ## 3. L’Atelier — anime / manga
 
-Arc = rideau anti-spoiler. Perso = lieu. Cel = relique du Coffre. Le concierge ne spoil pas au-delà de ton curseur.
+Arc = rideau anti-spoiler. Perso = lieu. Cel = relique du Coffre. Le concierge **filtre les fiches** au-delà du curseur (contexte Ghost + Geniuspedia). Yue n’existe pas avant la Finale.
 
 **SEO.** TVSeries + Person + Product (cel).
 
@@ -65,25 +65,25 @@ Atlas habité. Corridor = arête, pas un lien footer. Hreflang natif. Un lieu ou
 
 ## 5. La Maison — recrutement
 
-L’accueil présélectionne (3 questions). Juste → preuve → épreuve. Le carnet voyage de maison en maison. Vera reste le flagship historique.
+L’accueil présélectionne (3 questions). Juste → preuve → épreuve. Le carnet voyage de maison en maison. **Vera reste le flagship historique** (`/n/vera`, 35 offres). Un template `maison-rh` neuf reçoit le même catalogue (arêtes `offers` vers les missions).
 
 **SEO.** Organization + JobPosting, salaire en clair.
 
 ## 6. La Scène — musique
 
-Canvas waveform. Scroll = timecode. Stems lockés = fichiers signés. Drop = Event.
+Canvas waveform. Scroll = timecode. **Omni** : à 03:15 (0:03 sur teaser court) le clip s’efface, le mixer stems prend le cadre. Stems lockés = fichiers signés. Drop = Event.
 
 **SEO.** MusicAlbum + MusicRecording + Event + Product vinyl.
 
 ## 7. L’Arène — sport
 
-HUD stade. Joueur = fiche. VOD → tableau tactique. Match = SportsEvent URL.
+HUD stade. Joueur = fiche. **Omni** : VOD → pause → tableau tactique cliquable (N°9, N°10). Match = SportsEvent URL.
 
 **SEO.** SportsTeam + SportsEvent + Person.
 
 ## 8. Le Labo — formation
 
-Cœur omni-média : à 03:15 la vidéo s’efface, l’éditeur / le simulateur prend le cadre. Exo tenu = grant. Passage vers une mission qui recrute la compétence.
+Cœur omni-média : à **03:15** la vidéo s’efface, l’éditeur / le simulateur prend le cadre (sur teaser court : chapitre `0:03 Labo`, remappé si le fichier est trop court). Exo tenu = grant. Passage vers une mission qui recrute la compétence.
 
 **SEO.** Course + HowTo + VideoObject + Occupation.
 

@@ -149,7 +149,7 @@ class FlagshipSeeder extends Seeder
         ]);
         $this->product('p-mid-1', 'fl-terrain', 'Épée de Midgar', '24 €', 'Loot de boss. Rate 8 % sur Gate Hard.', 'loot', '/realms/portal-hero.jpg');
         $this->guide('fl-terrain', 'Route Hard Gate', 'Fenêtre boss : 0:42 après le choc. Loot : Épée 8 %. Patch 1.04.');
-        $this->clip('fl-terrain', 'VOD raid Gate', 'La route. Pause = labo.');
+        $this->clip('fl-terrain', 'VOD raid Gate', 'La route. Pause = labo.', "0:00 Teaser\n0:03 Route\n3:15 Labo");
     }
 
     private function dressAtelier(): void
@@ -160,9 +160,13 @@ class FlagshipSeeder extends Seeder
             'Arc actuel' => 'Tokyo',
         ]);
         $this->child('fl-sakura', 'sakura-kinomoto', 'person', 'Sakura', 'Perso', 'fl-atelier-anime', '/realms/sea-hero.jpg');
+        DB::table('nodes')->where('id', 'fl-sakura')->update(['appear_order' => 1, 'appear_label' => 'Cour 1']);
+        $this->child('fl-yue', 'yue-finale', 'person', 'Yue', 'Gardien', 'fl-atelier-anime', '/realms/sea-hero.jpg');
+        DB::table('nodes')->where('id', 'fl-yue')->update(['appear_order' => 4, 'appear_label' => 'Finale']);
         $this->product('p-cel-clamp', 'fl-atelier-anime', 'Cel Sakura', '90 €', 'Cel original. Le concierge tient le plancher.', 'relique', '/realms/sea-hero.jpg');
         $this->fillPlancher('fl-atelier-anime', 82, 90);
         $this->guide('fl-atelier-anime', 'Arc Tokyo sans spoiler', 'Jusqu’à l’arc Tokyo seulement. La suite n’existe pas encore.');
+        $this->guide('fl-atelier-anime', 'Arc Finale — Yue', 'Yue n’existe pas avant la Finale. Le concierge se tait.');
     }
 
     private function dressTerritoire(): void
@@ -187,7 +191,7 @@ class FlagshipSeeder extends Seeder
         ]);
         $this->product('p-vinyl-1', 'fl-scene', 'Pressage Néon', '32 €', 'Vinyl drop. Stems lockés.', 'vinyl', '/realms/studio-hero.jpg');
         $this->fillPlancher('fl-scene', 28, 32);
-        $this->clip('fl-scene', 'Clip Néon', 'Waveform. Scroll = timecode.');
+        $this->clip('fl-scene', 'Clip Néon', 'Waveform. Scroll = timecode.', "0:00 Clip\n0:03 Mixer\n3:15 Stems");
         $this->guide('fl-scene', 'Drop de la nuit', 'Le pressage est une relique. Le stem se mérite.');
     }
 
@@ -201,7 +205,7 @@ class FlagshipSeeder extends Seeder
         $this->child('fl-j9', 'ailier-reims', 'person', 'N°9', 'Attaquant', 'fl-arene', '/realms/205-meet.jpg');
         $this->child('fl-j10', 'meneur-reims', 'person', 'N°10', 'Meneur', 'fl-arene', '/realms/205-meet.jpg');
         $this->product('p-maillot', 'fl-arene', 'Maillot domicile', '79 €', 'Flockage. Split club.', 'merch', '/realms/205-meet.jpg');
-        $this->clip('fl-arene', 'VOD Reims — actions', 'Pause = tableau tactique.');
+        $this->clip('fl-arene', 'VOD Reims — actions', 'Pause = tableau tactique.', "0:00 Actions\n0:03 Tactique\n3:15 Tactique");
         $this->guide('fl-arene', 'Peau du match', 'Compos à 18 h. Absents notés. Pas un Facebook.');
     }
 
@@ -213,7 +217,7 @@ class FlagshipSeeder extends Seeder
             'Niveau' => 'Intermédiaire',
             'Langage' => 'PHP',
         ]);
-        $this->clip('fl-labo', 'Exo 3 — le cadre s’ouvre', 'À 03:15 tu ne regardes plus. Tu fais.');
+        $this->clip('fl-labo', 'Exo 3 — le cadre s’ouvre', 'À 03:15 tu ne regardes plus. Tu fais.', "0:00 Teaser\n0:03 Labo\n3:15 Labo");
         $this->product('p-mod-1', 'fl-labo', 'Module Next', '49 €', 'Leçon + labo + preuve.', 'cours', '/realms/studio-hero.jpg');
         $this->guide('fl-labo', 'Exo 3 : erreurs fréquentes', 'Colle l’erreur. Le tuteur débloque la porte, pas le TP.');
     }
@@ -277,14 +281,15 @@ class FlagshipSeeder extends Seeder
         }
     }
 
-    private function clip(string $nodeId, string $title, string $transcript): void
+    private function clip(string $nodeId, string $title, string $transcript, ?string $chapters = null): void
     {
+        $chapters = $chapters ?: "0:00 Teaser\n0:03 Labo\n3:15 Labo";
         DB::table('media')->where('node_id', $nodeId)->where('title', $title)->delete();
         DB::table('media')->insert([
             'node_id' => $nodeId, 'title' => $title, 'kind' => 'video',
             'path' => 'private/media/lumen-makingof.mp4', 'mode' => 'shop', 'access' => 'paid',
             'teaser_sec' => 6, 'price' => '0', 'duration' => '6:00',
-            'chapters' => "0:00 Teaser\n3:15 Labo", 'transcript' => $transcript, 'views' => 12, 'rating' => '4.6',
+            'chapters' => $chapters, 'transcript' => $transcript, 'views' => 12, 'rating' => '4.6',
         ]);
     }
 

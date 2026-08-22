@@ -43,7 +43,7 @@
 
     @elseif($canvas === 'atelier')
       <p class="kicker">Rideau · anti-spoiler</p>
-      <p>L’arc que tu n’as pas vu n’existe pas encore. Avance le curseur en haut, puis parle au concierge.</p>
+      <p>L’arc que tu n’as pas vu n’existe pas encore. Avance le curseur en haut, puis parle au concierge — il filtre.</p>
       @if($fiche)<a class="btn" href="/n/{{ $node->slug }}/f/{{ $fiche->slug }}">Fiche · {{ $fiche->title }}</a>@endif
       @if($shop)<a class="btn-line" href="/n/{{ $node->slug }}/p/{{ $shop->id }}">Cel · {{ $shop->title }}</a>@endif
 
@@ -83,7 +83,7 @@
       <p class="kicker">Exo · tu ne regardes plus</p>
       @if($clip)
         <h3>{{ $clip->title }}</h3>
-        <a class="btn" href="/n/{{ $node->slug }}/v/{{ $clip->id }}">Ouvrir l’exo</a>
+        <a class="btn" href="/n/{{ $node->slug }}/v/{{ $clip->id }}">Ouvrir l’exo · cadre à 03:15</a>
       @endif
       <a class="btn-line" href="/n/vera">Vers une mission qui recrute</a>
 
@@ -109,7 +109,7 @@
 
     @elseif($canvas === 'maison')
       <p class="kicker">Présélection · 3 questions</p>
-      <p>Pas un CV. Parle à l’accueil, ou ouvre une mission.</p>
+      <p>Pas un CV. Parle à l’accueil, ou ouvre une mission. Vera reste le lieu historique — ici le catalogue voyage.</p>
       <a class="btn" href="/n/{{ $node->slug }}/offres">Voir les missions</a>
       <a class="btn-line" href="/n/{{ $node->slug }}/epreuve">Tenter l’épreuve</a>
 

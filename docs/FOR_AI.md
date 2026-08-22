@@ -33,7 +33,11 @@ Tu travailles sur **Geniuspace**. Stack unique : Laravel dans `geniuspace/`.
 29. **Unlock = grant en base, sinon 403.** Le teaser est un fichier public distinct. Jamais le MP4 privé en `preview=1`. Fichier Drive locké = `/play` signé 15 min, jamais d’URL permanente.
 31. **Dix flagships.** Coffre, Terrain, Atelier, Territoire, Maison, Scène, Arène, Labo, Plateau, Table. Spec : `Flagships.php` + `/flagships`. Surface ≠ jargon. Hôte = Ghost::speak. Passage = neighbors. Preuve = lore_proposals. **Flagship ≠ démarrage** : les ~50 templates d’en dessous sont des coquilles métier, pas des skins.
 32. **Carnet = salle.** `RoomCatalog` clé `carnet`. `/n/{slug}/carnet` + export JSON. Le dock la pose. Le Ghost n’y 404 pas.
-33. **Négociation Ghost** : fourchette = `min_val` / `max_val` + `prix_plancher`. Accepté dans la fourchette → **ligne panier** au prix tenu (`extra_cents`). Jamais sous le min.
-34. **Geniuspedia** : fiches pack du Node (`Geniuspedia::cards`) dans `Ghost::context['fiches']`. Pas un dump web.
+33. **Négociation Ghost** : fourchette = `min_val` / `max_val` + `prix_plancher`. Accepté dans la fourchette → **ligne panier** au prix tenu (`held_cents`). Checkout encaisse **ce** montant (Stripe si `STRIPE_SECRET`, sinon ledger). Jamais sous le min.
+34. **Geniuspedia** : fiches pack du Node (`Geniuspedia::cards`) dans `Ghost::context['fiches']`. URLs locales seulement. **Pas de crawl web.**
 35. **`server/` n’est pas Laravel.** Chrome PWA Grok (`grok-pwa.ts`). Ignorer. Produit = `geniuspace/`.
+36. **Omni-média.** Chapitre Labo / Mixer / Tactique → le player **bascule le cadre** (`Omni::beats`, overlay `omni-frame`). Tenir l’exo = grant `omni`. Prod = 03:15. Démo courte = 0:03 + remap si `duration < at`.
+37. **Rideau Atelier.** Curseur d’arc par défaut = 1. `Spoiler` filtre fiches, produits, Geniuspedia. Le concierge refuse un perso hors rideau (« n’existe pas encore »).
+38. **Maison neuve.** `/n/vera` reste le flagship historique. `WorldTemplates::apply('maison-rh')` pose les 35 missions (`Maison::attachCatalog`). Pas un second Vera.
+39. **Paiement.** `Pay::cents` = prix tenu. Stripe Checkout Session HTTP (pas de SDK). Retour `/panier/retour`.
 

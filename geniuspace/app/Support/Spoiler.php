@@ -21,6 +21,17 @@ class Spoiler
         if (session()->has($key)) {
             return (int) session($key);
         }
+
+        return self::defaultCursor($clubId);
+    }
+
+    public static function defaultCursor(string $clubId): int
+    {
+        $node = GpNode::query()->find($clubId);
+        if ($node && Flagships::canvas($node) === 'atelier') {
+            return 1;
+        }
+
         return 99;
     }
 
@@ -29,11 +40,60 @@ class Spoiler
         if ($appear <= 0) {
             return true;
         }
+
         return $appear <= self::cursor($clubId);
     }
 
     public static function filterNodes($nodes, string $clubId)
     {
         return $nodes->filter(fn (GpNode $n) => self::ok((int) ($n->appear_order ?? 0), $clubId))->values();
+    }
+
+    /** @return array{cursor: int, label: string, arcs: list<array{ord:int,label:string}>} */
+    public static function curtain(GpNode $node): array
+    {
+        $arcs = DB::table('node_arcs')->where('node_id', $node->id)->orderBy('ord')->get();
+        $cursor = self::cursor($node->id);
+        $label = 'Tout vu';
+        foreach ($arcs as $a) {
+            if ((int) $a->ord <= $cursor) {
+                $label = $a->label;
+            }
+        }
+
+        return [
+            'cursor' => $cursor,
+            'label' => $label,
+            'arcs' => $arcs->map(fn ($a) => ['ord' => (int) $a->ord, 'label' => $a->label])->values()->all(),
+        ];
+    }
+
+    /** True si le texte appartient à un arc pas encore ouvert. */
+    public static function veiled(?string $text, GpNode $node): bool
+    {
+        if (! $text) {
+            return false;
+        }
+        $cursor = self::cursor($node->id);
+        foreach (DB::table('node_arcs')->where('node_id', $node->id)->where('ord', '>', $cursor)->get() as $a) {
+            if ($a->label !== '' && mb_stripos($text, $a->label) !== false) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /** Titres cachés derrière le rideau (fiches enfants). */
+    public static function hiddenTitles(GpNode $node): array
+    {
+        $ids = DB::table('edges')->where('from_id', $node->id)->pluck('to_id');
+        if ($ids->isEmpty()) {
+            return [];
+        }
+
+        return GpNode::query()->whereIn('id', $ids)->get()
+            ->filter(fn (GpNode $n) => ! self::ok((int) ($n->appear_order ?? 0), $node->id))
+            ->pluck('title')->all();
     }
 }

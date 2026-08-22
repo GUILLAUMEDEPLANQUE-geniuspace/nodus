@@ -174,4 +174,89 @@ class FlagshipTest extends TestCase
             ->assertSee('Caisse AOP', false)
             ->assertSee('Le sommelier', false);
     }
+
+    public function test_omni_labo_scene_arene_switch_the_frame(): void
+    {
+        $labo = \App\Models\GpNode::query()->where('slug', 'labo-next')->firstOrFail();
+        $clip = $labo->media()->first();
+        $this->assertNotNull($clip);
+        $beats = \App\Support\Omni::beats($clip, $labo);
+        $this->assertNotEmpty($beats);
+        $this->assertSame('labo', $beats[0]['kind']);
+        $this->get('/n/labo-next/v/'.$clip->id)
+            ->assertOk()
+            ->assertSee('omni-frame', false)
+            ->assertSee('Tu ne regardes plus', false)
+            ->assertDontSee('CCK');
+
+        $scene = \App\Models\GpNode::query()->where('slug', 'scene-neon')->firstOrFail();
+        $this->assertSame('mixer', \App\Support\Omni::beats($scene->media()->first(), $scene)[0]['kind']);
+        $arene = \App\Models\GpNode::query()->where('slug', 'arene-reims')->firstOrFail();
+        $this->assertSame('tactique', \App\Support\Omni::beats($arene->media()->first(), $arene)[0]['kind']);
+    }
+
+    public function test_atelier_concierge_filters_beyond_the_arc(): void
+    {
+        $this->get('/');
+        $ctx = $this->getJson('/n/atelier-clamp/ghost/context')->assertOk()->json('context');
+        $titles = collect($ctx['liens']['contient'] ?? [])->pluck('titre')->implode(' ');
+        $this->assertStringContainsString('Sakura', $titles);
+        $this->assertStringNotContainsString('Yue', $titles);
+        $this->assertLessThan(4, $ctx['rideau']['cursor']);
+
+        $spoiler = $this->postJson('/n/atelier-clamp/ghost', ['message' => 'Parle-moi de Yue']);
+        $spoiler->assertOk();
+        $this->assertMatchesRegularExpression('/n.existe pas encore|rideau/i', $spoiler->json('reply'));
+
+        $ok = $this->postJson('/n/atelier-clamp/ghost', ['message' => 'fiche Sakura']);
+        $ok->assertOk();
+        $this->assertStringNotContainsString('n’existe pas encore', $ok->json('reply'));
+    }
+
+    public function test_new_maison_rh_receives_vera_jobs(): void
+    {
+        $node = \App\Models\GpNode::query()->create([
+            'id' => 'maison-demo',
+            'slug' => 'maison-demo',
+            'kind' => 'company',
+            'title' => 'Maison Demo',
+            'subtitle' => '',
+            'summary' => '',
+            'body' => '',
+            'hero' => '/offer/releve-atelier.jpg',
+            'skin' => 'vera',
+            'template' => 'maison-rh',
+            'featured' => 0,
+        ]);
+        \App\Support\WorldTemplates::apply($node, 'maison-rh');
+        $n = \Illuminate\Support\Facades\DB::table('edges')->where('from_id', 'maison-demo')->where('kind', 'offers')->count();
+        $this->assertSame(35, $n);
+        $this->get('/n/maison-demo/offres')
+            ->assertOk()
+            ->assertSee('Offres', false);
+        $this->get('/n/vera')->assertOk();
+    }
+
+    public function test_checkout_charges_the_held_price(): void
+    {
+        $this->get('/');
+        $this->postJson('/n/coffre-celeste/ghost', ['message' => 'Je propose 1100'])->assertOk();
+        $this->post('/cart/checkout')->assertRedirect('/panier');
+        $this->assertDatabaseHas('ledger', [
+            'product_id' => 'p-cel-1',
+            'amount_cents' => 110000,
+            'kind' => 'sale',
+        ]);
+    }
+
+    public function test_geniuspedia_stays_inside_the_node(): void
+    {
+        $node = \App\Models\GpNode::query()->where('slug', 'atelier-clamp')->firstOrFail();
+        foreach (\App\Support\Geniuspedia::cards($node, 8) as $c) {
+            $this->assertTrue(str_starts_with($c['url'], '/'), $c['url']);
+            $this->assertContains($c['source'], ['pack', 'guide', 'magazine']);
+            $this->assertStringNotContainsString('Finale', $c['titre']);
+        }
+        $this->assertStringContainsString('jamais d\'un crawl', \App\Support\Ghost::systemPrompt($node));
+    }
 }

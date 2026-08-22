@@ -162,6 +162,7 @@ Route::get('/n/{slug}/p/{pid}', [UniverseController::class, 'product'])->name('p
 Route::get('/n/{slug}/v/{vid}', [UniverseController::class, 'video'])->name('video.show');
 Route::post('/n/{slug}/v/{vid}/unlock', [GrantController::class, 'unlock']);
 Route::post('/n/{slug}/v/{vid}/drop', [GrantController::class, 'drop']);
+Route::post('/n/{slug}/v/{vid}/omni', [GrantController::class, 'omni']);
 Route::post('/n/{slug}/visite', [GrantController::class, 'visit']);
 Route::get('/n/{slug}/carnet.json', [GrantController::class, 'export']);
 Route::get('/embed/{slug}', [EmbedController::class, 'show']);
@@ -183,6 +184,7 @@ Route::post('/n/{slug}/guilde', [ForumController::class, 'guild']);
 Route::get('/panier', [CartController::class, 'index']);
 Route::post('/cart', [CartController::class, 'add'])->name('cart.add');
 Route::post('/cart/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
+Route::get('/panier/retour', [CartController::class, 'retour']);
 Route::get('/sitemap.xml', function () {
     $nodes = \App\Models\GpNode::all();
     $xml = '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';

@@ -35,6 +35,12 @@ Le player, le Drive et l’éditeur d’images ne sont pas trois outils. Un chap
 
 Code : `Grantor.php`, `SignedMedia.php`, `MediaController`, `GrantController`. HLS plus tard (`Hls.php`).
 
+**Omni-média.** Un chapitre `3:15 Labo` (ou Mixer / Tactique) n’est pas un timecode mort : `Omni::beats` pause la VOD et le cadre devient l’éditeur / le mixer / le tableau. Tenir = grant `omni`. Sur un teaser court, 03:15 est remappé.
+
+**Rideau.** `Spoiler` filtre aussi le Ghost (`context.rideau.caches`). Geniuspedia ne sort pas du Node.
+
+**Paiement.** `Pay::cents` (prix tenu) → Stripe ou ledger. `Maison::attachCatalog` pose les 35 missions sur un `maison-rh` neuf. `/n/vera` inchangé.
+
 UI : `/n/{slug}/monde` (Structure / Design / Action / Motion).
 
 | Visible | Derrière |

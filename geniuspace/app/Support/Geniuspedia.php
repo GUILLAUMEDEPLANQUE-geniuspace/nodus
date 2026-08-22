@@ -11,7 +11,7 @@ use Illuminate\Support\Str;
 
 /**
  * Fiches du lieu pour le Ghost : wiki + magazine + table optionnelle geniuspedia_cards.
- * Pas un dump web : uniquement ce qui appartient au Node.
+ * Jamais un crawl web. Jamais Wikipedia. Uniquement ce qui appartient au Node.
  */
 class Geniuspedia
 {
@@ -24,7 +24,7 @@ class Geniuspedia
                 $out[] = [
                     'titre' => (string) $c->title,
                     'extrait' => Str::limit((string) ($c->summary ?: $c->body), 220),
-                    'url' => (string) ($c->url ?: '/n/'.$node->slug),
+                    'url' => self::localUrl((string) ($c->url ?: ''), $node),
                     'source' => 'pack',
                 ];
             }
@@ -53,6 +53,9 @@ class Geniuspedia
         $seen = [];
         $uniq = [];
         foreach ($out as $card) {
+            if (Spoiler::veiled($card['titre'].' '.$card['extrait'], $node)) {
+                continue;
+            }
             $k = mb_strtolower($card['titre']);
             if (isset($seen[$k])) {
                 continue;
@@ -65,5 +68,19 @@ class Geniuspedia
         }
 
         return $uniq;
+    }
+
+    /** Refuse une URL externe : le coffre ne sort pas du lieu. */
+    private static function localUrl(string $url, GpNode $node): string
+    {
+        $fallback = '/n/'.$node->slug;
+        if ($url === '') {
+            return $fallback;
+        }
+        if (str_starts_with($url, '/')) {
+            return $url;
+        }
+
+        return $fallback;
     }
 }

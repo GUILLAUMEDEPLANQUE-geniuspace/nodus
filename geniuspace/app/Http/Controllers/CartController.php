@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Models\User;
 use App\Support\Grantor;
 use App\Support\Order;
+use App\Support\Pay;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -33,8 +34,12 @@ class CartController extends Controller
         if ($node) {
             $chrome = \App\Support\Chrome::bag($node);
         }
+        $held = 0;
+        foreach ($cart as $row) {
+            $held += Pay::cents($row);
+        }
 
-        return view('cart', compact('cart', 'node', 'chrome'));
+        return view('cart', compact('cart', 'node', 'chrome', 'held'));
     }
 
     public function add(Request $request): RedirectResponse
@@ -47,11 +52,13 @@ class CartController extends Controller
             $line = $p->id.'|'.substr(md5(json_encode($cap['options'] + $cap['files'])), 0, 8);
         }
         $cart = $request->session()->get('cart', []);
+        $held = (int) round((float) $p->priceAmount() * 100) + $cap['extra_cents'];
         $cart[$line] = [
             'product_id' => $p->id,
             'title' => $p->title,
             'price' => Order::priceLabel($p, $cap['extra_cents']),
             'extra_cents' => $cap['extra_cents'],
+            'held_cents' => $held,
             'options' => $cap['options'],
             'files' => $cap['files'],
         ];
@@ -67,6 +74,34 @@ class CartController extends Controller
     public function checkout(Request $request): RedirectResponse
     {
         $cart = $request->session()->get('cart', []);
+        if (! $cart) {
+            return back()->with('ok', 'Panier vide.');
+        }
+        $stripe = Pay::stripeSession($cart, url('/panier/retour'), url('/panier'));
+        if ($stripe) {
+            $request->session()->put('pay_cart', $cart);
+            $request->session()->put('pay_sid', $stripe['id']);
+
+            return redirect()->away($stripe['url']);
+        }
+
+        return $this->settle($request, $cart);
+    }
+
+    public function retour(Request $request): RedirectResponse
+    {
+        $cart = $request->session()->get('pay_cart', $request->session()->get('cart', []));
+        $sid = (string) $request->query('session_id', $request->session()->get('pay_sid', ''));
+        if (Pay::secret() !== '' && $sid !== '' && ! Pay::stripePaid($sid)) {
+            return redirect('/panier')->with('ok', 'Paiement incomplet. Le prix tenu attend.');
+        }
+
+        return $this->settle($request, $cart);
+    }
+
+    /** @param  array<string, array<string, mixed>>  $cart */
+    private function settle(Request $request, array $cart): RedirectResponse
+    {
         $buyer = Auth::id();
         foreach ($cart as $row) {
             $pid = $row['product_id'] ?? null;
@@ -77,9 +112,11 @@ class CartController extends Controller
             if (! $p) {
                 continue;
             }
-            $extra = (int) ($row['extra_cents'] ?? 0);
-            $cents = (int) round((float) $p->priceAmount() * 100) + $extra;
+            $cents = Pay::cents($row, $p);
             $note = 'reste auteur';
+            if (! empty($row['options']['nego'])) {
+                $note .= ' · tenu '.$row['options']['nego'];
+            }
             if (! empty($row['options'])) {
                 $note .= ' · '.collect($row['options'])->map(fn ($v, $k) => $k.'='.$v)->implode(', ');
             }
@@ -105,6 +142,7 @@ class CartController extends Controller
                         'product_id' => $p->id,
                         'options' => $row['options'] ?? [],
                         'files' => $row['files'] ?? [],
+                        'held_cents' => $cents,
                     ], JSON_UNESCAPED_UNICODE),
                 ]);
             }
@@ -119,8 +157,8 @@ class CartController extends Controller
                 ]);
             }
         }
-        $request->session()->forget(['cart', 'koc', 'koc_product']);
+        $request->session()->forget(['cart', 'koc', 'koc_product', 'pay_cart', 'pay_sid']);
 
-        return back()->with('ok', 'Payé. Les fichiers mérités s’ouvrent. Stripe Connect en prod.');
+        return redirect('/panier')->with('ok', 'Payé au prix tenu. Les fichiers mérités s’ouvrent.');
     }
 }

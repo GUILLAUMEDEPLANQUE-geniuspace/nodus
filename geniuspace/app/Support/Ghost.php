@@ -58,12 +58,16 @@ class Ghost
             ."Tu ne cites que le contexte fourni. Si l'info n'y est pas : « Je n'ai pas cette preuve dans le coffre. » "
             ."Tu n'inventes ni prix, ni salaire, ni spoil, ni promesse d'embauche. "
             ."Tu ne débloques jamais un fichier toi-même : tu orientes vers l'action (achat, épreuve, unlock). "
+            ."Les fiches viennent du coffre du lieu, jamais d'un crawl web. "
             ."Réponds en français, court, utile. Aucun jargon technique (pas Node, CCK, edge, grant).";
 
         return $base.' '.match ($profile) {
             'marchand' => 'Profil marchand : tu aides sur les œuvres, certificats, options de commande et making-of. Négociation seulement dans les fourchettes indiquées.',
             'rh' => 'Profil RH : tu présentes les missions, délais, épreuves. Tu n\'embauchés pas : tu orientes vers l\'épreuve ou les offres.',
-            default => 'Profil guide : tu expliques le lieu, les salles, les fiches liées et le carnet de preuves.',
+            default => 'Profil guide : tu expliques le lieu, les salles, les fiches liées et le carnet de preuves.'
+                .(Flagships::canvas($node) === 'atelier'
+                    ? ' Rideau : tu ne parles jamais d’un perso ou d’un arc au-delà du curseur du visiteur. Si on te le demande : « Cette fiche n’existe pas encore pour toi. »'
+                    : ''),
         };
     }
 
@@ -90,14 +94,24 @@ class Ghost
         }
 
         $neighbors = Engine::neighbors($node);
-        $products = Product::query()->where('node_id', $node->id)->limit(12)->get()->map(function ($p) {
+        $hidden = Spoiler::hiddenTitles($node);
+        if ($hidden) {
+            $neighbors['contient'] = array_values(array_filter(
+                $neighbors['contient'] ?? [],
+                fn ($l) => ! in_array($l['titre'] ?? '', $hidden, true)
+            ));
+        }
+
+        $products = Product::query()->where('node_id', $node->id)->limit(12)->get()
+            ->filter(fn ($p) => Spoiler::ok((int) ($p->appear_order ?? 0), $node->id))
+            ->map(function ($p) use ($node) {
             $opts = Order::fields($p->id);
 
             return [
                 'id' => $p->id,
                 'titre' => $p->title,
                 'prix' => $p->price,
-                'url' => '/n/'.($p->node->slug ?? '').'/p/'.$p->id,
+                'url' => '/n/'.$node->slug.'/p/'.$p->id,
                 'options' => array_map(fn ($o) => [
                     'key' => $o->field_key ?: Str::slug($o->name),
                     'label' => $o->name,
@@ -162,6 +176,7 @@ class Ghost
             'preuves_visiteur' => Grantor::mine($node->id),
             'fiches' => Geniuspedia::cards($node, 6),
             'fourchette' => self::range($node, $products[0] ?? null),
+            'rideau' => Spoiler::curtain($node) + ['caches' => $hidden],
         ];
     }
 
@@ -249,6 +264,17 @@ class Ghost
         $citations = $toolResult['citations'] ?? [];
         $actions = $toolResult['actions'] ?? [];
         $data = $toolResult['data'] ?? null;
+
+        $hidden = $ctx['rideau']['caches'] ?? [];
+        foreach ($hidden as $title) {
+            if ($title !== '' && mb_stripos($message, $title) !== false) {
+                return [
+                    'reply' => 'Cette fiche n’existe pas encore pour toi. Avance le rideau, ensuite on en parle.',
+                    'citations' => [['label' => 'Rideau', 'url' => '/n/'.$node->slug]],
+                    'actions' => [['label' => 'Les fiches ouvertes', 'href' => '/n/'.$node->slug.'/personnages']],
+                ];
+            }
+        }
 
         if ($intent === 'hello') {
             $cta = $ctx['actions'][0]['label'] ?? 'Explorer';
@@ -544,6 +570,7 @@ class Ghost
             'title' => $p['titre'],
             'price' => $offer.' €',
             'extra_cents' => $delta,
+            'held_cents' => $offer * 100,
             'options' => ['nego' => $offer.' €'],
             'files' => [],
         ];

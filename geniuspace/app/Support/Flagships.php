@@ -227,7 +227,7 @@ class Flagships
             'pitch' => 'L’arc est un rideau. Le perso est un lieu. Le cel est une relique.',
             'innovation' => 'Anti-spoiler spatial : ce que tu n’as pas vu n’existe pas encore dans le lieu.',
             'secret' => 'TVSeries + curseur d’arc + fiches parent/enfant + merch cel en coffre. Jamais un dump wiki.',
-            'mechanic' => 'Scène : le personnage au centre, l’arc en rideau. Avancer le curseur révèle salles et fiches. Un passage relie un perso à un cel vendu ailleurs. Le concierge répond sans spoiler au-delà de ton arc.',
+            'mechanic' => 'Scène : le personnage au centre, l’arc en rideau. Avancer le curseur révèle salles et fiches. Un passage relie un perso à un cel vendu ailleurs. Le concierge ne cite que les fiches du curseur — le reste n’existe pas encore.',
             'moat' => 'Fandom est une guerre d’édition. Ici le lore est staké, l’arc est un droit, le cel a un certificat. Google lit TVSeries + Person + Product liés. Le fan voyage, il ne clique pas un lien bleu.',
             'ghost' => [
                 'name' => 'Le concierge',

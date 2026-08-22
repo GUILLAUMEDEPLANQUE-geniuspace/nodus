@@ -100,6 +100,23 @@ body:has(.vault){overflow-x:hidden}
   mask-size:cover;opacity:.7
 }
 
+.omni-frame{
+  position:absolute;inset:0;z-index:6;
+  background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(14px);
+  display:grid;place-content:center;gap:.5rem;padding:1.4rem;text-align:center;
+}
+.omni-mixer{display:flex;gap:1rem;justify-content:center;margin:.8rem 0}
+.omni-mixer label{display:grid;gap:.3rem;font-size:.75rem;letter-spacing:.04em}
+.omni-pitch{
+  width:min(16rem,86%);aspect-ratio:3/4;margin:.6rem auto;position:relative;
+  border:1px dashed color-mix(in srgb,var(--primary) 60%,transparent);
+  border-radius:.4rem;background:linear-gradient(#163, #141);
+}
+.omni-dot{
+  position:absolute;width:1.6rem;height:1.6rem;border-radius:50%;border:0;
+  background:var(--primary);color:#111;font-weight:700;font-size:.75rem;
+}
+
 @media (max-width:720px){
   .vault-frame{width:min(86vw,22rem)}
   .wormhole{display:none}

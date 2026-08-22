@@ -155,6 +155,9 @@ class UniverseController extends Controller
             return app(VeraController::class)->jobShow($fiche);
         }
         $node = GpNode::query()->where('slug', $fiche)->firstOrFail();
+        if ($node->kind === 'job' && \App\Support\VeraCatalog::job($node->slug)) {
+            return redirect('/n/vera/offres/'.$node->slug);
+        }
         abort_unless(Edge::query()->where('from_id', $club->id)->where('to_id', $node->id)->exists(), 404);
         abort_unless(Spoiler::ok((int) ($node->appear_order ?? 0), $club->id), 403, 'Spoiler. Recule le curseur d’arc.');
         $cck = \Illuminate\Support\Facades\DB::table('cck_fields')->where('node_id', $node->id)->get();
@@ -186,8 +189,10 @@ class UniverseController extends Controller
         $chrome = \App\Support\Chrome::bag($node);
         $doors = \App\Support\Grantor::doors($media);
         $chapters = \App\Support\Chapters::parse($media->chapters);
+        $omni = \App\Support\Omni::beats($media, $node);
+        $canvas = \App\Support\Flagships::canvas($node);
 
-        return view('video', compact('node', 'media', 'src', 'related', 'children', 'files', 'chrome', 'granted', 'doors', 'chapters'));
+        return view('video', compact('node', 'media', 'src', 'related', 'children', 'files', 'chrome', 'granted', 'doors', 'chapters', 'omni', 'canvas'));
     }
 
     public function guide(string $slug, string $wid): View

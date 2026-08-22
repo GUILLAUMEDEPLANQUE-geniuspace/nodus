@@ -34,6 +34,8 @@
   $poster = $theme->poster ?: $node->hero;
   $unlockUrl = '/n/'.$node->slug.'/v/'.$media->id.'/unlock';
   $dropUrl = '/n/'.$node->slug.'/v/'.$media->id.'/drop';
+  $omniUrl = '/n/'.$node->slug.'/v/'.$media->id.'/omni';
+  $omni = $omni ?? [];
 @endphp
 <div class="cockpit" x-data="playerMaison()" x-init="boot()">
   <div>
@@ -70,6 +72,7 @@
         <a class="chip" x-show="activeDoor && activeDoor.kind==='door' && activeDoor.href" :href="activeDoor && activeDoor.href">Ouvrir le lieu</a>
         <button class="chip" type="button" x-show="activeDoor && activeDoor.kind==='drop'" @click="drop()">Prendre</button>
       </div>
+      @include('partials.omni-frame')
     </div>
     <p class="wrap" style="padding:.5rem 1rem 0" x-show="preuve" x-cloak>
       <span class="chip" x-text="preuve && preuve.quoi"></span>
@@ -170,8 +173,23 @@ function playerMaison(){
     preuve: null,
     unlockUrl: @json($unlockUrl),
     dropUrl: @json($dropUrl),
+    omniUrl: @json($omniUrl ?? ''),
+    omni: @json($omni ?? []),
+    omniNow: null,
+    omniNote: '',
     csrf: document.querySelector('meta[name="csrf-token"]')?.content || '',
-    boot(){},
+    boot(){
+      const v = document.getElementById('v');
+      if (!v) return;
+      v.addEventListener('loadedmetadata', () => {
+        const dur = v.duration || 0;
+        if (!dur) return;
+        this.omni = this.omni.map(b => ({
+          ...b,
+          at: (b.at > dur - 0.4) ? Math.max(1.2, dur * 0.45) : b.at
+        }));
+      });
+    },
     onTime(e){
       this.t = e.target.currentTime;
       if(!this.granted && this.teaser && this.t >= this.teaser){ e.target.pause(); }
@@ -180,6 +198,34 @@ function playerMaison(){
         if (this.t >= d.at && this.t <= d.at + 4) { hit = d; break; }
       }
       this.activeDoor = hit;
+      if (!this.omniNow) {
+        const beat = this.omni.find(b => this.t >= b.at && this.t <= b.at + 1.8);
+        if (beat) {
+          e.target.pause();
+          this.omniNow = beat;
+        }
+      }
+    },
+    resume(){
+      const beat = this.omniNow;
+      this.omniNow = null;
+      const v = document.getElementById('v');
+      if (v) {
+        if (beat) v.currentTime = Math.min(v.duration || beat.at + 2, beat.at + 2);
+        v.play();
+      }
+    },
+    async hold(extra){
+      const beat = this.omniNow;
+      if (!beat) return;
+      const r = await fetch(this.omniUrl, {
+        method: 'POST',
+        headers: { 'X-CSRF-TOKEN': this.csrf, 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+        credentials: 'same-origin',
+        body: JSON.stringify({ kind: beat.kind, label: extra || beat.label, at: Math.round(this.t), note: this.omniNote })
+      });
+      const d = await r.json();
+      this.preuve = { quoi: d.quoi || 'Cadre tenu' };
     },
     async unlock(){
       const r = await fetch(this.unlockUrl, {

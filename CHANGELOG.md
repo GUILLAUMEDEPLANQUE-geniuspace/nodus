@@ -2,6 +2,14 @@
 
 Format : ce qui est **dans le code**, pas la vision PDF.
 
+## 2026-08-22 — Omni, rideau, maison, Stripe tenu
+
+- **Omni-média.** Labo / Scène / Arène : à 03:15 (0:03 sur teaser) le player **bascule le cadre** (éditeur, mixer stems, tableau tactique). Tenir l’exo = preuve `omni`. `Omni.php` + overlay `omni-frame`.
+- **Rideau Atelier.** Le concierge filtre fiches / Geniuspedia au-delà du curseur. Yue (Finale) n’existe pas à Cour 1. Défaut curseur = 1 sur l’Atelier.
+- **Maison neuve.** Vera reste `/n/vera`. Un `maison-rh` reçoit les 35 missions (`Maison::attachCatalog`).
+- **Paiement au prix tenu.** `held_cents` → Stripe Checkout si `STRIPE_SECRET`, sinon ledger au même montant. Plus un panier cosmétique.
+- **Geniuspedia.** Coffres du Node seulement. URL externe → URL du lieu. Pas de crawl.
+
 ## 2026-08-22 — Flagships jouables + Ghost clos
 
 - **8 flagships habillés** (Terrain → Plateau) : champs, objet, guide, média, HUD `flagships/play`. Plus seulement Coffre / Table / Vera.

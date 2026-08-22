@@ -81,6 +81,9 @@ class WorldTemplates
             FieldTemplates::apply($node->id, $pack);
         }
         Chrome::applyPreset($node, Chrome::presetFromTemplate($id));
+        if (in_array($id, ['maison-rh', 'vera-tech'], true)) {
+            Maison::attachCatalog($node);
+        }
     }
 
     /** @return list<array<string,mixed>> */
