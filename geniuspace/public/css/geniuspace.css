@@ -108,3 +108,38 @@ input, textarea, select {
 textarea { height: auto; border-radius: 1rem; padding: 0.75rem 1rem; }
 .steps { display: grid; gap: 0.5rem; }
 .step { background: var(--surface); border-radius: 1rem; padding: 0.75rem 1rem; }
+
+/* Holo-Forum */
+.snap { height: calc(100dvh - 3.5rem); overflow-y: auto; scroll-snap-type: y mandatory; }
+.snap-card { position: relative; min-height: calc(100dvh - 3.5rem); scroll-snap-align: start; display: flex; align-items: flex-end; padding: 2rem 1.25rem 6rem; }
+.snap-card > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.snap-card .veil { position: absolute; inset: 0; background: linear-gradient(to top, var(--bg), transparent 55%); }
+.side-btns { position: relative; display: flex; flex-direction: column; gap: 0.6rem; }
+.orb { width: 3.5rem; height: 3.5rem; border-radius: 999px; border: 1px solid var(--border); background: color-mix(in srgb, var(--bg) 55%, transparent); display: grid; place-items: center; font-size: 0.7rem; color: var(--fg); }
+.orb.pri { background: var(--primary); color: var(--primary-fg); border: 0; }
+.dive { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; height: 72%; background: color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter: blur(12px); border-top: 1px solid var(--border); display: flex; flex-direction: column; }
+@media (min-width: 900px) {
+  .forum-split { display: grid; grid-template-columns: 40% 60%; height: calc(100dvh - 3.5rem); }
+  .forum-split .snap { height: 100%; }
+  .dive { position: static; height: 100%; }
+}
+.legacy-card { background: var(--surface); border-radius: 1.25rem; padding: 1rem; margin-bottom: 0.75rem; }
+.live-row { display: flex; gap: 0.5rem; margin-bottom: 0.6rem; }
+.av { width: 2rem; height: 2rem; border-radius: 999px; background: var(--surface-2); display: grid; place-items: center; font-size: 0.65rem; color: var(--primary); flex-shrink: 0; }
+.bubble { background: var(--surface); border-radius: 1rem 1rem 1rem 0.2rem; padding: 0.5rem 0.8rem; font-size: 0.9rem; }
+
+/* Dock + bulles */
+.dock { max-width: 96vw; overflow-x: auto; }
+.rise { position: absolute; bottom: 4.2rem; left: 50%; transform: translateX(-50%); color: var(--primary); font-size: 0.8rem; animation: rise 3s ease-out forwards; }
+@keyframes rise { from { opacity: 1; transform: translate(-50%, 0); } to { opacity: 0; transform: translate(-50%, -80px); } }
+
+/* Player */
+.cockpit { display: grid; }
+@media (min-width: 960px) { .cockpit { grid-template-columns: 1fr 280px; min-height: calc(100dvh - 3.5rem); } }
+.rail { border-left: 1px solid var(--border); padding: 1rem; }
+.stars { color: var(--primary); letter-spacing: 0.1em; }
+
+/* Salon / arbre Vera */
+.salon { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; min-height: 16rem; }
+.salon .cell { background: var(--surface); border-radius: 1rem; display: grid; place-items: center; min-height: 5rem; border: 1px dashed var(--border); }
+.tree { width: 100%; max-width: 28rem; }

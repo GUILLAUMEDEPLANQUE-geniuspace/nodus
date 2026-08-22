@@ -15,6 +15,10 @@ Route::get('/n/{slug}/v/{vid}', [UniverseController::class, 'video'])->name('vid
 Route::get('/play', [MediaController::class, 'play'])->name('media.play');
 Route::get('/drive', [DriveController::class, 'index'])->name('drive');
 Route::post('/drive', [DriveController::class, 'store'])->name('drive.store');
+Route::post('/forum', [\App\Http\Controllers\ForumController::class, 'thread']);
+Route::post('/n/{slug}/t/{tid}/reply', [\App\Http\Controllers\ForumController::class, 'reply']);
+Route::post('/n/{slug}/t/{tid}/live', [\App\Http\Controllers\ForumController::class, 'live']);
+Route::post('/n/{slug}/guilde', [\App\Http\Controllers\ForumController::class, 'guild']);
 Route::post('/cart', [CartController::class, 'add'])->name('cart.add');
 Route::post('/cart/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
 Route::get('/sitemap.xml', function () {
