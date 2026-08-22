@@ -29,6 +29,24 @@ class Acl
         return ($rank[$have] ?? 0) >= ($rank[$min] ?? 99);
     }
 
+    public static function canWrite(string $nodeId, string $min = 'mod'): bool
+    {
+        if (! Auth::check()) {
+            return false;
+        }
+        $has = DB::table('node_staff')->where('node_id', $nodeId)->exists();
+        if (! $has) {
+            DB::table('node_staff')->insert(['node_id' => $nodeId, 'user_id' => Auth::id(), 'role' => 'owner']);
+            return true;
+        }
+        return self::atLeast($nodeId, $min);
+    }
+
+    public static function guard(string $nodeId, string $min = 'mod'): void
+    {
+        abort_unless(self::canWrite($nodeId, $min), 403, 'Connectez-vous (Créateur) pour sculpter.');
+    }
+
     public static function nodeOfSlug(string $slug): GpNode
     {
         return GpNode::query()->where('slug', $slug)->firstOrFail();

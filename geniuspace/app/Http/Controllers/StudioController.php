@@ -98,6 +98,14 @@ class StudioController extends Controller
         return back()->with('ok', 'Étape ATS ajoutée.');
     }
 
+    public function seoCompile(string $slug): RedirectResponse
+    {
+        $node = Acl::nodeOfSlug($slug);
+        Acl::guard($node->id, 'admin');
+        \App\Llm\SeoCompiler::compile($node);
+        return back()->with('ok', 'SEO compilé (title, keywords enfants, JSON-LD, maillage).');
+    }
+
     public function weave(string $slug): RedirectResponse
     {
         $node = Acl::nodeOfSlug($slug);

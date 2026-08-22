@@ -36,14 +36,15 @@
 </header>
 <div id="ideas" class="hud rel" style="top:3.4rem;left:50%;transform:translateX(-50%);z-index:16;max-width:90vw"></div>
 <aside class="palette" id="palette" style="{{ $fresh ? 'opacity:0' : '' }}">
-  <p class="kicker">CCK · coller sur le nœud visé</p>
+  <p class="kicker">CCK · 8 essentiels</p>
+  <button type="button" id="adv" class="chip">Mode avancé</button>
   @php $g=''; @endphp
   @foreach($catalog as $key => $meta)
     @if($g !== $meta['g'])
       @php $g = $meta['g']; @endphp
-      <p class="primary" style="margin:.5rem 0 .15rem;font-size:.7rem">{{ $g }}</p>
+      <p class="primary cck-g {{ !empty($meta['pro']) ? 'pro' : '' }}" style="margin:.5rem 0 .15rem;font-size:.7rem;{{ !empty($meta['pro']) ? 'display:none' : '' }}">{{ $g }}</p>
     @endif
-    <button type="button" data-cck="{{ $key }}">{{ $meta['label'] }}</button>
+    <button type="button" data-cck="{{ $key }}" class="{{ !empty($meta['pro']) ? 'pro' : '' }}" style="{{ !empty($meta['pro']) ? 'display:none' : '' }}">{{ $meta['label'] }}</button>
   @endforeach
 </aside>
 @if($fresh)
@@ -70,7 +71,7 @@
   <button type="button" data-add="job">Offre</button>
   <button type="button" data-add="crypto">Actif</button>
   <button type="button" id="link-mode">Lier</button>
-  <button type="button" id="recompile">Proposer (LLM)</button>
+  <button type="button" id="seo-go">Compiler SEO</button>
   <label class="muted" style="font-size:.75rem;padding:.4rem">Importer <input id="imp" type="file" accept="image/*,video/*,audio/*" style="width:8rem"></label>
 </nav>
 <aside class="slide" id="panel">

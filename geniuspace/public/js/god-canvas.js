@@ -229,6 +229,21 @@
   if (gp) gp.onclick = propose;
   const rc = document.getElementById("recompile");
   if (rc) rc.onclick = propose;
+  const adv = document.getElementById("adv");
+  if (adv)
+    adv.onclick = function () {
+      document.querySelectorAll(".pro").forEach(function (el) {
+        el.style.display = el.style.display === "none" ? "" : "none";
+      });
+      this.textContent = this.textContent.indexOf("simple") >= 0 ? "Mode avancé" : "Mode simple";
+    };
+  const seoBtn = document.getElementById("seo-go");
+  if (seoBtn)
+    seoBtn.onclick = function () {
+      api("/builder/" + slug + "/seo").then(function (r) {
+        alert("SEO : " + (r.title || JSON.stringify(r)));
+      });
+    };
 
   function sendFile(file) {
     const fd = new FormData();

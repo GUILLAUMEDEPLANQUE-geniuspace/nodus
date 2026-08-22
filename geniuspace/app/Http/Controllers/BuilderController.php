@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Llm\CckCatalog;
+use App\Llm\SeoCompiler;
 use App\Llm\Toolbelt;
 use App\Llm\WorldCompiler;
 use App\Models\Edge;
 use App\Models\GpNode;
+use App\Support\Acl;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -58,6 +60,8 @@ class BuilderController extends Controller
 
     public function bang(Request $request, string $slug): JsonResponse
     {
+        $uni = GpNode::query()->where('slug', $slug)->firstOrFail();
+        Acl::guard($uni->id);
         $prompt = $request->input('prompt', '');
         $compiled = WorldCompiler::run($slug, $prompt);
         $state = $this->state($slug)->getData(true);
@@ -78,6 +82,7 @@ class BuilderController extends Controller
 
     public function add(Request $request, string $slug): JsonResponse
     {
+        Acl::guard(GpNode::query()->where('slug', $slug)->value('id'));
         $type = $request->validate(['type' => 'required|string'])['type'];
         $title = $request->input('title');
         Toolbelt::spawn(['slug' => $slug, 'type' => $type, 'title' => $title]);
@@ -86,6 +91,7 @@ class BuilderController extends Controller
 
     public function link(Request $request, string $slug): JsonResponse
     {
+        Acl::guard(GpNode::query()->where('slug', $slug)->value('id'));
         $data = $request->validate(['from' => 'required|string', 'to' => 'required|string']);
         Toolbelt::link($data['from'], $data['to']);
         return $this->state($slug);
@@ -102,6 +108,7 @@ class BuilderController extends Controller
             'field_value' => 'nullable|string',
         ]);
         $n = GpNode::query()->findOrFail($data['id']);
+        Acl::guard($n->id);
         if (! empty($data['title'])) {
             $n->title = $data['title'];
         }
@@ -129,12 +136,25 @@ class BuilderController extends Controller
     {
         $request->validate(['file' => 'required|file|max:512000', 'node_id' => 'nullable|string']);
         $uni = GpNode::query()->where('slug', $slug)->firstOrFail();
+        Acl::guard($uni->id);
         $target = $request->string('node_id')->toString();
         $node = $target ? GpNode::query()->find($target) : $uni;
         $res = Toolbelt::storeUpload($node ?? $uni, $request->file('file'));
         $state = $this->state($slug)->getData(true);
         $state['upload'] = $res;
         return response()->json($state);
+    }
+
+    public function proposeCck(Request $request, string $slug): JsonResponse
+    {
+        return response()->json(['fields' => CckCatalog::proposeFrom($request->input('prompt', ''))]);
+    }
+
+    public function compileSeo(string $slug): JsonResponse
+    {
+        $uni = GpNode::query()->where('slug', $slug)->firstOrFail();
+        Acl::guard($uni->id);
+        return response()->json(SeoCompiler::compile($uni));
     }
 
     public function tools(): JsonResponse

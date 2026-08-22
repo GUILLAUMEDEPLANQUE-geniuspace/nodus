@@ -26,18 +26,27 @@
     <button class="btn" type="submit">Ajouter</button>
   </form>
 
-  <h2 class="font-display">CCK (catalogue complet)</h2>
+  <form method="post" action="/n/{{ $node->slug }}/studio/seo-compile" style="margin:.5rem 0">@csrf<button class="btn" type="submit">Compiler le SEO</button></form>
+  <h2 class="font-display">CCK (8 essentiels — avancé pour les pro)</h2>
   @foreach($cck as $f)
     <p class="card" style="padding:0.7rem;margin:0.3rem 0">{{ $f->name }} · {{ $f->type }} = {{ $f->value }}</p>
   @endforeach
   <form method="post" action="/n/{{ $node->slug }}/studio/cck">
     @csrf
     <input name="name" placeholder="Nom" required>
-    <select name="type">
-      @foreach(\App\Llm\CckCatalog::all() as $k=>$m)
-        <option value="{{ $k }}">{{ $m['g'] }} · {{ $m['label'] }}</option>
-      @endforeach
+    <select name="type" id="cck-type">
+      <optgroup label="Essentiel">
+        @foreach(\App\Llm\CckCatalog::simple() as $k=>$m)
+          <option value="{{ $k }}">{{ $m['label'] }}</option>
+        @endforeach
+      </optgroup>
+      <optgroup label="Avancé (pro)" id="cck-pro" disabled>
+        @foreach(\App\Llm\CckCatalog::all() as $k=>$m)
+          @if(!empty($m['pro']))<option value="{{ $k }}">{{ $m['label'] }}</option>@endif
+        @endforeach
+      </optgroup>
     </select>
+    <label class="muted"><input type="checkbox" onchange="document.getElementById('cck-pro').disabled=!this.checked"> Mode avancé</label>
     <input name="value" placeholder="Valeur">
     <button class="btn" type="submit">Champ</button>
   </form>
