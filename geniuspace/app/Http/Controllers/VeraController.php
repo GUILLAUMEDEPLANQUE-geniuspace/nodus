@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\GpNode;
+use App\Support\Engine;
 use App\Support\VeraCatalog;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -23,7 +24,11 @@ class VeraController extends Controller
             'lexique' => view('vera.lexique', ['node' => $node, 'tab' => 'lexique']),
             'viviers' => view('vera.viviers', ['node' => $node, 'tab' => 'viviers']),
             'europe' => view('vera.europe', ['node' => $node, 'tab' => 'europe']),
-            'guilde', 'passport', 'carnet' => view('vera.passport', ['node' => $node, 'tab' => 'passport']),
+            'guilde', 'passport', 'carnet' => view('vera.passport', [
+                'node' => $node,
+                'tab' => 'passport',
+                'carnet' => Engine::passport('carnet-karim'),
+            ]),
             'journal', 'blog' => app(MagazineController::class)->index($request, $node->slug),
             'reliques', 'drive' => view('vera.drive', ['node' => $node, 'tab' => 'reliques']),
             'pacte', 'delais' => view('vera.pacte', ['node' => $node, 'tab' => 'pacte']),
@@ -38,7 +43,14 @@ class VeraController extends Controller
     {
         $job = VeraCatalog::job($slug);
         abort_unless($job, 404);
-        return view('vera.job', ['job' => $job, 'tab' => 'offres', 'node' => GpNode::query()->where('slug', 'vera')->first()]);
+        $node = GpNode::query()->where('slug', 'vera')->first();
+        $jobNode = GpNode::query()->where('slug', $slug)->first();
+        $trail = $jobNode ? Engine::trail($jobNode) : [];
+        $also = $jobNode ? Engine::alsoInWorld($jobNode, 3) : [];
+        $align = $jobNode ? Engine::align('carnet-karim', $jobNode->id) : null;
+        $heritage = $jobNode ? Engine::inherit($jobNode) : [];
+        $details = $jobNode ? Engine::fields($jobNode->id) : [];
+        return view('vera.job', compact('job', 'node', 'jobNode', 'trail', 'also', 'align', 'heritage', 'details') + ['tab' => 'offres']);
     }
 
     public function vivier(string $slug): View

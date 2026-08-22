@@ -42,8 +42,10 @@ Document root en prod (o2switch) : `geniuspace/public/`.
 | Profils oubliés | Seniors à la journée, RSA, multi-activité… |
 | Candidat qualifié | Quelqu’un qui a réussi le test. L’entreprise ne paie que ça. |
 | Champs personnalisés | Briques (texte, image, lieu, prix) posées sur une fiche |
+| Maison / Offre / Fiche | Un lieu dans l’univers. On ne dit pas « Node » |
+| Fait partie de | Le lien parent → enfant. On ne dit pas « edge » |
 
-Les noms historiques (PPQC, Pacte, Passport, CCK) restent dans le [lexique](geniuspace/resources/views/vera/lexique.blade.php) pour ceux qui les connaissent. L’interface parle français d’abord.
+Les noms historiques (PPQC, Pacte, Passport, CCK) restent dans le [lexique](geniuspace/resources/views/vera/lexique.blade.php) pour ceux qui les connaissent. L’interface parle français d’abord. Le graphe et les champs sont le moteur : on vend le classement, le carnet, l’alignement — jamais « notre graphe de connaissances ».
 
 ## Tests
 

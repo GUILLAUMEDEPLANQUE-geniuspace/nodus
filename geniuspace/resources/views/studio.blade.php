@@ -30,11 +30,11 @@
   <p><a class="btn" href="/n/{{ $node->slug }}/radar">Radar SEO</a>
      <a class="btn-line" href="/n/{{ $node->slug }}/digest">Digest</a>
      <a class="btn-line" href="/n/{{ $node->slug }}/sitemap.xml">Sitemap club</a>
-     <a class="btn-line" href="/g/{{ $node->slug }}">Graphe public</a>
+     <a class="btn-line" href="/g/{{ $node->slug }}">Connexions</a>
      <a class="btn-line" href="/n/{{ $node->slug }}/bounties">Bounties SEO</a>
      <a class="btn-line" href="/n/{{ $node->slug }}/import">Import FB/Discord</a>
      <a class="btn-line" href="/n/{{ $node->slug }}/dns">DNS 1 clic</a>
-     <a class="btn-line" href="/api/v1/g/{{ $node->slug }}">API graphe v1</a></p>
+     <a class="btn-line" href="/v1/nodes/{{ $node->slug }}/fields">API de la fiche</a></p>
   <form method="post" action="/n/{{ $node->slug }}/ping" style="margin:.4rem 0">@csrf<button class="btn-line" type="submit">Ping sitemap Google</button></form>
   <p class="kicker">Split paiement (objet hybride, plusieurs créateurs)</p>
   @foreach($products ?? [] as $p)
@@ -61,6 +61,17 @@
     <button class="btn" type="submit">Enregistrer</button>
   </form>
   @include('partials.cck-builder')
+  @if(isset($orphans) && $orphans->count())
+    <aside class="card" style="padding:1rem;max-width:36rem;margin:1rem 0">
+      <p class="kicker">Qualité des fiches</p>
+      <p>{{ $orphans->count() }} fiche(s) sans rattachement — une fiche orpheline n’est pas un état normal.</p>
+      <div class="rel" style="margin-top:.4rem">
+        @foreach($orphans->take(8) as $o)
+          <a class="chip" href="/n/{{ $o->slug }}">{{ $o->title }}</a>
+        @endforeach
+      </div>
+    </aside>
+  @endif
   <p><a class="btn-line" href="/atelier/{{ $node->slug }}">Atelier simple</a> <a class="btn-ghost" href="/builder/{{ $node->slug }}">3D pro</a></p>
 
   <h2 class="font-display">Étapes de recrutement</h2>

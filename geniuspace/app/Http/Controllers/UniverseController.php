@@ -144,7 +144,10 @@ class UniverseController extends Controller
         $childIds = Edge::query()->where('from_id', $node->id)->pluck('to_id');
         $children = GpNode::query()->whereIn('id', $childIds)->get();
         $sibs = GpNode::query()->whereIn('id', Edge::query()->where('from_id', $club->id)->pluck('to_id'))->get();
-        return view('fiche', compact('club', 'node', 'cck', 'parents', 'children', 'sibs'));
+        $trail = \App\Support\Engine::trail($node);
+        $also = \App\Support\Engine::alsoInWorld($node, 3);
+        $heritage = \App\Support\Engine::inherit($node);
+        return view('fiche', compact('club', 'node', 'cck', 'parents', 'children', 'sibs', 'trail', 'also', 'heritage'));
     }
 
     public function video(string $slug, string $vid): View

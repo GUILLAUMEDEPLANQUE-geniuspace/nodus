@@ -96,9 +96,11 @@ class VeraProductTest extends TestCase
             ->assertOk()
             ->assertSee('Champs de la fiche', false)
             ->assertSee('Aperçu de la fiche', false)
+            ->assertSee('Modèles de fiche', false)
             ->assertSee('Texte', false)
             ->assertSee('Lieu', false)
-            ->assertDontSee('LivingWorld');
+            ->assertDontSee('LivingWorld')
+            ->assertDontSee('CCK');
     }
 
     public function test_nav_labels_on_vera_home(): void

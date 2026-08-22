@@ -1,9 +1,13 @@
-{{-- Rendu public SEO d’un champ CCK. Le type dicte schema.org. --}}
+{{-- Un enregistrement, plusieurs surfaces. $surface = badge|fiche|compare --}}
 @php
   $drip = !empty($f->drip_at) && strtotime($f->drip_at) > time();
+  $surface = $surface ?? 'fiche';
+  $shown = \App\Support\Engine::surface($f, $surface);
 @endphp
 @if($drip)
-  <p class="muted">Contenu drip — visible {{ $f->drip_at }}</p>
+  <p class="muted">Contenu programmé — visible {{ $f->drip_at }}</p>
+@elseif($surface === 'badge')
+  <span class="badge">{{ $shown }}</span>
 @else
 <article class="cck-f" data-type="{{ $f->type }}">
   <h3 class="font-display" style="font-size:1.2rem;margin:0.4rem 0">{{ $f->name }}</h3>
@@ -32,19 +36,21 @@
     @case('geo')
       @if($f->lat)
         <iframe title="Carte {{ $f->name }}" src="https://www.openstreetmap.org/export/embed.html?bbox={{ $f->lng-0.02 }}%2C{{ $f->lat-0.02 }}%2C{{ $f->lng+0.02 }}%2C{{ $f->lat+0.02 }}&layer=mapnik" style="width:100%;height:12rem;border:0;border-radius:1rem"></iframe>
+      @else
+        <p>{{ $shown }}</p>
       @endif
       @break
     @case('pay_download')
-      <p class="primary">Pay to download · {{ $f->value }}</p>
+      <p class="primary">Payant à télécharger · {{ $f->value }}</p>
       @break
     @case('og')
-      <p class="muted">OG · {{ $f->value }}</p>
+      <p class="muted">{{ $f->value }}</p>
       @break
     @case('password')
       <p class="muted">Champ privé</p>
       @break
     @default
-      <p>{{ $f->value }}</p>
+      <p>{{ $shown }}</p>
   @endswitch
 </article>
 @endif

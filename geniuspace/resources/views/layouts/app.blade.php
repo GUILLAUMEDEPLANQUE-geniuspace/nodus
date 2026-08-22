@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title', 'Geniuspace')</title>
-    <meta name="description" content="@yield('description', 'Univers interconnectés — graphe, boutique RWA, recrutement expérientiel.')">
+    <meta name="description" content="@yield('description', 'Univers interconnectés — offres lisibles, galeries, fiches liées.')">
     <meta name="robots" content="@yield('robots', 'index,follow,max-image-preview:large')">
     @isset($node)
       @php $gsc = \Illuminate\Support\Facades\DB::table('node_seo')->where('node_id', $node->id)->value('gsc'); @endphp

@@ -65,7 +65,7 @@ class GpNode extends Model
         return match ($this->kind) {
             'auto' => "{$this->title} — garage, fiches, pièces | Geniuspace",
             'company' => "{$this->title} — maison, salon, épreuves | Geniuspace",
-            'product' => "{$this->title} — boutique du Node | Geniuspace",
+            'product' => "{$this->title} — boutique | Geniuspace",
             default => "{$this->title} — {$this->kind} | Geniuspace",
         };
     }

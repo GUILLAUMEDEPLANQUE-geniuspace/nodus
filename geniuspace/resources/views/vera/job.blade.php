@@ -16,7 +16,16 @@
 @endpush
 @section('content')
 <div class="vera-wrap" style="padding:2rem 0 4rem" x-data="veraJob(@js($p['sim'] ?? null), @js($p['gates'] ?? []))">
-  <nav class="crumb"><a href="/n/vera">Vera</a> · <a href="/n/vera/offres">Offres</a> · {{ $j['title'] }}</nav>
+  <nav class="crumb">
+    @if(!empty($trail))
+      @foreach($trail as $c)
+        @if($c['href'])<a href="{{ $c['href'] }}">{{ $c['title'] }}</a>@else{{ $c['title'] }}@endif
+        @if(!$loop->last) · @endif
+      @endforeach
+    @else
+      <a href="/n/vera">Vera</a> · <a href="/n/vera/offres">Offres</a> · {{ $j['title'] }}
+    @endif
+  </nav>
   <div style="display:grid;gap:2rem;margin-top:1.4rem" class="job-layout">
     <article>
       <div class="job-head">
@@ -28,15 +37,22 @@
         </div>
       </div>
       <div class="chips" style="margin:1rem 0">
-        <span class="salary">{{ $j['salaryLabel'] }}</span>
+        <span class="salary">{{ isset($details['salaire']) ? \App\Support\Engine::surface($details['salaire'], 'badge') : $j['salaryLabel'] }}</span>
         @if($pos)<span class="badge {{ $pos['band']==='below'?'bad':($pos['band']==='above'?'good':'') }}">{{ $pos['label'] }}</span>@endif
-        <span class="badge {{ $j['honorTone'] }}">{{ $j['honorCaption'] }} · {{ $co['slaDays'] }} j</span>
+        @if(($pos['band'] ?? '') === 'below')<span class="badge bad">Cette offre est sous le marché</span>@endif
+        <span class="badge {{ $j['honorTone'] }}">{{ $j['honorCaption'] }} · {{ $heritage['delayDays'] ?? $co['slaDays'] }} j</span>
         <span class="badge">Ghost {{ $j['ghostRisk'] }}</span>
         @if(!empty($j['full']))<span class="badge primary">Offre lue · épreuve</span>@endif
         <span class="badge primary">{{ $j['scarcity']['label'] }} {{ $j['scarcity']['score'] }}</span>
+        @if(!empty($align))
+          <span class="badge {{ $align['level']==='fort'?'good':($align['level']==='faible'?'bad':'') }}">{{ $align['word'] }}</span>
+        @endif
         @if(!empty($j['pass']))<span class="badge bad">Verdict : Passez</span>
         @else<span class="badge good">Verdict : Allez</span>@endif
       </div>
+      @if(!empty($align))
+        <p style="font-size:.9rem;color:var(--muted);max-width:40rem">{{ $align['plain'] }}</p>
+      @endif
 
       <p style="font-size:1.05rem;max-width:42rem">{{ $j['description'] }}</p>
 
@@ -85,7 +101,7 @@
       @if(!empty($p['career']))
       <section style="margin-top:2rem">
         <p class="vera-kicker">Carrière</p>
-        <h2>Trois nœuds, pas un titre</h2>
+        <h2>Trois étapes, pas un titre</h2>
         <div class="career">
           @foreach($p['career'] as $c)
             <article class="{{ !empty($c['current']) ? 'cur' : '' }}">
@@ -225,6 +241,22 @@
       @endif
       @endif
 
+      @if(!empty($also))
+      <section style="margin-top:2rem">
+        <p class="vera-kicker">Aussi dans cet univers</p>
+        <h2>Les profils qui ont réussi un test proche ont aussi regardé</h2>
+        <div class="vera-grid g2" style="margin-top:.8rem">
+          @foreach($also as $a)
+            <a class="v-card" href="{{ $a['href'] }}" style="display:block">
+              <p class="vera-kicker">{{ $a['nature'] }}</p>
+              <h3 style="margin:.2rem 0 0">{{ $a['title'] }}</h3>
+              <p style="font-size:.85rem;color:var(--muted);margin:.3rem 0 0">{{ $a['plain'] }}</p>
+            </a>
+          @endforeach
+        </div>
+      </section>
+      @endif
+
       <section style="margin-top:2rem">
         <p class="vera-kicker">Le poste</p>
         <h2>Responsabilités</h2>
@@ -237,10 +269,10 @@
 
     <aside class="side apply-box">
       <p class="vera-kicker">Candidater</p>
-      <p class="salary">{{ $j['salaryLabel'] }}</p>
+      <p class="salary">{{ isset($details['salaire']) ? \App\Support\Engine::surface($details['salaire'], 'badge') : $j['salaryLabel'] }}</p>
       <p style="font-size:.85rem;color:var(--muted)">Facture entreprise si le test est réussi : {{ $j['ppqc']['euros'] }} €</p>
       <p style="font-size:.8rem;color:var(--muted)">{{ $j['ppqc']['why'] }}</p>
-      <p style="font-size:.8rem;margin-top:.6rem">Réponse sous {{ $co['slaDays'] }} jours. Fiabilité {{ $co['honorScore'] }}.</p>
+      <p style="font-size:.8rem;margin-top:.6rem">{{ $heritage['from']->title ?? $co['name'] }} répond en {{ $heritage['delayDays'] ?? $co['slaDays'] }} jours. Fiabilité {{ $heritage['honor'] ?? $co['honorScore'] }}.</p>
       <div class="stepper" style="margin-top:.8rem">
         <span :class="step>=1 && 'on'">1 Lire</span>
         <span :class="step>=2 && 'on'">2 Honnêteté</span>

@@ -77,7 +77,7 @@
   <div class="vera-wrap">
     <p class="vera-kicker">L’offre, lue</p>
     <h2 style="font-size:clamp(1.8rem,4vw,2.4rem);max-width:24ch">Lire un poste comme on lit un outil — pas une fiche Pôle emploi.</h2>
-    <p class="vera-lead">Salaire contre le marché. Semaine réelle. Carrière en trois nœuds. Visite du lieu. Collègues au téléphone. Un test avant le CV. Indeed ne peut pas : ses clients paient pour le volume.</p>
+    <p class="vera-lead">Salaire contre le marché. Semaine réelle. Carrière en trois étapes. Visite du lieu. Collègues au téléphone. Un test avant le CV. Indeed ne peut pas : ses clients paient pour le volume.</p>
     <div class="vera-grid g4" style="margin-top:1.6rem">
       @foreach(array_slice($featured, 0, 4) as $f)
         <a class="v-card" href="/n/vera/offres/{{ $f['slug'] }}">

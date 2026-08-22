@@ -1,32 +1,49 @@
-# Champs personnalisés
+# Champs de fiche (moteur, pas un formulaire)
 
-Inspiré de JoomCCK. Des **briques** qu’on pose sur une fiche (texte, image, lieu, prix…), pas une colonne SQL par métier.
+Des **briques** qu’on pose sur une fiche (texte, image, lieu, prix…), pas une colonne SQL par métier.
 
-En interne les développeurs disent encore « CCK ». L’interface dit **champs de la fiche**.
+En interne les développeurs disent encore « CCK ». L’interface dit **champs de la fiche** ou **détail**.
+
+Le graphe (`nodes` + `edges`) et ces champs sont **l’unique enregistrement de la vérité métier**. L’UI n’affiche que des lieux, des preuves et des décisions.
+
+## Modèles (P0)
+
+Dans le Studio, l’opérateur choisit un métier — les détails se créent. Il ne compose pas depuis zéro.
+
+| Modèle | Détails |
+| --- | --- |
+| Offre tech | salaire, télétravail, contrat, séniorité, stack, visa |
+| Offre industrie | + habilitation, CACES, 3×8 |
+| Personnage | fruit, prime, affiliation |
+| Produit | référence, stock, matière, prix |
+| Maison | délai de réponse, fiabilité, industrie, ville |
+
+`field_key` est stable (`salaire`, pas le libellé traduit). Unité + min/max sur les échelles.
+
+## Un enregistrement, quatre surfaces
+
+Le même champ `salaire` s’affiche :
+
+1. en badge sur la card
+2. en fourchette sur la fiche
+3. en position vs médiane dans le comparateur
+4. en `baseSalary` JobPosting
+
+Code : `Engine::surface($field, 'badge'|'fiche'|'compare'|'jsonld')`.
+
+## API (ATS / embed)
+
+```
+GET /v1/nodes/{slug}/fields
+GET /v1/nodes/{slug}/neighbors
+```
+
+JSON humain : `fiche`, `details`, `liens.fait_partie_de`. Jamais `CCK`, `parent_of`, `node`.
 
 ## Éditeur visuel
 
-Dans le **Studio** de chaque univers (`/n/{slug}/studio`) :
+Studio (`/n/{slug}/studio`) : modèles + palette + aperçu live.
 
-1. Palette de types (Texte, Image, Prix, Lieu…)
-2. Aperçu live de la fiche, à droite
-3. Nommer, poser une valeur, enregistrer
-4. Éditer / retirer un champ déjà posé
+## Règle d’or
 
-Huit types essentiels. Le mode avancé déverrouille ~24 types (galerie, paywall, graphe…).
-
-## Surfaces
-
-| Surface | Exemple |
-| --- | --- |
-| Offre | rémunération, remote, test, contrat |
-| Personnage | fruit, prime, rôle |
-| Boutique | SKU, stock, matière |
-| Journal | temps de lecture, sources |
-| Vidéo | langue, chapitres |
-
-## Schéma
-
-Table `cck_fields` : `node_id`, `name`, `type`, `value`, `target_kind`, `sort`.
-
-Règle d’or : un nouveau besoin métier = un champ, pas une migration SQL.
+Un nouveau besoin métier = un champ ou une arête, pas une migration SQL.

@@ -108,7 +108,7 @@
     @endif
     @if($cluster->count())
       <section>
-        <p class="kicker">Cluster · fiches du graphe</p>
+        <p class="kicker">Cluster · fiches liées</p>
         <div class="rel">@foreach($cluster as $c)<a class="chip" href="/n/{{ $node->slug }}/f/{{ $c->slug }}">{{ $c->title }}</a>@endforeach</div>
       </section>
     @endif

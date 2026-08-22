@@ -16,11 +16,11 @@ class RoomCatalog
                 'stories' => ['Stories', '15s indexées en Clip, digest Legacy le lendemain', 'VideoObject'],
             ],
             'Fiches' => [
-                'personnages' => ['Les fiches', 'Graphe parent/enfant public /g/{slug} — Wikidata du club', 'ItemList'],
+                'personnages' => ['Les fiches', 'Fiches parent / enfant, publiques — l’encyclopédie du club', 'ItemList'],
                 'collections' => ['Collections', 'Série → volumes enfants, une URL par gamme', 'CollectionPage'],
             ],
             'Médias' => [
-                'videos' => ['Vidéos', 'Holo-fiche : chapitres Clip, produits, Drive, auteur — YouTube n’a pas le graphe', 'VideoObject'],
+                'videos' => ['Vidéos', 'Holo-fiche : chapitres, produits, Drive, auteur — YouTube n’a pas ça', 'VideoObject'],
                 'audio' => ['Podcasts / radio', 'PodcastEpisode + chapitres, transcript indexé', 'PodcastSeries'],
                 'gallery' => ['Galerie', 'ImageObject EXIF + maillage fiche, pas une grille Drive', 'ImageGallery'],
                 'reliques' => ['Photos & fichiers', 'Drive signé, paywall, jeton — le fichier a une URL SEO', 'DataDownload'],

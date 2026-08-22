@@ -129,7 +129,7 @@
             @endforeach
         </div>
         <p><a class="btn-line" href="/n/{{ $node->slug }}/personnages">Toutes les fiches</a>
-           <a class="btn-ghost" href="/g/{{ $node->slug }}">Graphe public</a></p>
+           <a class="btn-ghost" href="/g/{{ $node->slug }}">Connexions</a></p>
     </div>
     @endif
 
@@ -141,16 +141,16 @@
                 <a class="card" href="/n/{{ $node->slug }}/f/{{ $c->slug }}">
                     <img src="{{ $c->hero }}" alt="">
                     <div class="pad">
-                        <p class="kicker">{{ $c->kind }} · enfant du graphe</p>
+                        <p class="kicker">{{ \App\Support\Vocab::kind($c->kind) }}</p>
                         <h3 class="font-display">{{ $c->title }}</h3>
                     </div>
                 </a>
             @empty
-                <p class="muted">Pas encore d'enfant. Reliez un nœud.</p>
+                <p class="muted">Pas encore de fiche liée.</p>
             @endforelse
         </div>
         @if($parents->count())
-            <p class="kicker" style="margin-top:1.5rem">Parents</p>
+            <p class="kicker" style="margin-top:1.5rem">Fait partie de</p>
             <div class="rel">
                 @foreach($parents as $p)
                     <a class="chip" href="/n/{{ $p->slug }}">{{ $p->title }}</a>
@@ -298,7 +298,7 @@
     @if(in_array($tab, ['classifieds','merch']))
     <div>
         <h2 class="font-display" style="font-size:2.4rem">{{ $tab === 'merch' ? 'Merch' : 'Pièces & annonces' }}</h2>
-        <p class="muted">Offer + ville. Pas Leboncoin : chaque pièce a une URL, un graphe, un share.</p>
+        <p class="muted">Offer + ville. Pas Leboncoin : chaque pièce a une URL, des fiches liées, un share.</p>
         <div class="grid-3">
         @forelse($node->products as $p)
             <article class="card card-film">

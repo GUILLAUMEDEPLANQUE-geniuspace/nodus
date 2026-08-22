@@ -2,12 +2,24 @@
 @php
   $catalog = \App\Llm\CckCatalog::all();
   $simple = \App\Llm\CckCatalog::simple();
+  $templates = $templates ?? \App\Support\FieldTemplates::all();
 @endphp
 <section class="cck" x-data='{ type: "text", pro: false, name: "", value: "", labels: @json(array_map(fn ($m) => $m["label"], $catalog)) }' style="margin:1.6rem 0 2.4rem">
   <h2 class="font-display">Champs de la fiche</h2>
-  <p class="muted" style="max-width:40rem">Cliquez une brique, nommez, voyez l’aperçu, enregistrez. Ça s’affiche sur la fiche publique. Pas une colonne SQL par métier.</p>
+  <p class="muted" style="max-width:40rem">Choisissez un métier — les détails se posent. Ou cliquez une brique, nommez, voyez l’aperçu, enregistrez. Ça s’affiche sur la fiche publique.</p>
 
-  <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(16rem,20rem);gap:1.2rem;align-items:start;margin-top:1rem">
+  <p class="kicker" style="margin-top:1.2rem">Modèles de fiche</p>
+  <form method="post" action="/n/{{ $node->slug }}/studio/cck/template" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(11rem,1fr));gap:.5rem;max-width:46rem">
+    @csrf
+    @foreach($templates as $tid => $t)
+      <button class="card" name="template" value="{{ $tid }}" type="submit" style="padding:.85rem .9rem;text-align:left;border:1px solid var(--border);background:var(--surface);border-radius:.7rem">
+        <strong style="display:block">{{ $t['label'] }}</strong>
+        <span class="muted" style="display:block;margin-top:.25rem;font-size:.78rem">{{ $t['plain'] }}</span>
+      </button>
+    @endforeach
+  </form>
+
+  <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(16rem,20rem);gap:1.2rem;align-items:start;margin-top:1.4rem">
     <div>
       <div class="cck-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(7.5rem,1fr));gap:.5rem;max-width:42rem">
         @foreach($catalog as $k => $m)
@@ -51,7 +63,7 @@
           <p class="muted" style="margin:.15rem 0 0">{{ $f->value !== '' ? $f->value : '…' }}</p>
         </div>
       @empty
-        <p class="muted">Aucun champ encore. L’aperçu se remplit ici.</p>
+        <p class="muted">Aucun champ encore. Choisissez un modèle, ou une brique.</p>
       @endforelse
       <div x-show="name" style="border-top:1px dashed var(--primary);padding:.55rem 0;margin-top:.2rem">
         <p class="kicker" style="margin:0;color:var(--primary)">Nouveau</p>
@@ -84,7 +96,7 @@
         </form>
       </article>
     @empty
-      <p class="muted">Aucun champ pour l’instant. Cliquez une brique ci-dessus.</p>
+      <p class="muted">Aucun champ pour l’instant. Un modèle pose tout le métier d’un clic.</p>
     @endforelse
   </div>
 </section>

@@ -25,7 +25,9 @@ class StudioController extends Controller
         $role = Acl::role($node->id);
         $products = $node->products;
         $splits = DB::table('product_splits')->get()->groupBy('product_id');
-        return view('studio', compact('node', 'tabs', 'cck', 'seo', 'steps', 'staff', 'pending', 'bans', 'cats', 'role', 'products', 'splits'));
+        $templates = \App\Support\FieldTemplates::all();
+        $orphans = \App\Support\Engine::orphans();
+        return view('studio', compact('node', 'tabs', 'cck', 'seo', 'steps', 'staff', 'pending', 'bans', 'cats', 'role', 'products', 'splits', 'templates', 'orphans'));
     }
 
     public function tab(Request $request, string $slug): RedirectResponse
@@ -63,6 +65,8 @@ class StudioController extends Controller
             'sort' => 0,
             'options' => '',
             'seo_title' => $data['name'],
+            'field_key' => \Illuminate\Support\Str::slug($data['name']),
+            'schema_version' => 1,
         ]);
         return back()->with('ok', 'Champ créé.');
     }
@@ -85,6 +89,17 @@ class StudioController extends Controller
         abort_unless(Acl::atLeast($node->id, 'admin'), 403);
         DB::table('cck_fields')->where('node_id', $node->id)->where('id', $id)->delete();
         return back()->with('ok', 'Champ retiré.');
+    }
+
+    public function cckTemplate(\Illuminate\Http\Request $request, string $slug): \Illuminate\Http\RedirectResponse
+    {
+        $node = Acl::nodeOfSlug($slug);
+        abort_unless(Acl::atLeast($node->id, 'admin'), 403);
+        $key = $request->validate(['template' => 'required|string'])['template'];
+        $n = \App\Support\FieldTemplates::apply($node->id, $key);
+        $label = \App\Support\FieldTemplates::get($key)['label'];
+
+        return back()->with('ok', $n ? $n.' détails « '.$label.' » posés. Ajustez les valeurs.' : 'Ce modèle est déjà posé sur la fiche.');
     }
 
     public function seo(Request $request, string $slug): RedirectResponse

@@ -7,8 +7,34 @@
   <p class="vera-kicker">Carnet de preuves</p>
   <h1 style="font-size:clamp(2rem,5vw,3.2rem)">Une preuve que vous emportez</h1>
   <p class="vera-lead">Pas un PDF LinkedIn. Un registre de tests tenus, de modules, de scores. Les entreprises paient ce dossier — les CV générés restent sur Indeed.</p>
+
+  @if(!empty($carnet['preuves']))
   <div class="v-card" style="margin-top:1.6rem">
-    <p class="vera-kicker">Preuves tenues</p>
+    <p class="vera-kicker">{{ $carnet['titre'] ?? 'Carnet' }}</p>
+    <p style="font-size:.9rem;color:var(--muted)">Preuves déjà tenues, liées aux maisons. Ça voyage avec vous.</p>
+    <ul style="list-style:none;padding:0;margin:.8rem 0">
+      @foreach($carnet['preuves'] as $p)
+        <li style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding:.7rem 0;gap:1rem">
+          <div>
+            <p style="font-weight:500;margin:0"><a href="{{ $p['href'] }}">{{ $p['titre'] }}</a></p>
+            <p style="font-size:.75rem;color:var(--muted);margin:0">{{ $p['maison'] }} · {{ $p['quoi'] }}</p>
+          </div>
+          <p style="font-family:var(--display);font-size:1.1rem;color:var(--good);margin:0">Tenu</p>
+        </li>
+      @endforeach
+    </ul>
+    @if(!empty($carnet['details']))
+      <div class="chips">
+        @foreach($carnet['details'] as $d)
+          <span class="badge">{{ $d['label'] }} · {{ $d['value'] }}</span>
+        @endforeach
+      </div>
+    @endif
+  </div>
+  @endif
+
+  <div class="v-card" style="margin-top:1.6rem">
+    <p class="vera-kicker">Preuves tenues sur cet appareil</p>
     <p x-show="held.length===0" style="color:var(--muted)">Aucune encore. Passez un test. <a href="/n/vera/preuve" style="color:var(--primary)">Tests métier</a></p>
     <ul style="list-style:none;padding:0;margin:.8rem 0">
       <template x-for="r in held" :key="r.at">

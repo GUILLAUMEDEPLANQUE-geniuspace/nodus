@@ -1,5 +1,12 @@
 # Changelog Geniuspace
 
+## 2026-08-22 — Moteur secret (graphe + champs)
+
+- Modèles de fiche par métier dans le Studio.
+- Copy public sans CCK / graphe / Node. Insights : alignement, héritage, « aussi dans cet univers ».
+- API `GET /v1/nodes/{slug}/fields` et `/neighbors`.
+- Carnet = projection des preuves liées.
+
 ## 2026-08-22 — Une stack, du français, des tests
 
 - **Laravel seul.** Prototype React / TanStack retiré du dépôt. Source de vérité : `geniuspace/`.

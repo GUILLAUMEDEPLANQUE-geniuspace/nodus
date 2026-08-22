@@ -79,8 +79,14 @@ class DualWorldsSeeder extends Seeder
             DB::table('nodes')->where('id', $old)->delete();
         }
         DB::table('edges')->where('from_id', $id)->delete();
+        DB::table('edges')->where('from_id', 'like', 'vc-%')->delete();
+        DB::table('edges')->where('from_id', 'carnet-karim')->delete();
+        DB::table('cck_fields')->where('node_id', 'like', 'vj-%')->delete();
+        DB::table('cck_fields')->where('node_id', 'like', 'vc-%')->delete();
+        DB::table('cck_fields')->where('node_id', 'carnet-karim')->delete();
 
         $jobs = \App\Support\VeraCatalog::jobs();
+        $houses = [];
         foreach ($jobs as $j) {
             $nid = 'vj-'.$j['slug'];
             $taken = DB::table('nodes')->where('slug', $j['slug'])->where('id', '!=', $nid)->first();
@@ -100,8 +106,42 @@ class DualWorldsSeeder extends Seeder
                 'skin' => 'vera',
                 'template' => 'vera-tech',
             ]);
+            // Vera liste l’offre. La maison la propose. Deux arêtes, deux phrases.
             DB::table('edges')->insert(['from_id' => $id, 'to_id' => $nid, 'kind' => 'parent_of', 'label' => 'Offre']);
+
+            $coSlug = $j['companySlug'];
+            $cid = 'vc-'.$coSlug;
+            if (! isset($houses[$cid])) {
+                $co = $j['company'];
+                $this->node([
+                    'id' => $cid,
+                    'slug' => 'maison-'.$coSlug,
+                    'kind' => 'company',
+                    'title' => $co['name'],
+                    'subtitle' => $co['tagline'] ?? '',
+                    'summary' => $co['about'] ?? '',
+                    'body' => $co['about'] ?? '',
+                    'hero' => $hero,
+                    'skin' => 'living',
+                ]);
+                \App\Support\FieldTemplates::apply($cid, 'maison');
+                \App\Support\Engine::fill($cid, [
+                    'delai_reponse' => ['value' => ($co['slaDays'] ?? 10).' j', 'min' => $co['slaDays'] ?? 10],
+                    'fiabilite' => ['value' => (string) ($co['honorScore'] ?? 80), 'min' => $co['honorScore'] ?? 80],
+                    'industrie' => $co['industry'] ?? '',
+                    'ville' => $co['hqCity'] ?? '',
+                ]);
+                DB::table('edges')->insert(['from_id' => $id, 'to_id' => $cid, 'kind' => 'parent_of', 'label' => 'Maison']);
+                $houses[$cid] = true;
+            }
+            DB::table('edges')->insert(['from_id' => $cid, 'to_id' => $nid, 'kind' => 'parent_of', 'label' => 'Offre']);
+
+            $tpl = $this->templateForJob($j);
+            \App\Support\FieldTemplates::apply($nid, $tpl);
+            \App\Support\Engine::fill($nid, $this->jobFieldValues($j));
         }
+
+        $this->seedKarimCarnet($id);
 
         DB::table('quests')->where('node_id', $id)->delete();
         $qs = [
@@ -188,7 +228,7 @@ class DualWorldsSeeder extends Seeder
         ]);
         DB::table('node_seo')->updateOrInsert(['node_id' => $id], [
             'title' => 'Lumen — galerie hologramme | Geniuspace',
-            'description' => 'Œuvres uniques, holo-vidéo, RWA, split auteurs. Shopify n’a pas le graphe.',
+            'description' => 'Œuvres uniques, holo-vidéo, RWA, split auteurs. Shopify n’a pas les fiches liées.',
         ]);
         DB::table('products')->where('node_id', $id)->delete();
         $ps = [
@@ -228,10 +268,10 @@ class DualWorldsSeeder extends Seeder
             'resume' => 'Une œuvre = VisualArtwork + Offer + holo-vidéo + split. La grille produit ne peut pas.',
             'body' => "Lumen n’est pas une boutique. C’est une cimaise. @p-lu-1 a une URL, un certificat, un making-of.",
             'definition_term' => 'Holo-fiche',
-            'definition' => 'Landing d’une œuvre : chapitres, loot temporel, Drive, auteur, panier. YouTube n’a pas le graphe.',
+            'definition' => 'Landing d’une œuvre : chapitres, loot temporel, Drive, auteur, panier. YouTube n’a pas ça.',
             'toc' => "Grille vs cimaise\nRWA\nSplit\nFAQ",
             'longtail' => "galerie rwa|Vitrine Lumen\nboutique hologramme|Ce guide\nsplit payment artistes|Produit @p-lu-2",
-            'faq' => "C’est un NFT ?||Certificat, pas une spéculation. Le fichier reste chez toi.\nShopify peut faire ça ?||Pas le graphe, pas le forum Legacy, pas le split natif.",
+            'faq' => "C’est un NFT ?||Certificat, pas une spéculation. Le fichier reste chez toi.\nShopify peut faire ça ?||Pas les fiches liées, pas le forum Legacy, pas le split natif.",
             'cover' => '/realms/actor-hero.jpg', 'video_path' => 'media/atelier.mp4',
             'author' => 'Inès', 'author_role' => 'Galerie', 'reading_min' => 7, 'views' => 70,
             'published_at' => $now, 'updated_at' => $now,
@@ -245,5 +285,94 @@ class DualWorldsSeeder extends Seeder
         DB::table('drive_files')->updateOrInsert(['node_id' => $id, 'title' => 'Cimaise 01.jpg'], [
             'path' => '/realms/actor-hero.jpg', 'kind' => 'image', 'locked' => 0,
         ]);
+
+        $this->seedLumenPieces($id);
+    }
+
+    private function templateForJob(array $j): string
+    {
+        $blob = mb_strtolower(implode(' ', array_merge($j['skills'] ?? [], $j['requirements'] ?? [])));
+        if (($j['collection'] ?? '') === 'terrain' || str_contains($blob, 'caces') || str_contains($blob, 'habilitation') || str_contains($blob, 'hydraulique')) {
+            return 'offre-industrie';
+        }
+
+        return 'offre-tech';
+    }
+
+    private function jobFieldValues(array $j): array
+    {
+        $minK = isset($j['salaryMin']) ? (int) round($j['salaryMin'] / 1000) : null;
+        $maxK = isset($j['salaryMax']) ? (int) round($j['salaryMax'] / 1000) : null;
+        $text = mb_strtolower(($j['description'] ?? '').' '.implode(' ', $j['requirements'] ?? []).' '.implode(' ', $j['benefits'] ?? []));
+        $out = [
+            'salaire' => ['value' => $j['salaryLabel'], 'min' => $minK, 'max' => $maxK],
+            'remote' => $j['remoteLabel'] ?? '',
+            'contrat' => $j['contractLabel'] ?? '',
+            'seniorite' => $j['seniorityLabel'] ?? '',
+            'stack' => implode(', ', $j['skills'] ?? []),
+            'visa' => str_contains($text, 'visa') ? 'Sponsorisé' : 'Non requis',
+            'habilitation' => str_contains($text, 'habilitation') ? 'Requise / financée' : 'Selon poste',
+            'caces' => str_contains($text, 'caces') ? 'Oui — financé' : 'Non',
+            'trois_huit' => (str_contains($text, 'astreinte') || str_contains($text, 'nuit')) ? 'Astreinte écrite' : 'Non',
+        ];
+
+        return $out;
+    }
+
+    /** Carnet démo : projection graphe (arêtes validées + détails). */
+    private function seedKarimCarnet(string $veraId): void
+    {
+        $this->node([
+            'id' => 'carnet-karim',
+            'slug' => 'carnet-karim',
+            'kind' => 'person',
+            'title' => 'Carnet de Karim',
+            'subtitle' => 'Maintenance · Fos-sur-Mer',
+            'summary' => 'Preuves tenues : consignation, hydraulique, GMAO.',
+            'hero' => '/offer/karim.jpg',
+            'skin' => 'vera',
+        ]);
+        DB::table('cck_fields')->where('node_id', 'carnet-karim')->delete();
+        foreach ([
+            ['geste', 'Le geste', 'text', 'Consignation'],
+            ['metier', 'Métier', 'text', 'Maintenance industrielle'],
+            ['stack', 'Compétences', 'text', 'Mécanique, Hydraulique, Consignation, GMAO, CACES'],
+        ] as $i => $f) {
+            DB::table('cck_fields')->insert([
+                'node_id' => 'carnet-karim', 'name' => $f[1], 'type' => $f[2], 'value' => $f[3],
+                'target_kind' => 'node', 'target_id' => '', 'sort' => $i, 'options' => '', 'seo_title' => $f[1],
+                'field_key' => $f[0], 'unit' => '', 'schema_version' => 1,
+            ]);
+        }
+        DB::table('edges')->insert(['from_id' => $veraId, 'to_id' => 'carnet-karim', 'kind' => 'parent_of', 'label' => 'Carnet']);
+        foreach (['vj-technicien-maintenance-releve', 'vj-electricien-ombrieres-kora'] as $to) {
+            if (DB::table('nodes')->where('id', $to)->exists()) {
+                DB::table('edges')->insert(['from_id' => 'carnet-karim', 'to_id' => $to, 'kind' => 'validated', 'label' => 'Épreuve validée']);
+            }
+        }
+    }
+
+    private function seedLumenPieces(string $lumenId): void
+    {
+        DB::table('edges')->where('from_id', $lumenId)->where('to_id', 'like', 'lu-%')->delete();
+        DB::table('cck_fields')->where('node_id', 'like', 'lu-%')->delete();
+        $pieces = [
+            ['lu-cristal', 'cristal-lumen-01', 'Cristal Lumen #01', 'Pièce unique, certificat.', '/realms/actor-hero.jpg', 'LU-CR-01', '1', 'Cristal optique', '2400'],
+            ['lu-print', 'print-nocturne-40-60', 'Print nocturne 40×60', 'Tirage 25.', '/realms/portal-hero.jpg', 'LU-PR-25', '8', 'Papier baryté', '180'],
+        ];
+        foreach ($pieces as $p) {
+            $this->node([
+                'id' => $p[0], 'slug' => $p[1], 'kind' => 'product', 'title' => $p[2],
+                'subtitle' => $p[3], 'summary' => $p[3], 'hero' => $p[4], 'skin' => 'living',
+            ]);
+            DB::table('edges')->insert(['from_id' => $lumenId, 'to_id' => $p[0], 'kind' => 'parent_of', 'label' => 'Œuvre']);
+            \App\Support\FieldTemplates::apply($p[0], 'produit');
+            \App\Support\Engine::fill($p[0], [
+                'sku' => $p[5],
+                'stock' => $p[6],
+                'matiere' => $p[7],
+                'prix' => $p[8],
+            ]);
+        }
     }
 }

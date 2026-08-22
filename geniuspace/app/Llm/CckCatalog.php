@@ -36,7 +36,7 @@ class CckCatalog
             'records' => ['g' => 'Relations', 'label' => 'Fiches liées', 'seo' => 'mentions', 'pro' => true],
             'status' => ['g' => 'Affichage', 'label' => 'Statut', 'seo' => 'prop', 'pro' => true],
             'readmore' => ['g' => 'Affichage', 'label' => 'Lire la suite', 'seo' => 'article', 'pro' => true],
-            'parent' => ['g' => 'Graphe', 'label' => 'Fiche parent', 'seo' => 'ispartof', 'pro' => true],
+            'parent' => ['g' => 'Relations', 'label' => 'Fiche parent', 'seo' => 'ispartof', 'pro' => true],
             'drip' => ['g' => 'Temps', 'label' => 'Contenu programmé', 'seo' => 'none', 'pro' => true],
             'signature' => ['g' => 'Identité', 'label' => 'Signature', 'seo' => 'none', 'pro' => true],
             'multilevel' => ['g' => 'Sélection', 'label' => 'Liste à niveaux', 'seo' => 'prop', 'pro' => true],
