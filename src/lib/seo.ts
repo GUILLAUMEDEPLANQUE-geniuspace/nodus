@@ -184,15 +184,31 @@ function jobPosting(job: GraphNode, org: GraphNode | undefined, cck: CckField[])
   };
 }
 
-function productLd(p: ShopProduct, node: GraphNode) {
+export function productOfferLd(p: ShopProduct, node: GraphNode) {
   return {
     "@type": "Product",
     name: p.title,
     description: p.summary,
     brand: node.title,
-    offers: { "@type": "Offer", price: p.price.replace(/[^\d.,]/g, "") || "0", priceCurrency: "EUR" },
+    url: `/n/${node.slug}/p/${p.id}`,
+    offers: {
+      "@type": "Offer",
+      price: p.price.replace(/[^\d.,]/g, "") || "0",
+      priceCurrency: "EUR",
+      availability: p.stock?.includes("unique")
+        ? "https://schema.org/LimitedAvailability"
+        : "https://schema.org/InStock",
+    },
+    aggregateRating:
+      Number(p.rating) > 0
+        ? { "@type": "AggregateRating", ratingValue: p.rating, reviewCount: p.votes || 1, bestRating: "5" }
+        : undefined,
     isPartOf: `/n/${node.slug}`,
   };
+}
+
+function productLd(p: ShopProduct, node: GraphNode) {
+  return productOfferLd(p, node);
 }
 
 function articleLd(w: WikiPage, node: GraphNode) {

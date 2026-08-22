@@ -231,6 +231,9 @@ export type ShopProduct = {
   price: string;
   summary: string;
   kind: string;
+  rating: string;
+  votes: number;
+  stock: string;
 };
 
 export type Playlist = {

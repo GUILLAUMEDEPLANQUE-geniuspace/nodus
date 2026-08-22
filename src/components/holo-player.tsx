@@ -22,6 +22,7 @@ import { parseChapters } from "@/lib/chapters";
 import { unlockVideo } from "@/lib/graph-api";
 import { MODE_COPY, videoModeOf } from "@/lib/video-mode";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
+import { ShareBar, Stars } from "@/components/share-bar";
 
 export function HoloPlayer({
   slug,
@@ -44,6 +45,12 @@ export function HoloPlayer({
   const copy = MODE_COPY[mode];
   const teaser = media.teaserSec ?? 0;
   const gated = (media.accessKind ?? "free") !== "free" && teaser > 0;
+  const commerce = mode === "shop" || mode === "formation" || mode === "game" || products.length > 0;
+  const offer = products[0];
+  const displayPrice = offer?.price || media.price || "";
+  const displayRating = offer?.rating || media.rating || "0";
+  const displayVotes = offer?.votes ?? 0;
+  const sharePath = `/n/${slug}/v/${media.id}`;
   const chapters = useMemo(() => parseChapters(media.chapters), [media.chapters]);
   const [t, setT] = useState(0);
   const [playing, setPlaying] = useState(false);
@@ -183,16 +190,26 @@ export function HoloPlayer({
             </button>
             <span className="hidden items-center gap-3 px-2 text-xs text-muted sm:inline-flex">
               <Eye className="size-3.5" /> {media.views ?? 0}
-              <Star className="size-3.5 text-primary" /> {media.rating || "—"}
+              <Star className="size-3.5 text-primary" /> {media.rating || displayRating || "—"}
             </span>
+            <ShareBar title={media.title} path={sharePath} text={media.transcript.slice(0, 80)} />
             {gated ? (
               <button
                 type="button"
-                onClick={() => (granted ? setPanel("shop") : setPanel("shop"))}
+                onClick={() => setPanel("shop")}
                 className="h-10 rounded-full bg-primary px-3 text-sm font-medium text-primary-fg"
               >
                 <ShoppingBag className="mr-1 inline size-3.5" />
                 {granted ? "Accès actif" : copy.shop}
+              </button>
+            ) : commerce ? (
+              <button
+                type="button"
+                onClick={() => setPanel("shop")}
+                className="h-10 rounded-full bg-primary px-3 text-sm font-medium text-primary-fg"
+              >
+                <ShoppingBag className="mr-1 inline size-3.5" />
+                {displayPrice || copy.shop}
               </button>
             ) : null}
           </div>
@@ -247,27 +264,35 @@ export function HoloPlayer({
               {panel === "desc" ? <p className="text-sm leading-relaxed">{media.transcript}</p> : null}
               {panel === "shop" ? (
                 <div>
-                  <p className="font-display text-2xl">{media.title}</p>
-                  <p className="mt-1 text-sm text-muted">{copy.paywallBody || media.transcript}</p>
-                  <p className="mt-3 font-display text-3xl text-primary">{media.price || "Libre"}</p>
-                  {!granted && gated ? (
-                    user ? (
-                      <button type="button" onClick={() => void unlock()} className="mt-4 h-11 rounded-full bg-primary px-5 text-sm text-primary-fg">
-                        {copy.unlock}
+                  <p className="font-display text-2xl">{offer?.title || media.title}</p>
+                  <p className="mt-1 text-sm text-muted">{offer?.summary || copy.paywallBody || media.transcript}</p>
+                  <p className="mt-3 font-display text-3xl text-primary">{displayPrice || "Libre"}</p>
+                  {displayRating !== "0" ? <Stars rating={displayRating} votes={displayVotes} /> : null}
+                  {offer?.stock ? <p className="mt-1 text-xs text-muted">{offer.stock}</p> : null}
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {!granted && gated && user ? (
+                      <button type="button" onClick={() => void unlock()} className="h-11 rounded-full bg-primary px-5 text-sm text-primary-fg">
+                        {copy.unlock} {media.price ? `· ${media.price}` : ""}
                       </button>
-                    ) : (
-                      <Link to="/login" className="mt-4 inline-flex h-11 items-center rounded-full bg-primary px-4 text-sm text-primary-fg">
+                    ) : !granted && gated ? (
+                      <Link to="/login" className="inline-flex h-11 items-center rounded-full bg-primary px-4 text-sm text-primary-fg">
                         Se connecter
                       </Link>
-                    )
-                  ) : (
-                    <p className="mt-3 text-sm text-primary">Accès ouvert — Drive séquencé à droite.</p>
-                  )}
-                  {products[0] ? (
-                    <p className="mt-2 text-xs text-muted">
-                      Boutique liée · {products[0].title} · {products[0].price}
-                    </p>
-                  ) : null}
+                    ) : (
+                      <button type="button" className="h-11 rounded-full bg-primary px-5 text-sm text-primary-fg">
+                        {mode === "shop" ? "Ajouter au panier" : "Accès ouvert"}
+                      </button>
+                    )}
+                    <button type="button" className="h-11 rounded-full border border-border px-4 text-sm">
+                      Carte
+                    </button>
+                    <button type="button" className="h-11 rounded-full border border-border px-4 text-sm">
+                      Crypto
+                    </button>
+                  </div>
+                  <div className="mt-4">
+                    <ShareBar title={offer?.title || media.title} path={sharePath} text={`${displayPrice} · ${displayRating}/5`} />
+                  </div>
                 </div>
               ) : null}
             </div>

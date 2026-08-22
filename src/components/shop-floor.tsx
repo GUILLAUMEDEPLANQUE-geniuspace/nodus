@@ -1,6 +1,8 @@
-/** Boutique du Node — produits enfants, commission 6–7 % en modèle, panier plus tard. */
+/** Boutique du Node — prix, note, stock, partage. JSON-LD Product sur /p/:id. */
+import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { CckPanel } from "@/components/cck-panel";
+import { ShareBar, Stars } from "@/components/share-bar";
 import type { CckField, ShopProduct } from "@/lib/graph";
 import { addProduct } from "@/lib/graph-api";
 
@@ -23,7 +25,16 @@ export function ShopFloor({
       const res = await addProduct({ data: { slug, title: title.trim(), price: price.trim() } });
       setList((cur) => [
         ...cur,
-        { id: res.id, title: title.trim(), price: price.trim(), summary: "", kind: "objet" },
+        {
+          id: res.id,
+          title: title.trim(),
+          price: price.trim(),
+          summary: "",
+          kind: "objet",
+          rating: "0",
+          votes: 0,
+          stock: "en stock",
+        },
       ]);
       setTitle("");
       setPrice("");
@@ -36,7 +47,7 @@ export function ShopFloor({
     <div>
       <h2 className="font-display text-3xl">Boutique</h2>
       <p className="mt-1 mb-6 text-sm text-muted">
-        Merch, prints, OSTs — collés au lore, pas une vitrine générique.
+        Merch, prints, OSTs — collés au lore. Prix, note et lien de partage sur chaque fiche.
       </p>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {list.map((p) => (
@@ -44,13 +55,28 @@ export function ShopFloor({
             <p className="text-[11px] tracking-[0.16em] text-primary uppercase">{p.kind}</p>
             <h3 className="font-display text-2xl">{p.title}</h3>
             <p className="mt-2 text-sm text-muted">{p.summary}</p>
+            <p className="mt-4 font-display text-3xl text-primary">{p.price}</p>
+            <Stars rating={p.rating} votes={p.votes} />
+            <p className="mt-1 text-xs text-muted">{p.stock}</p>
             <div className="mt-3">
               <CckPanel fields={cck.filter((f) => f.targetKind === "product" && f.targetId === p.id)} />
             </div>
-            <p className="mt-4 font-display text-xl text-primary">{p.price}</p>
-            <button type="button" className="mt-3 h-11 rounded-full bg-primary px-4 text-sm font-medium text-primary-fg">
-              Ajouter au panier
-            </button>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <button type="button" className="h-11 rounded-full bg-primary px-4 text-sm font-medium text-primary-fg">
+                Ajouter au panier
+              </button>
+              <Link
+                to="/n/$slug/p/$pid"
+                params={{ slug, pid: p.id }}
+                search={{ view: "fiche" }}
+                className="inline-flex h-11 items-center rounded-full border border-border px-3 text-sm"
+              >
+                Fiche SEO
+              </Link>
+            </div>
+            <div className="mt-3">
+              <ShareBar title={p.title} path={`/n/${slug}/p/${p.id}`} text={`${p.price} · ${p.rating}/5`} />
+            </div>
           </article>
         ))}
       </div>

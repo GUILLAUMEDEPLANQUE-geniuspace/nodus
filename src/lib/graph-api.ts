@@ -463,8 +463,21 @@ export const getNodeUniverse = createServerFn({ method: "GET" })
        where thread_id in (select id from threads where node_id = $1)`,
       [bundle.node.id],
     );
-    const products = await sql.query<{ id: string; title: string; price: string; summary: string; kind: string }>(
-      `select id, title, price, summary, kind from shop_products where node_id = $1`,
+    const products = await sql.query<{
+      id: string;
+      title: string;
+      price: string;
+      summary: string;
+      kind: string;
+      rating: string;
+      votes: number;
+      stock: string;
+    }>(
+      `select id, title, price, summary, kind,
+              coalesce(rating, '0') as rating,
+              coalesce(votes, 0) as votes,
+              coalesce(stock, '') as stock
+       from shop_products where node_id = $1`,
       [bundle.node.id],
     );
     const lists = await sql.query<{ id: string; title: string; author: string }>(
@@ -606,6 +619,9 @@ export const getNodeUniverse = createServerFn({ method: "GET" })
           price: p.price,
           summary: p.summary,
           kind: p.kind,
+          rating: p.rating,
+          votes: Number(p.votes),
+          stock: p.stock,
         }),
       ),
       playlists: lists.map(
@@ -823,7 +839,8 @@ export const addProduct = createServerFn({ method: "POST" })
     if (!node) throw new Error("Univers introuvable");
     const id = crypto.randomUUID();
     await sql.query(
-      `insert into shop_products (id, node_id, title, price, summary, kind) values ($1, $2, $3, $4, $5, 'objet')`,
+      `insert into shop_products (id, node_id, title, price, summary, kind, rating, votes, stock)
+       values ($1, $2, $3, $4, $5, 'objet', '0', 0, 'en stock')`,
       [id, node.id, data.title, data.price, data.summary ?? ""],
     );
     return { id };

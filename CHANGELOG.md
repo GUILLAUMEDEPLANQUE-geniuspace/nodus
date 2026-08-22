@@ -2,6 +2,14 @@
 
 Format : ce qui est **dans le code**, pas la vision PDF.
 
+## 0.8.1 — 2026-08-22
+
+### Commerce + partage
+- Produit : prix, note, avis, stock, Offer JSON-LD
+- URL `/n/:slug/p/:id`
+- ShareBar (Web Share, copie, X) sur fiche produit et cockpit vidéo
+- Vidéo boutique/formation : panneau prix + note + carte/crypto
+
 ## 0.8.0 — 2026-08-22
 
 ### Moteur vidéo sécurisé
