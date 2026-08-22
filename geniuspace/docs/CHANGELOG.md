@@ -64,6 +64,11 @@ Routes radar + panier + Moat. 20 fiches rédigées. Stories, avis, live, auteurs
 
 Le dock dit **Forum** (plus « Parler »). Split héros / pane claire. Réponse = texte + vidéo Drive + PDF locké + relique panier. Composer Relique / Vidéo / Fichier. Page `/t/{id}` identique, JSON-LD DiscussionForumPosting.
 
+## 2026-08-22 — Magazine par univers (moule chef-de-secteur)
+
+`/n/{club}/blog` + `/blog/{slug}`. Résumé, sommaire, définition, longue traîne, FAQPage, auteur, cluster, vidéo. Les membres publient. Club 205 : 3 articles.
+
+
 
 
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\MagazineController;
 use App\Models\CrowdGoal;
 use App\Models\DriveFile;
 use App\Models\Edge;
@@ -52,6 +53,9 @@ class UniverseController extends Controller
 
     public function room(Request $request, string $slug, string $salle): View
     {
+        if (in_array($salle, ['journal', 'blog'], true)) {
+            return app(MagazineController::class)->index($request, $slug);
+        }
         return $this->page($request, $slug, $salle);
     }
 

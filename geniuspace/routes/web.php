@@ -9,6 +9,7 @@ use App\Http\Controllers\DriveController;
 use App\Http\Controllers\ForumController;
 use App\Http\Controllers\ImageStudioController;
 use App\Http\Controllers\LeaderController;
+use App\Http\Controllers\MagazineController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\MoatController;
 use App\Http\Controllers\PilotController;
@@ -96,6 +97,9 @@ Route::post('/n/{slug}/host', [LeaderController::class, 'host']);
 Route::get('/g/{slug}.json', [LeaderController::class, 'graph']);
 Route::get('/g/{slug}', [LeaderController::class, 'graph']);
 Route::get('/w/{slug}', [LeaderController::class, 'white']);
+Route::get('/n/{slug}/blog/{aid}', [MagazineController::class, 'show']);
+Route::post('/n/{slug}/blog', [MagazineController::class, 'store']);
+Route::get('/n/{slug}/blog', [MagazineController::class, 'index']);
 Route::get('/n/{slug}/guide/{wid}', [UniverseController::class, 'guide']);
 Route::get('/n/{slug}/f/{fiche}', [UniverseController::class, 'fiche']);
 Route::get('/n/{slug}/llms.txt', function (string $slug) {

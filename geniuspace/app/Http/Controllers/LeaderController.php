@@ -36,6 +36,9 @@ class LeaderController extends Controller
         foreach (DB::table('products')->where('node_id', $club->id)->get() as $p) {
             $urls[] = url('/n/'.$slug.'/p/'.$p->id);
         }
+        foreach (DB::table('articles')->where('node_id', $club->id)->get() as $a) {
+            $urls[] = url('/n/'.$slug.'/blog/'.$a->slug);
+        }
         foreach (DB::table('wiki_pages')->where('node_id', $club->id)->get() as $w) {
             $urls[] = url('/n/'.$slug.'/guide/'.\Illuminate\Support\Str::slug($w->title));
         }

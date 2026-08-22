@@ -199,4 +199,17 @@ textarea { height: auto; border-radius: 1rem; padding: 0.75rem 1rem; }
 .holo-tools select { font-size:.8rem; }
 .holo-new { display:flex; gap:.4rem; padding:.7rem; border-top:1px solid #e4ddd3; }
 .holo-new input { flex:1; background:#fff; color:#1c1814; border:1px solid #ddd; border-radius:.5rem; padding:.45rem .6rem; }
+.mag-hero { position:relative; min-height:48dvh; }
+.mag-hero img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+.mag-hero .copy { position:absolute; left:0; right:0; bottom:0; padding:2rem 1.25rem; }
+.mag-body { max-width:44rem; padding:2rem 1.25rem 7rem; }
+.mag-box { background:var(--surface); border:1px solid var(--border); border-radius:1rem; padding:1.1rem 1.2rem; margin:1rem 0; }
+.mag-def { border-left:3px solid var(--primary); padding:.8rem 1rem; margin:1.2rem 0; background:var(--surface); }
+.mag-toc ol { margin:.4rem 0 1rem 1.1rem; }
+.mag-table { width:100%; border-collapse:collapse; font-size:.9rem; }
+.mag-table th,.mag-table td { border-bottom:1px solid var(--border); text-align:left; padding:.4rem .3rem; }
+.mag-faq details { border-bottom:1px solid var(--border); padding:.6rem 0; }
+.mag-faq summary { cursor:pointer; font-weight:500; }
+.mag-video { width:100%; border-radius:.8rem; margin:1rem 0; background:#000; }
+.mag-prose { font-size:1.05rem; line-height:1.6; }
 @media (max-width:700px){ .pulse { grid-template-columns:1fr 1fr; } }

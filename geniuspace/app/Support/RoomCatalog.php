@@ -9,7 +9,7 @@ class RoomCatalog
         return [
             'Vie du club' => [
                 'forum' => ['Parler ensemble', 'Le garage : débats, entraide, comme un forum vivant'],
-                'journal' => ['Le journal', 'Actus du club, sorties, récits'],
+                'journal' => ['Magazine', 'Articles + vidéos des membres, template chef-de-secteur'],
                 'guilde' => ['Les membres', 'Trombinoscope, grades, qui est qui'],
                 'agenda' => ['Agenda / sorties', 'Rassemblements, meets, dates'],
                 'stories' => ['Stories', 'Bulles courtes, 15 secondes, le pulse du club'],
