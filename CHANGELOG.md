@@ -2,6 +2,16 @@
 
 Format : ce qui est **dans le code**, pas la vision PDF.
 
+## 2026-08-22 — Ghost cognitif (V1)
+
+- **Orchestrateur.** `Ghost::reply` = mémoire → planner → multi-outils → compose → vérificateur. Plus `intent → 1 tool`.
+- **Mémoire structurée.** Tables `ghost_facts` / `ghost_experiences` / `ghost_tool_stats`. Un fait = sujet, prédicat, objet, confiance, source, statut. Pas un dump de chat.
+- **Skills.** find_product, negotiate, match_job, verify_claim, inspect_carnet, investigate_place, build_application, greet.
+- **Raisonnement.** `compare_products`, `rank`, `match_user_job`, `search_graph`, `find_path`.
+- **Plafond.** OBSERVE / SUGGEST / PREPARE / ACT. Achat, candidature, unlock, graphe : jamais seuls.
+- **Vérificateur.** Chiffre hors coffre, jargon, « je débloque » → `verified-block`.
+- JSON : `goal`, `skill`, `plan`, `verify`, `memory`, `permission`.
+
 ## 2026-08-22 — Omni, rideau, maison, Stripe tenu
 
 - **Omni-média.** Labo / Scène / Arène : à 03:15 (0:03 sur teaser) le player **bascule le cadre** (éditeur, mixer stems, tableau tactique). Tenir l’exo = preuve `omni`. `Omni.php` + overlay `omni-frame`.

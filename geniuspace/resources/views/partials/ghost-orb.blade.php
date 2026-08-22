@@ -14,6 +14,17 @@
       <span class="muted" x-text="profile || '{{ $ghostProfile }}'"></span>
       <button type="button" class="btn-ghost" @click="open=false" aria-label="Fermer">×</button>
     </header>
+    <div class="ghost-brain" x-show="trace.skill">
+      <span class="ghost-chip" x-text="trace.skill"></span>
+      <span class="muted" x-text="(trace.tools||[]).join(' → ') || 'observe'"></span>
+      <span class="ghost-ok" x-show="trace.valid !== false">ancré</span>
+      <span class="ghost-bad" x-show="trace.valid === false">bloqué</span>
+    </div>
+    <div class="ghost-mem" x-show="memory.length">
+      <template x-for="(f, i) in memory" :key="i">
+        <span class="ghost-chip muted" x-text="f.label+' · '+f.value"></span>
+      </template>
+    </div>
     <div class="ghost-log" x-ref="log">
       <template x-for="(m, i) in messages" :key="i">
         <div class="ghost-msg" :class="m.role">
@@ -44,6 +55,10 @@
   @keyframes ghost-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
   .ghost-panel{position:absolute;bottom:3.8rem;right:0;width:min(22rem,92vw);max-height:70vh;display:flex;flex-direction:column;background:color-mix(in srgb,var(--bg,#07080c) 92%,#000);border:1px solid var(--border,#2a2c38);border-radius:1rem;box-shadow:0 20px 50px rgba(0,0,0,.45);overflow:hidden}
   .ghost-head{display:flex;align-items:center;gap:.5rem;padding:.75rem 1rem;border-bottom:1px solid var(--border,#2a2c38);font-size:.85rem}
+  .ghost-brain,.ghost-mem{display:flex;flex-wrap:wrap;gap:.35rem;padding:.35rem 1rem;border-bottom:1px solid var(--border,#2a2c38);font-size:.72rem;align-items:center}
+  .ghost-chip{border:1px solid var(--border,#2a2c38);border-radius:999px;padding:.1rem .45rem}
+  .ghost-ok{color:#8aa37a}
+  .ghost-bad{color:#c4a574}
   .ghost-head .btn-ghost{margin-left:auto}
   .ghost-log{flex:1;overflow:auto;padding:.75rem 1rem;display:flex;flex-direction:column;gap:.65rem;min-height:8rem}
   .ghost-msg{font-size:.9rem;line-height:1.4;white-space:pre-wrap}
@@ -60,7 +75,7 @@
 function ghostOrb(slug){
   return {
     open:false, boot:false, loading:false, input:'', profile:'', messages:[],
-    voice:true, listening:false, rec:null,
+    voice:true, listening:false, rec:null, trace:{}, memory:[],
     canListen: typeof window !== 'undefined' && !!(window.SpeechRecognition || window.webkitSpeechRecognition),
     speak(text){
       if(!this.voice || !window.speechSynthesis || !text) return;
@@ -85,6 +100,8 @@ function ghostOrb(slug){
         const r = await fetch('/n/'+slug+'/ghost');
         const j = await r.json();
         this.profile = j.profile || '';
+        this.trace = { skill: j.skill || '', tools: j.tools || [], valid: j.verify ? j.verify.valid : true };
+        this.memory = j.memory || [];
         this.messages.push({role:'assistant', content:j.reply, actions:j.actions||[]});
         this.speak(j.reply);
       }catch(e){ this.messages.push({role:'assistant', content:'Ghost indisponible un instant.'}); }
@@ -104,6 +121,8 @@ function ghostOrb(slug){
         const j = await r.json();
         this.messages.push({role:'assistant', content:j.reply||'…', actions:j.actions||[]});
         this.profile = j.profile || this.profile;
+        this.trace = { skill: j.skill || this.trace.skill, tools: j.tools || [], valid: j.verify ? j.verify.valid : true };
+        this.memory = j.memory || this.memory;
         this.speak(j.reply||'');
       }catch(e){
         this.messages.push({role:'assistant', content:'Je n\'ai pas pu joindre le coffre. Réessayez.'});

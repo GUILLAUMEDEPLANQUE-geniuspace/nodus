@@ -2,7 +2,6 @@
 
 namespace App\Support;
 
-use App\Llm\GhostTools;
 use App\Models\GpNode;
 use App\Models\Media;
 use App\Models\Product;
@@ -12,9 +11,9 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 /**
- * Ghost du lieu : agent ancré, pas un chat généraliste.
- * Contexte = fiches + voisins + produits + grants du visiteur.
- * Tools = lecture / orientation. Aucun grant inventé ici.
+ * Ghost du lieu : agent cognitif ancré, pas un chat généraliste.
+ * Orchestrateur = mémoire + planner + executor + vérificateur.
+ * Le LLM raisonne ; le graphe décide de ce qui est vrai.
  */
 class Ghost
 {
@@ -182,43 +181,99 @@ class Ghost
 
     /**
      * @param  list<array{role: string, content: string}>  $history
-     * @return array{reply: string, citations: list<array>, tools: list<array>, actions: list<array>, profile: string, mode: string}
+     * @return array<string, mixed>
      */
     public static function reply(GpNode $node, string $message, array $history = []): array
     {
         $message = trim(Str::limit($message, 800));
         $ctx = self::context($node);
-        $toolsUsed = [];
-        $citations = [];
-        $actions = [];
+        $working = GhostMemory::load($node);
+        GhostMemory::ingest($node, $message, $working);
 
-        $intent = self::intent($message, $ctx);
-        $toolResult = GhostTools::runIntent($node, $intent, $message, $ctx);
-        if ($toolResult) {
-            $toolsUsed[] = $toolResult['tool'];
-            $citations = array_merge($citations, $toolResult['citations'] ?? []);
-            $actions = array_merge($actions, $toolResult['actions'] ?? []);
-        }
+        $plan = GhostPlanner::plan($node, $message, $ctx, $working);
+        $exec = GhostExecutor::run($node, $plan, $message, $ctx, $working);
+        $ctx = GhostExecutor::merge($ctx, $exec);
 
+        $intent = $plan['intent'] ?? self::intent($message, $ctx);
+        $toolResult = $exec['primary'] ?? null;
         $grounded = self::groundedReply($node, $message, $intent, $ctx, $toolResult);
-        $mode = 'grounded';
+        $grounded = self::withPick($grounded, $exec['pick'] ?? null, $working, $plan);
 
+        $mode = 'grounded';
         $llm = self::maybeLlm($node, $message, $history, $ctx, $grounded);
         if ($llm !== null) {
             $grounded['reply'] = $llm;
             $mode = 'llm+grounded';
         }
 
-        self::logTurn($node, $message, $grounded['reply'], $toolsUsed, $mode);
+        $check = GhostVerifier::check($grounded['reply'], $exec, $ctx);
+        if (! $check['valid']) {
+            $grounded['reply'] = $check['safe_reply'];
+            $mode = 'verified-block';
+        }
+
+        GhostMemory::rememberTurn($node, $plan, $exec, $check);
+        self::logTurn($node, $message, $grounded['reply'], $exec['tools'] ?? [], $mode);
+
+        $citations = array_values(array_unique(array_merge($exec['citations'] ?? [], $grounded['citations'] ?? []), SORT_REGULAR));
+        $actions = ($exec['actions'] ?? []) ?: ($grounded['actions'] ?? []);
+        if ($exec['pending'] ?? []) {
+            $actions[] = ['label' => 'Confirmer l’action', 'href' => $ctx['lieu']['url'] ?? '/'];
+        }
 
         return [
             'reply' => $grounded['reply'],
-            'citations' => array_values(array_unique($citations ?: ($grounded['citations'] ?? []), SORT_REGULAR)),
-            'tools' => $toolsUsed,
-            'actions' => $actions ?: ($grounded['actions'] ?? []),
+            'citations' => $citations,
+            'tools' => $exec['tools'] ?? [],
+            'actions' => $actions,
             'profile' => self::profile($node),
             'mode' => $mode,
+            'goal' => $plan['goal'] ?? null,
+            'skill' => $plan['skill'] ?? null,
+            'plan' => $plan['steps'] ?? [],
+            'verify' => ['valid' => $check['valid'], 'status' => $check['status']],
+            'memory' => GhostMemory::publicFacts($node),
+            'permission' => $exec['ceiling'] ?? GhostSkills::OBSERVE,
         ];
+    }
+
+    /**
+     * @param  array{reply:string, citations:list<array>, actions:list<array>}  $grounded
+     * @param  array<string, mixed>|null  $pick
+     * @param  array<string, mixed>  $working
+     * @param  array<string, mixed>  $plan
+     * @return array{reply:string, citations:list<array>, actions:list<array>}
+     */
+    private static function withPick(array $grounded, ?array $pick, array $working, array $plan): array
+    {
+        if (! $pick) {
+            return $grounded;
+        }
+        $title = $pick['titre'] ?? $pick['title'] ?? null;
+        if (! $title) {
+            return $grounded;
+        }
+        $style = $plan['constraints']['style'] ?? ($working['constraints']['style'] ?? null);
+        $max = $plan['constraints']['max_price'] ?? null;
+        $prefix = '';
+        if ($style) {
+            $prefix = "Tu as dit préférer « {$style} ». ";
+        }
+        if (($plan['goal'] ?? '') === 'find_product') {
+            $prix = $pick['prix'] ?? '';
+            $note = $max ? " sous {$max} €" : '';
+            $grounded['reply'] = $prefix."Parmi ce qui est dans le coffre{$note} : « {$title} »".($prix ? " — {$prix}" : '').'. '.$grounded['reply'];
+            if (! empty($pick['url'])) {
+                array_unshift($grounded['actions'], ['label' => $title, 'href' => $pick['url']]);
+            }
+        }
+        if (($plan['goal'] ?? '') === 'match_job' && isset($pick['score'])) {
+            $missing = implode(', ', $pick['missing'] ?? []);
+            $gap = $missing ? " Il manque : {$missing}." : ' Les preuves collent.';
+            $grounded['reply'] = "Piste : « {$title} » (score ".round(((float) $pick['score']) * 100).' %).'.$gap.' Je n’embauche pas : l’épreuve tranche.';
+        }
+
+        return $grounded;
     }
 
     public static function intent(string $message, array $ctx): string

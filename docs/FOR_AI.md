@@ -37,7 +37,8 @@ Tu travailles sur **Geniuspace**. Stack unique : Laravel dans `geniuspace/`.
 34. **Geniuspedia** : fiches pack du Node (`Geniuspedia::cards`) dans `Ghost::context['fiches']`. URLs locales seulement. **Pas de crawl web.**
 35. **`server/` n’est pas Laravel.** Chrome PWA Grok (`grok-pwa.ts`). Ignorer. Produit = `geniuspace/`.
 36. **Omni-média.** Chapitre Labo / Mixer / Tactique → le player **bascule le cadre** (`Omni::beats`, overlay `omni-frame`). Tenir l’exo = grant `omni`. Prod = 03:15. Démo courte = 0:03 + remap si `duration < at`.
-37. **Rideau Atelier.** Curseur d’arc par défaut = 1. `Spoiler` filtre fiches, produits, Geniuspedia. Le concierge refuse un perso hors rideau (« n’existe pas encore »).
+38. **Ghost = agent cognitif.** Le LLM n’est pas le cerveau. Pipeline : Understand → Memory → Plan → Observe (multi-outils) → Verify → Respond. Faits structurés, jamais un transcript comme vérité. ACT (achat, candidature, unlock, graphe) exige une confirmation humaine. `GhostVerifier` bloque les affirmations hors coffre. Skills dans `GhostSkills.php`.
+
 38. **Maison neuve.** `/n/vera` reste le flagship historique. `WorldTemplates::apply('maison-rh')` pose les 35 missions (`Maison::attachCatalog`). Pas un second Vera.
 39. **Paiement.** `Pay::cents` = prix tenu. Stripe Checkout Session HTTP (pas de SDK). Retour `/panier/retour`.
 
