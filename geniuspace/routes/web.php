@@ -1,17 +1,20 @@
 <?php
 
 use App\Http\Controllers\AtelierController;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BuilderController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CreateController;
 use App\Http\Controllers\DriveController;
 use App\Http\Controllers\ForumController;
 use App\Http\Controllers\ImageStudioController;
+use App\Http\Controllers\LeaderController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StudioController;
 use App\Http\Controllers\UniverseController;
 use App\Models\User;
+use App\Support\RoomCatalog;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -59,6 +62,17 @@ Route::post('/builder/{slug}/add', [BuilderController::class, 'add']);
 Route::post('/builder/{slug}/link', [BuilderController::class, 'link']);
 Route::post('/builder/{slug}/sync', [BuilderController::class, 'sync']);
 Route::post('/builder/{slug}/media', [BuilderController::class, 'media']);
+Route::get('/n/{slug}/sitemap.xml', [LeaderController::class, 'sitemap']);
+Route::get('/n/{slug}/radar', [LeaderController::class, 'radar']);
+Route::get('/n/{slug}/digest', [LeaderController::class, 'digest']);
+Route::post('/n/{slug}/digest', [LeaderController::class, 'digestStore']);
+Route::get('/n/{slug}/vs/{a}/{b}', [LeaderController::class, 'compare']);
+Route::get('/n/{slug}/q', [LeaderController::class, 'search']);
+Route::post('/n/{slug}/host', [LeaderController::class, 'host']);
+Route::get('/g/{slug}.json', [LeaderController::class, 'graph']);
+Route::get('/g/{slug}', [LeaderController::class, 'graph']);
+Route::get('/w/{slug}', [LeaderController::class, 'white']);
+Route::get('/n/{slug}/{salle}', [UniverseController::class, 'room'])->where('salle', RoomCatalog::keys());
 Route::get('/n/{slug}', [UniverseController::class, 'show'])->name('node.show');
 Route::get('/n/{slug}/t/{tid}', [UniverseController::class, 'thread'])->name('thread.show');
 Route::get('/n/{slug}/p/{pid}', [UniverseController::class, 'product'])->name('product.show');

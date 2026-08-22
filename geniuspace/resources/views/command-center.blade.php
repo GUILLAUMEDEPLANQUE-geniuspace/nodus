@@ -9,7 +9,14 @@
   'name' => $product->title,
   'description' => $product->summary,
   'image' => url($product->image),
-  'offers' => ['@'.'type'=>'Offer','priceCurrency'=>'EUR','price'=>$product->priceAmount(),'availability'=>'https://schema.org/InStock'],
+  'offers' => array_filter([
+    '@'.'type'=>'Offer',
+    'priceCurrency'=>'EUR',
+    'price'=>$product->priceAmount(),
+    'availability'=>'https://schema.org/InStock',
+    'areaServed' => $product->city ?: null,
+  ]),
+  'geo' => ($product->lat ?? null) ? ['@'.'type'=>'GeoCoordinates','latitude'=>$product->lat,'longitude'=>$product->lng] : null,
   'url' => url('/n/'.$node->slug.'/p/'.$product->id),
 ]]], JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) !!}
 </script>

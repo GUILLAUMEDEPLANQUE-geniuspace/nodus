@@ -22,7 +22,14 @@
     </script>
 </head>
 <body>
+@php $white = $white ?? false; @endphp
 <header class="site-head">
+    @if($white && isset($node))
+      <a href="/w/{{ $node->slug }}" class="brand">{{ $node->title }}</a>
+      <form action="/n/{{ $node->slug }}/q" class="nav" style="flex:1;max-width:20rem">
+        <input name="q" placeholder="Dans le club…">
+      </form>
+    @else
     <a href="/" class="brand">Geniuspace</a>
     <form action="/explore" class="nav" style="flex:1;max-width:20rem">
         <input name="q" placeholder="Jack O'Neill, Luffy…" style="width:100%">
@@ -39,6 +46,7 @@
         @endauth
         <button class="btn-line" type="button" onclick="document.documentElement.setAttribute('data-theme',document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');localStorage.setItem('nodus-theme',document.documentElement.getAttribute('data-theme'))">Thème</button>
     </nav>
+    @endif
 </header>
 @if(session('ok'))
     <p class="wrap primary" style="padding-top:0.75rem">{{ session('ok') }}</p>

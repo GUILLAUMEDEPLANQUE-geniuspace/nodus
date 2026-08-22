@@ -21,6 +21,7 @@ class AtelierController extends Controller
             'node' => $node,
             'groups' => RoomCatalog::groups(),
             'chosen' => $chosen,
+            'packs' => RoomCatalog::packs(),
         ]);
     }
 

@@ -14,6 +14,7 @@
   'duration' => 'PT'.($media->duration ?: '0M'),
   'embedUrl' => url('/n/'.$node->slug.'/v/'.$media->id),
   'contentUrl' => url('/'.$media->path),
+  'hasPart' => \App\Support\Chapters::clips(\App\Support\Chapters::parse($media->chapters), url('/n/'.$node->slug.'/v/'.$media->id)),
 ], JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE) !!}
 </script>
 @endpush
@@ -74,8 +75,8 @@
         <pre class="muted" style="white-space:pre-wrap;font-family:inherit">{{ $media->chapters }}</pre>
       </div>
       <div x-show="panel==='chap'" style="margin-top:1rem">
-        @foreach($chapters as $c)
-          <p class="chip">{{ $c }}</p>
+        @foreach(\App\Support\Chapters::parse($media->chapters) as $c)
+          <button class="chip" type="button" @click="document.getElementById('v').currentTime={{ $c['startOffset'] }};document.getElementById('v').play()">{{ $c['label'] }}</button>
         @endforeach
       </div>
       <div x-show="panel==='graph'" style="margin-top:1rem">

@@ -27,6 +27,18 @@
   </form>
 
   <form method="post" action="/n/{{ $node->slug }}/studio/seo-compile" style="margin:.5rem 0">@csrf<button class="btn" type="submit">Compiler le SEO</button></form>
+  <p><a class="btn" href="/n/{{ $node->slug }}/radar">Radar SEO</a>
+     <a class="btn-line" href="/n/{{ $node->slug }}/digest">Digest</a>
+     <a class="btn-line" href="/n/{{ $node->slug }}/sitemap.xml">Sitemap club</a>
+     <a class="btn-line" href="/g/{{ $node->slug }}">Graphe public</a></p>
+  <form method="post" action="/n/{{ $node->slug }}/host" class="card" style="padding:1rem;max-width:36rem;margin:1rem 0">
+    @csrf
+    <p class="kicker">Sous-domaine club</p>
+    <input type="hidden" name="slug" value="{{ $node->slug }}">
+    <input name="host" placeholder="205" value="{{ $node->host }}" pattern="[a-z0-9\-]+">
+    <p class="muted">→ 205.geniuspace.com (DNS vers ce serveur). Aperçu : <a class="primary" href="/w/{{ $node->slug }}">/w/{{ $node->slug }}</a></p>
+    <button class="btn" type="submit">Enregistrer</button>
+  </form>
   <h2 class="font-display">CCK (8 essentiels — avancé pour les pro)</h2>
   @foreach($cck as $f)
     <p class="card" style="padding:0.7rem;margin:0.3rem 0">{{ $f->name }} · {{ $f->type }} = {{ $f->value }}</p>

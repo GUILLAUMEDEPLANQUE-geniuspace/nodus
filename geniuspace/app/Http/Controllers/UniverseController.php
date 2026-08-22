@@ -39,6 +39,16 @@ class UniverseController extends Controller
 
     public function show(Request $request, string $slug): View
     {
+        return $this->page($request, $slug, $request->query('tab'));
+    }
+
+    public function room(Request $request, string $slug, string $salle): View
+    {
+        return $this->page($request, $slug, $salle);
+    }
+
+    private function page(Request $request, string $slug, ?string $tab): View
+    {
         $node = GpNode::query()->where('slug', $slug)->firstOrFail();
         $node->load(['products', 'media', 'threads', 'wiki', 'quests', 'translations']);
         $node->localized($request->cookie('locale', 'fr'));
@@ -52,19 +62,21 @@ class UniverseController extends Controller
         $live = LiveMessage::query()->whereIn('thread_id', $tids)->get()->groupBy('thread_id');
         $files = DriveFile::query()->where('node_id', $node->id)->get();
         $guild = GuildMessage::query()->where('node_id', $node->id)->get();
-        $tab = $request->query('tab', $node->skin === 'vera' ? 'maison' : 'vivre');
+        $default = $node->skin === 'vera' ? 'maison' : 'vivre';
+        $tab = $tab ?: $default;
         $tid = $request->query('tid');
         $mode = $request->query('mode', 'legacy');
         $cck = \Illuminate\Support\Facades\DB::table('cck_fields')->where('node_id', $node->id)->get();
         $seoRow = \Illuminate\Support\Facades\DB::table('node_seo')->where('node_id', $node->id)->first();
         $tabs = \Illuminate\Support\Facades\DB::table('node_tabs')->where('node_id', $node->id)->orderBy('sort')->get();
+        $white = $request->is('w/*');
         \Illuminate\Support\Facades\DB::table('visits')->insert([
             'node_id' => $node->id,
             'path' => $request->path(),
             'session' => substr($request->session()->getId(), 0, 16),
         ]);
         return view('universe', compact(
-            'node', 'children', 'parents', 'goal', 'replies', 'live', 'files', 'guild', 'tab', 'tid', 'mode', 'cck', 'seoRow', 'tabs'
+            'node', 'children', 'parents', 'goal', 'replies', 'live', 'files', 'guild', 'tab', 'tid', 'mode', 'cck', 'seoRow', 'tabs', 'white'
         ));
     }
 

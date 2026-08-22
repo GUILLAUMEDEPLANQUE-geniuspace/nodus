@@ -2,7 +2,6 @@
 
 namespace App\Support;
 
-/** Salles du club. Accueil est toujours là. Le reste se coche. */
 class RoomCatalog
 {
     public static function groups(): array
@@ -43,6 +42,16 @@ class RoomCatalog
         ];
     }
 
+    public static function packs(): array
+    {
+        return [
+            'auto' => ['label' => 'Club auto', 'rooms' => ['forum', 'personnages', 'classifieds', 'carte', 'agenda', 'videos', 'gallery']],
+            'manga' => ['label' => 'Hub manga / série', 'rooms' => ['forum', 'personnages', 'videos', 'journal', 'guides', 'stories', 'boutique']],
+            'boutique_expert' => ['label' => 'Boutique expert', 'rooms' => ['boutique_expert', 'gallery', 'videos', 'journal', 'classifieds', 'guides']],
+            'jobs' => ['label' => 'Maison / jobs', 'rooms' => ['offres', 'epreuve', 'forum', 'videos', 'guides', 'guilde']],
+        ];
+    }
+
     public static function all(): array
     {
         $out = [];
@@ -50,5 +59,10 @@ class RoomCatalog
             $out += $rooms;
         }
         return $out;
+    }
+
+    public static function keys(): string
+    {
+        return implode('|', array_merge(array_keys(self::all()), ['vivre', 'maison', 'salon', 'arbre', 'academie']));
     }
 }

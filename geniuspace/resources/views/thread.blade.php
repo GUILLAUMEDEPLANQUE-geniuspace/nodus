@@ -19,13 +19,13 @@
 @endpush
 @section('content')
 <main class="wrap" style="padding:2rem 1.25rem 6rem" x-data="{ mode: 'legacy' }">
-    <a class="kicker" href="/n/{{ $node->slug }}?tab=forum">{{ $node->title }} · Holo-Forum</a>
+    <a class="kicker" href="/n/{{ $node->slug }}/forum">{{ $node->title }} · Holo-Forum</a>
     <h1 class="font-display" style="font-size:clamp(2rem,6vw,3.2rem)">{{ $thread->title }}</h1>
     <p class="muted" style="display:flex;align-items:center;gap:.5rem">
         <img src="{{ $thread->author_avatar ?: \App\Support\Faces::of($thread->author) }}" alt="" style="width:2rem;height:2rem;border-radius:999px;object-fit:cover">
         {{ $thread->author }} · {{ $thread->views }} vues · {{ $thread->fires }} feux
     </p>
-    <p style="max-width:40rem;font-size:1.1rem">{{ $thread->body }}</p>
+    <p style="max-width:40rem;font-size:1.1rem">{!! \App\Support\Linker::html($node, $thread->body) !!}</p>
     <div class="rel" style="margin:1rem 0">
         <button class="chip" type="button" @click="mode='legacy'">Top SEO</button>
         <button class="chip" type="button" @click="mode='live'">Live</button>
@@ -36,7 +36,7 @@
         @forelse($replies as $r)
             <article class="legacy-card">
                 <p class="kicker">{{ $r->author }} · {{ $r->votes }} votes</p>
-                <p>{{ $r->body }}</p>
+                <p>{!! \App\Support\Linker::html($node, $r->body) !!}</p>
             </article>
         @empty
             <p class="muted">Écrivez la première réponse indexable.</p>

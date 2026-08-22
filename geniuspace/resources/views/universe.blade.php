@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('title', ($seoRow->title ?? null) ?: $node->seoTitle())
 @section('description', ($seoRow->description ?? null) ?: $node->summary)
-@section('canonical', url('/n/'.$node->slug))
+@section('canonical', url($tab && $tab !== 'vivre' && $tab !== 'maison' ? '/n/'.$node->slug.'/'.$tab : '/n/'.$node->slug))
 @push('jsonld')
 <script type="application/ld+json">
 {!! json_encode([
@@ -13,6 +13,7 @@
       ['@'.'type' => 'ListItem', 'position' => isset($parents[0]) ? 3 : 2, 'name' => $node->title, 'item' => url('/n/'.$node->slug)],
     ]))],
     ['@'.'type' => $node->kind === 'company' ? 'Organization' : 'CreativeWork', 'name' => $node->title, 'description' => $node->summary, 'url' => url('/n/'.$node->slug)],
+    ['@'.'type' => 'ItemList', 'name' => ($tabs->firstWhere('key', $tab)->label ?? $tab).' — '.$node->title, 'url' => url('/n/'.$node->slug.'/'.$tab)],
   ],
 ], JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) !!}
 </script>
@@ -149,6 +150,11 @@
         <h1>{{ $node->title }}</h1>
         <p>{{ $node->subtitle ?: $node->summary }}</p>
         <div style="margin-top:1.1rem;display:flex;gap:0.5rem;flex-wrap:wrap">
+            <form action="/n/{{ $node->slug }}/q"><input name="q" placeholder="Chercher dans le club" style="width:12rem"><button class="btn-line" type="submit">OK</button></form>
+            @if($children->count()>=2)
+              <a class="btn-line" href="/n/{{ $node->slug }}/vs/{{ $children[0]->slug }}/{{ $children[1]->slug }}">Comparer 2 fiches</a>
+            @endif
+            <a class="btn-ghost" href="/n/{{ $node->slug }}/digest">Digest</a>
             <button class="btn" type="button" @click="tab='personnages'">Rejoindre l'équipage</button>
             <button class="btn-line" type="button" @click="tab='guilde'">Entrer dans la guilde</button>
             <a class="btn-line" href="/studio/image?src={{ urlencode($node->hero) }}&target=hero&slug={{ $node->slug }}">Éditer le héros</a>
@@ -398,7 +404,7 @@
 <nav class="dock">
     <template x-for="b in bubbles" :key="b.id"><span class="rise" x-text="b.name + ' vient de poster'"></span></template>
     @foreach($tabs as $t)
-      <button type="button" :class="tab==='{{ $t->key }}' && 'active'" @click="tab='{{ $t->key }}'">{{ $t->label }}</button>
+      <button type="button" :class="tab==='{{ $t->key }}' && 'active'" @click="tab='{{ $t->key }}'; history.replaceState(null,'','/n/{{ $node->slug }}/{{ $t->key }}')">{{ $t->label }}</button>
     @endforeach
 </nav>
 

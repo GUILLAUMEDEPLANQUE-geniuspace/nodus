@@ -2,7 +2,13 @@
 @section('title', 'Ton atelier — '.$node->title)
 @section('robots', 'noindex')
 @section('content')
-<main class="wrap" style="padding:2.5rem 1.25rem 5rem;max-width:44rem" x-data="{ step: 1, open: {} }">
+<main class="wrap" style="padding:2.5rem 1.25rem 5rem;max-width:44rem" x-data="{
+  step: 1, open: {},
+  applyPack(keys) {
+    document.querySelectorAll('[name=\'rooms[]\']').forEach(cb => { cb.checked = keys.includes(cb.value) });
+    this.step = 2;
+  }
+}">
   <p class="kicker">3 questions · chaque salle se habille</p>
   <h1 class="font-display" style="font-size:2.4rem">On monte {{ $node->title }}</h1>
   <p class="muted">Coche une salle, puis ouvre-la pour la couleur, le fond, l’anim, le SEO.</p>
@@ -20,6 +26,12 @@
     <section class="card" style="padding:1.25rem;margin:1rem 0" x-show="step===2" x-cloak>
       <p class="kicker">2 / 3 · les salles</p>
       <h2 class="font-display">Chez toi, on pourra…</h2>
+      <p class="muted">Pack vide (structure seulement) :</p>
+      <div class="rel" style="margin:.6rem 0 1rem">
+        @foreach($packs as $id => $pack)
+          <button class="chip" type="button" @click="applyPack(@js($pack['rooms']))">{{ $pack['label'] }}</button>
+        @endforeach
+      </div>
       @foreach($groups as $g => $rooms)
         <p class="primary" style="margin:1.1rem 0 .4rem">{{ $g }}</p>
         @foreach($rooms as $key => [$label, $hint])
