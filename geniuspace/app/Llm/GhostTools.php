@@ -22,6 +22,7 @@ class GhostTools
             ['name' => 'list_media', 'description' => 'Vidéos du lieu et état ouvert/fermé'],
             ['name' => 'check_grants', 'description' => 'Preuves déjà tenues par le visiteur'],
             ['name' => 'list_rooms', 'description' => 'Salles du dock'],
+            ['name' => 'list_fiches', 'description' => 'Fiches pack / guides / magazine du lieu'],
             ['name' => 'order_options', 'description' => 'Options d\'achat d\'un produit'],
         ];
     }
@@ -36,6 +37,7 @@ class GhostTools
             'price', 'order' => self::listProducts($node, $ctx),
             'navigate' => self::listRooms($node, $ctx),
             'carnet' => self::checkGrants($node, $ctx),
+            'fiches' => self::listFiches($ctx),
             'unlock', 'certificate' => self::listMedia($node, $ctx),
             'jobs' => self::listNeighbors($node, $ctx),
             default => null,
@@ -96,6 +98,18 @@ class GhostTools
             'data' => ['preuves' => $mine],
             'citations' => [['label' => 'Carnet', 'url' => '/n/'.$node->slug.'/carnet']],
             'actions' => [['label' => 'Ouvrir le carnet', 'href' => '/n/'.$node->slug.'/carnet']],
+        ];
+    }
+
+    public static function listFiches(array $ctx): array
+    {
+        $cards = $ctx['fiches'] ?? [];
+
+        return [
+            'tool' => 'list_fiches',
+            'data' => ['fiches' => $cards],
+            'citations' => array_map(fn ($c) => ['label' => $c['titre'], 'url' => $c['url']], $cards),
+            'actions' => $cards ? [['label' => $cards[0]['titre'], 'href' => $cards[0]['url']]] : [],
         ];
     }
 

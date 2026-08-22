@@ -29,6 +29,7 @@ class RoomCatalog
             'Savoir' => [
                 'guides' => ['Guides', 'Wiki HowTo + bounty SEO : la guilde écrit, Google rank', 'HowTo'],
                 'reviews' => ['Essais & avis', 'Review + note, liée à la fiche et à l’offre', 'Review'],
+                'carnet' => ['Carnet', 'Preuves tenues, export JSON. Ça voyage d’un lieu à l’autre.', 'ProfilePage'],
             ],
             'Commerce' => [
                 'boutique' => ['Boutique', 'Offer + split auteurs, 1-tap depuis le forum', 'OfferCatalog'],
@@ -86,7 +87,7 @@ class RoomCatalog
         return implode('|', array_merge(array_keys(self::all()), [
             'vivre', 'maison', 'salon', 'arbre', 'academie', 'blog', 'home',
             'savoirs', 'lexique', 'viviers', 'europe', 'passport', 'preuve',
-            'pacte', 'ppqc', 'tarif', 'delais', 'carnet', 'marches', 'entreprises', 'maisons', 'metiers', 'apprendre',
+            'pacte', 'ppqc', 'tarif', 'delais', 'marches', 'entreprises', 'maisons', 'metiers', 'apprendre',
         ]));
     }
 }

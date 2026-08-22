@@ -160,6 +160,8 @@ class Ghost
             'salles' => $tabs,
             'actions' => $actions,
             'preuves_visiteur' => Grantor::mine($node->id),
+            'fiches' => Geniuspedia::cards($node, 6),
+            'fourchette' => self::range($node, $products[0] ?? null),
         ];
     }
 
@@ -209,6 +211,9 @@ class Ghost
         $m = mb_strtolower($message);
         if (preg_match('/prix|co[uû]t|combien|offre|n[eé]goc|rabais|r[eé]duc|propose|€|euro/u', $m)) {
             return 'price';
+        }
+        if (preg_match('/fiche|guide|wiki|pack|geniuspedia|article/u', $m)) {
+            return 'fiches';
         }
         if (preg_match('/certificat|rwa|authent|preuve mat[eé]riel/u', $m)) {
             return 'certificate';
@@ -332,6 +337,24 @@ class Ghost
             ];
         }
 
+        if ($intent === 'fiches') {
+            $cards = $ctx['fiches'] ?? [];
+            if (! $cards) {
+                return [
+                    'reply' => 'Pas encore de fiche pack dans ce lieu. Les guides se posent ici.',
+                    'citations' => [],
+                    'actions' => [['label' => 'Guides', 'href' => '/n/'.$node->slug.'/guides']],
+                ];
+            }
+            $lines = collect($cards)->take(5)->map(fn ($c) => '· '.$c['titre'].' — '.$c['extrait'])->all();
+
+            return [
+                'reply' => "Fiches de ce lieu :\n".implode("\n", $lines),
+                'citations' => collect($cards)->take(3)->map(fn ($c) => ['label' => $c['titre'], 'url' => $c['url']])->values()->all(),
+                'actions' => [['label' => $cards[0]['titre'], 'href' => $cards[0]['url']]],
+            ];
+        }
+
         if ($intent === 'carnet') {
             $preuves = $ctx['preuves_visiteur'] ?? [];
             if (! $preuves) {
@@ -392,7 +415,7 @@ class Ghost
         ];
     }
 
-    /** Négociation dans la fourchette (plancher en fiche). Jamais sous le plancher. */
+    /** Négociation dans la fourchette (min/max de fiche + plancher). Clos = ligne panier. */
     private static function negotiate(GpNode $node, string $message, array $ctx): ?array
     {
         if (! preg_match('/(\d+(?:[.,]\d+)?)/u', $message, $m)) {
@@ -403,33 +426,34 @@ class Ghost
             return null;
         }
         $products = $ctx['produits'] ?? [];
-        $p = $products[0] ?? null;
+        $p = self::matchProduct($products, $message) ?? ($products[0] ?? null);
         if (! $p) {
             return null;
         }
-        $list = (int) round((float) preg_replace('/[^\d.,]/', '', (string) ($p['prix'] ?? '0')));
-        $fields = Engine::fields($node->id);
-        $floor = $list ? (int) round($list * 0.9) : 0;
-        foreach ($fields as $key => $f) {
-            if (in_array($key, ['prix_plancher', 'plancher'], true) || mb_strtolower((string) $f->name) === 'plancher') {
-                if (is_numeric($f->value)) {
-                    $floor = (int) $f->value;
-                }
-            }
-        }
+        $range = self::range($node, $p);
+        $list = $range['list'];
+        $floor = $range['floor'];
+        $ceil = $range['ceil'];
         $shop = [['label' => 'Voir l’œuvre', 'href' => $p['url'] ?? Chrome::shopPath($node)]];
-        if ($list && $offer >= $list) {
+        if ($list && $offer >= $list && ($ceil === 0 || $offer <= $ceil || $offer >= $list)) {
+            $price = min($offer, $ceil ?: $offer);
+            if ($price < $list) {
+                $price = $list;
+            }
+
             return [
-                'reply' => "Oui. À {$list} €, je clos. L’œuvre « {$p['titre']} » vous attend — le certificat s’ouvre au paiement.",
+                'reply' => "Oui. À {$list} €, je clos. L’œuvre « {$p['titre']} » est au panier — le certificat s’ouvre au paiement.",
                 'citations' => [['label' => $p['titre'], 'url' => $p['url'] ?? '']],
-                'actions' => $shop,
+                'actions' => self::putDeal($p, $list),
             ];
         }
-        if ($floor && $offer >= $floor) {
+        if ($floor && $offer >= $floor && ($ceil === 0 || $offer <= max($ceil, $list))) {
+            $held = $ceil && $offer > $ceil ? $ceil : $offer;
+
             return [
-                'reply' => "J’ai la fourchette. {$offer} €, c’est tenu pour « {$p['titre']} ». Je prépare l’écrin.",
+                'reply' => "J’ai la fourchette. {$held} €, c’est tenu pour « {$p['titre']} ». Je pose la ligne au panier.",
                 'citations' => [['label' => $p['titre'], 'url' => $p['url'] ?? '']],
-                'actions' => $shop,
+                'actions' => self::putDeal($p, $held),
             ];
         }
         if ($floor && $offer >= (int) round($floor * 0.85)) {
@@ -448,6 +472,87 @@ class Ghost
         }
 
         return null;
+    }
+
+    /**
+     * Fourchette marchande : min/max des champs prix + plancher. Jamais sous le min.
+     *
+     * @param  array<string, mixed>|null  $p
+     * @return array{floor: int, ceil: int, list: int}
+     */
+    public static function range(GpNode $node, ?array $p): array
+    {
+        $list = $p ? (int) round((float) preg_replace('/[^\d.,]/', '', (string) ($p['prix'] ?? '0'))) : 0;
+        $floor = $list ? (int) round($list * 0.9) : 0;
+        $ceil = $list;
+        $flag = Flagships::of($node);
+        $floorKey = (string) ($flag['ghost']['floor_key'] ?? 'prix_plancher');
+        foreach (Engine::fields($node->id) as $key => $f) {
+            $name = mb_strtolower((string) $f->name);
+            $isFloor = in_array($key, ['prix_plancher', 'plancher', $floorKey], true) || $name === 'plancher';
+            $isPrice = in_array($key, ['prix', 'price', 'salaire', $floorKey], true) || $name === 'prix';
+            if ($isFloor && is_numeric($f->value) && (float) $f->value > 0) {
+                $floor = (int) $f->value;
+            }
+            if ($isFloor || $isPrice) {
+                if (is_numeric($f->min_val) && (float) $f->min_val > 0) {
+                    $floor = (int) $f->min_val;
+                }
+                if (is_numeric($f->max_val) && (float) $f->max_val > 0) {
+                    $ceil = (int) $f->max_val;
+                }
+            }
+        }
+        if (isset($p['min']) && is_numeric($p['min']) && (float) $p['min'] > 0) {
+            $floor = (int) $p['min'];
+        }
+        if (isset($p['max']) && is_numeric($p['max']) && (float) $p['max'] > 0) {
+            $ceil = (int) $p['max'];
+        }
+
+        return ['floor' => $floor, 'ceil' => $ceil, 'list' => $list];
+    }
+
+    /** @param  list<array<string, mixed>>  $products */
+    private static function matchProduct(array $products, string $message): ?array
+    {
+        $m = mb_strtolower($message);
+        foreach ($products as $p) {
+            $t = mb_strtolower((string) ($p['titre'] ?? ''));
+            if ($t !== '' && str_contains($m, $t)) {
+                return $p;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Pose la ligne au prix négocié. Le checkout lit extra_cents (souvent négatif).
+     *
+     * @param  array<string, mixed>  $p
+     * @return list<array{label: string, href: string}>
+     */
+    private static function putDeal(array $p, int $offer): array
+    {
+        $list = (int) round((float) preg_replace('/[^\d.,]/', '', (string) ($p['prix'] ?? '0')));
+        $delta = ($offer - $list) * 100;
+        $cart = session()->get('cart', []);
+        $line = ($p['id'] ?? 'deal').'|ghost';
+        $cart[$line] = [
+            'product_id' => $p['id'],
+            'title' => $p['titre'],
+            'price' => $offer.' €',
+            'extra_cents' => $delta,
+            'options' => ['nego' => $offer.' €'],
+            'files' => [],
+        ];
+        session()->put('cart', $cart);
+
+        return [
+            ['label' => 'Voir le panier · '.$offer.' €', 'href' => '/panier'],
+            ['label' => 'L’œuvre', 'href' => $p['url'] ?? '/panier'],
+        ];
     }
 
     private static function maybeLlm(GpNode $node, string $message, array $history, array $ctx, array $grounded): ?string

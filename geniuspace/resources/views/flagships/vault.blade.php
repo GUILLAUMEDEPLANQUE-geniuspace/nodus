@@ -64,8 +64,6 @@
     </div>
   </div>
 
-  @include('partials.ghost-orb', ['node' => $node, 'ghostProduct' => $product])
-
   <aside class="lore-drawer" :class="lore && 'open'">
     <div class="ld-head">
       <p class="kicker">Origines de l’œuvre</p>

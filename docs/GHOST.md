@@ -54,6 +54,24 @@ OLLAMA_MODEL=llama3.1
 
 Le LLM reçoit le system prompt + JSON contexte + la réponse grounded à respecter sur les faits.
 
+## Fourchette marchande
+
+Le plancher n’est plus un seul champ magique. `Ghost::range()` lit, dans l’ordre :
+
+1. `min_val` / `max_val` du champ `prix` ou `prix_plancher`
+2. valeur de `prix_plancher` (Coffre, Table, Scène, Atelier)
+3. 90 % du prix affiché, si rien n’est écrit
+
+Une offre **dans** la fourchette pose une ligne au panier (`session.cart`, `extra_cents` = delta). CTA « Voir le panier · X € ». Hors fourchette : refus, pas de ligne.
+
+## Fiches pack (Geniuspedia)
+
+`Ghost::context()['fiches']` = wiki + magazine + table optionnelle `geniuspedia_cards` **du Node**. Intent `fiche|guide|wiki|pack`.
+
+## Voix (orbe)
+
+STT = Web Speech Recognition (bouton ●). TTS = `speechSynthesis` (bouton ♪). Pas de service tiers. Fallback : le champ texte.
+
 ## Fichiers
 
 | Fichier | Rôle |

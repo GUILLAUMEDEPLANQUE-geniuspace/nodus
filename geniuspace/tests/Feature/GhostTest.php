@@ -76,5 +76,13 @@ class GhostTest extends TestCase
         $this->assertSame('lumen', $ctx['lieu']['slug']);
         $this->assertArrayHasKey('produits', $ctx);
         $this->assertArrayHasKey('videos', $ctx);
+        $this->assertArrayHasKey('fiches', $ctx);
+        $this->assertArrayHasKey('fourchette', $ctx);
     }
-}
+
+    public function test_hello_uses_host_wake(): void
+    {
+        $res = $this->getJson('/n/coffre-celeste/ghost');
+        $res->assertOk()->assertJsonPath('profile', 'marchand');
+        $this->assertStringContainsString('hôte', mb_strtolower($res->json('reply')));
+    }

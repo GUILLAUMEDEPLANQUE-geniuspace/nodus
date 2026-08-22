@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\GpNode;
-use App\Support\Chrome;
 use App\Support\Ghost;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -43,17 +42,7 @@ class GhostController extends Controller
     public function hello(string $slug): JsonResponse
     {
         $node = GpNode::query()->where('slug', $slug)->firstOrFail();
-        $chrome = Chrome::bag($node);
-        $cta = optional($chrome['heroActions']->first())->label ?? 'Explorer';
 
-        return response()->json([
-            'reply' => "Ghost de {$node->title} en ligne. Posez une question sur ce lieu — pas sur le web entier.",
-            'profile' => Ghost::profile($node),
-            'actions' => $chrome['heroActions']->map(fn ($a) => [
-                'label' => $a->label,
-                'href' => Chrome::href($node, $a),
-            ])->values(),
-            'hint' => $cta,
-        ]);
+        return response()->json(Ghost::reply($node, 'bonjour'));
     }
 }

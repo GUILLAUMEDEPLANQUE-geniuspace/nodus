@@ -136,7 +136,8 @@ class UniverseController extends Controller
     {
         $node = GpNode::query()->where('slug', $slug)->firstOrFail();
         $product = Product::query()->where('id', $pid)->where('node_id', $node->id)->firstOrFail();
-        if (in_array(\App\Support\Flagships::canvas($node), ['vault', 'table'], true)) {
+        if (in_array(\App\Support\Flagships::canvas($node), ['vault', 'table', 'scene', 'atelier', 'terrain'], true)
+            || in_array(\App\Support\Flagships::of($node)['id'] ?? '', ['vault', 'table', 'scene', 'atelier-anime', 'terrain', 'territoire', 'arene'], true)) {
             return FlagshipController::vaultPage($node, $product);
         }
         $products = $node->products;

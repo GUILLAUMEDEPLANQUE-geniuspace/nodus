@@ -95,6 +95,7 @@
         </div>
     </div>
 </section>
+<div class="wrap" style="padding-top:1.5rem">@include('flagships.play')</div>
 @else
   <header class="room-head wrap">
     <p class="kicker">{{ $node->title }} · salle</p>
@@ -402,7 +403,6 @@
 @endif
 
 @include('partials.wormholes', ['node' => $node])
-@include('partials.ghost-orb', ['node' => $node])
 
 <nav class="dock dock-{{ $theme->dock ?? 'bottom' }}">
     <template x-for="b in bubbles" :key="b.id"><span class="rise" x-text="b.name + ' vient de poster'"></span></template>

@@ -84,13 +84,66 @@ class FlagshipTest extends TestCase
             'message' => 'Je propose 1100',
         ]);
         $ok->assertOk();
-        $this->assertMatchesRegularExpression('/1100|tenu|clos|fourchette/i', $ok->json('reply'));
+        $this->assertMatchesRegularExpression('/1100|tenu|clos|fourchette|panier/i', $ok->json('reply'));
+        $hrefs = collect($ok->json('actions'))->pluck('href')->implode(' ');
+        $this->assertStringContainsString('/panier', $hrefs);
+        $this->get('/panier')->assertOk()->assertSee('1100', false);
 
         $no = $this->postJson('/n/coffre-celeste/ghost', [
             'message' => 'Je propose 800 euros',
         ]);
         $no->assertOk();
         $this->assertMatchesRegularExpression('/non|plancher|ne tient pas/i', $no->json('reply'));
+    }
+
+    public function test_carnet_is_a_room_not_a_404(): void
+    {
+        $this->assertArrayHasKey('carnet', \App\Support\RoomCatalog::all());
+        $this->get('/n/coffre-celeste/carnet')
+            ->assertOk()
+            ->assertSee('Carnet', false)
+            ->assertDontSee('CCK');
+        $this->get('/n/coffre-celeste/carnet.json')->assertOk();
+    }
+
+    public function test_bible_separates_flagship_and_start(): void
+    {
+        $this->get('/flagships')
+            ->assertOk()
+            ->assertSee('Flagship vs démarrage', false)
+            ->assertSee('Ghost marchand', false);
+    }
+
+    public function test_range_reads_min_max_fields(): void
+    {
+        $node = \App\Models\GpNode::query()->where('slug', 'coffre-celeste')->firstOrFail();
+        $r = Ghost::range($node, ['prix' => '1 200 €']);
+        $this->assertSame(1080, $r['floor']);
+        $this->assertSame(1200, $r['ceil']);
+    }
+
+    public function test_eight_flagships_are_playable_homes(): void
+    {
+        $homes = [
+            'coffre-celeste' => 'L’hôte',
+            'terrain-midgar' => 'Maître du donjon',
+            'atelier-clamp' => 'Le concierge',
+            'territoire-japon' => 'Le guide',
+            'scene-neon' => 'Le régisseur',
+            'arene-reims' => 'Le speaker',
+            'labo-next' => 'Le tuteur',
+            'plateau-nuit' => 'L’AD',
+            'table-aop' => 'Le sommelier',
+        ];
+        foreach ($homes as $slug => $host) {
+            $this->get('/n/'.$slug)
+                ->assertOk()
+                ->assertSee($host, false)
+                ->assertSee('Parler à', false)
+                ->assertDontSee('CCK')
+                ->assertDontSee('parent_of')
+                ->assertDontSee('JoomCCK');
+        }
     }
 
     public function test_lore_stake_writes_a_proposal(): void

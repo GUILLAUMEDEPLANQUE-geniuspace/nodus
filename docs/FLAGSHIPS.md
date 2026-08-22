@@ -22,6 +22,19 @@ Code : `app/Support/Flagships.php` (spec), `Ghost.php`, `Lore.php`, `Chrome` pre
 
 Création : `/create` groupe Flagship. Spec lisible : `/flagships`.
 
+## Flagship vs démarrage
+
+| | Flagship (10) | Démarrage (~50) |
+|---|---|---|
+| Où | Groupe **Flagship** en tête de `/create` | Groupes Fandom / Jeux / Emploi / … |
+| Contrat | Hôte + boucle + passage + preuve. Démo visitable. | Structure, salles, SEO. Le fan habille. |
+| Code | `Flagships.php` + seeder + HUD `flagships/play` | `WorldTemplates.php` |
+| Exemples | Coffre, Terrain, Vera, Table | Hub manga, Club auto, BTS |
+
+Les 50 ne sont **pas** des skins des 10. Un hub manga n’est pas L’Atelier tant qu’il n’a pas le rideau anti-spoiler + concierge + cel.
+
+Démo jouable (seed) : `/n/coffre-celeste`, `/n/terrain-midgar`, `/n/table-aop`, `/n/vera`, plus les 6 autres flagships habillés (hôte, objet, guide, carnet).
+
 ## 1. Le Coffre — boutique physique / reliques
 
 **Innovation.** L’hôte est l’avatar permanent du vendeur. Canvas infini, scroll narratif, hotspots = champs, checkout intra-page.

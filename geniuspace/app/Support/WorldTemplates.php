@@ -39,7 +39,11 @@ class WorldTemplates
         $node->subtitle = $t['pitch'];
         $node->save();
         DB::table('node_tabs')->where('node_id', $node->id)->delete();
-        foreach ($t['rooms'] as $i => $key) {
+        $rooms = $t['rooms'];
+        if (! in_array('carnet', $rooms, true)) {
+            $rooms[] = 'carnet';
+        }
+        foreach ($rooms as $i => $key) {
             $meta = RoomCatalog::all()[$key] ?? ['label' => $key];
             DB::table('node_tabs')->insert([
                 'node_id' => $node->id,
@@ -50,6 +54,7 @@ class WorldTemplates
                 'color' => $t['primary'],
                 'seo_title' => ($meta[0] ?? $key).' — '.$node->title,
                 'seo_desc' => $t['seo'],
+                'enabled' => 1,
             ]);
         }
         DB::table('node_seo')->updateOrInsert(['node_id' => $node->id], [

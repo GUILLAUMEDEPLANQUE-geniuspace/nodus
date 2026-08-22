@@ -83,8 +83,26 @@ body:has(.vault){overflow-x:hidden}
 .tpl.flag{min-height:11rem;border-color:var(--tpl)}
 .tpl.flag strong{font-size:1.15rem}
 
+.flag-play{
+  display:grid;gap:1.2rem;grid-template-columns:minmax(16rem,1fr) minmax(18rem,1.3fr);
+  margin:0 0 2rem;padding:1.2rem;border:1px solid var(--border);border-radius:1rem;
+  background:color-mix(in srgb,var(--primary) 8%,transparent);
+}
+.flag-host h2{margin:.15rem 0 .4rem;font-size:1.8rem}
+.flag-loop .price{color:var(--primary);font-size:1.2rem}
+.flag-loop .btn,.flag-loop .btn-line{margin:.35rem .35rem 0 0;display:inline-block}
+.flag-compos{display:flex;flex-wrap:wrap;gap:.4rem}
+.flag-compos a{padding:.4rem .7rem;border:1px solid var(--border);border-radius:2rem}
+.flag-wave{height:2.2rem;margin:.4rem 0;background:
+  repeating-linear-gradient(90deg,var(--primary) 0 2px,transparent 2px 8px);
+  mask-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 40'><path fill='none' stroke='white' stroke-width='2' d='M0 20 Q 25 0 50 20 T 100 20 T 150 20 T 200 20'/></svg>");
+  -webkit-mask-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 40'><path fill='none' stroke='white' stroke-width='2' d='M0 20 Q 25 0 50 20 T 100 20 T 150 20 T 200 20'/></svg>");
+  mask-size:cover;opacity:.7
+}
+
 @media (max-width:720px){
   .vault-frame{width:min(86vw,22rem)}
   .wormhole{display:none}
   .ghost-orb{bottom:6.2rem;right:.8rem}
+  .flag-play{grid-template-columns:1fr}
 }

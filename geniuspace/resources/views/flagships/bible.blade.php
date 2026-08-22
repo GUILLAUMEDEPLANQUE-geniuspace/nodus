@@ -6,6 +6,11 @@
   <p class="kicker">Bible produit · 10 flagships</p>
   <h1 class="font-display" style="font-size:clamp(2rem,6vw,3.4rem);line-height:.95">Le moteur ne se montre pas.<br>Il se sent.</h1>
   <p class="lede">Surface : lieux, preuves, décisions. Moteur : fiches + voisins + grant. L’utilisateur ne doit jamais lire « node », « edge », « CCK ».</p>
+  <div class="card" style="padding:1.2rem;margin:1.2rem 0">
+    <p class="kicker">Flagship vs démarrage</p>
+    <p><strong>Flagship</strong> (les 10) : un secret, un hôte, une boucle jouable (acquérir, négocier, warp, exo, compos). Démos : Coffre, Terrain, Table, Vera.</p>
+    <p><strong>Démarrage</strong> (~50 templates sous le groupe Flagship sur /create) : structure + salles + SEO. Le fan habille. Ce n’est pas un skin du flagship.</p>
+  </div>
   <p><a class="btn" href="/create">Créer un flagship</a> <a class="btn-line" href="/n/coffre-celeste/p/p-cel-1">Voir le Coffre</a></p>
 
   @foreach($flags as $id => $f)

@@ -16,7 +16,7 @@
 }">
   <p class="kicker">Création de monde</p>
   <h1 class="font-display" style="font-size:clamp(2rem,6vw,3.4rem);line-height:.95">Dix flagships.<br>Pas des skins. Des moteurs.</h1>
-  <p class="lede">Coffre, Terrain, Atelier, Territoire, Maison, Scène, Arène, Labo, Plateau, Table. Chaque carte a un hôte, des passages, des preuves. <a href="/flagships">Bible →</a></p>
+  <p class="lede">Les 10 cartes du haut sont des <strong>flagships</strong> : un hôte, une boucle, un passage, une preuve. En dessous, ~50 templates de <strong>démarrage</strong> métier (structure + SEO, à habiller). <a href="/flagships">Bible →</a></p>
 
   <div class="rel" style="margin:1rem 0;flex-wrap:wrap">
     <button type="button" class="chip" @click="g='Tous'" :class="g==='Tous' && 'primary'">Tous</button>

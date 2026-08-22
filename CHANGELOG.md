@@ -2,6 +2,16 @@
 
 Format : ce qui est **dans le code**, pas la vision PDF.
 
+## 2026-08-22 — Flagships jouables + Ghost clos
+
+- **8 flagships habillés** (Terrain → Plateau) : champs, objet, guide, média, HUD `flagships/play`. Plus seulement Coffre / Table / Vera.
+- **Négociation Ghost** : offre dans la fourchette → ligne panier au prix tenu. Fourchette = `min_val`/`max_val` + plancher.
+- **Carnet** = salle `RoomCatalog`. `/n/{slug}/carnet` dans le dock. Plus de 404 Ghost.
+- **Geniuspedia** dans `Ghost::context` (fiches du lieu).
+- **Voix** STT/TTS sur l’orbe (Web Speech, pas un SaaS).
+- **`server/`** documenté : chrome Grok, hors stack Laravel.
+- Bible : **Flagship vs démarrage**.
+
 ## 2026-08-22 — 10 flagships
 
 Coffre, Terrain, Atelier, Territoire, Maison, Scène, Arène, Labo, Plateau, Table.

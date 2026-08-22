@@ -52,6 +52,7 @@ UI : `/n/{slug}/monde` (Structure / Design / Action / Motion).
 | HTTP, vues, SEO | `geniuspace/app/Http`, `geniuspace/resources/views` |
 | Graphe | tables `nodes` + `edges` |
 | Champs | table `cck_fields` (`field_key`, `unit`, min/max) |
+| Carnet | salle `RoomCatalog` `carnet` → `/n/{slug}/carnet` |
 | Vera (éditorial packs) | `geniuspace/app/Support/VeraCatalog.php` + JSON `Support/vera/` — posé dans le graphe au seed |
 | Lumen (galerie) | seeder `DualWorldsSeeder` + vues living |
 

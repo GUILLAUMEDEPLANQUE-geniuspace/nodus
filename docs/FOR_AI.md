@@ -31,4 +31,9 @@ Tu travailles sur **Geniuspace**. Stack unique : Laravel dans `geniuspace/`.
 27. **Carnet = déblocages + export JSON.** Relique d’un chapitre, brief d’épreuve, certificat d’achat : même coffre. Surface : « tenu », jamais « grant ».
 28. Un calque image / un chapitre `@slug` ouvre un lieu. Pas un timecode mort.
 29. **Unlock = grant en base, sinon 403.** Le teaser est un fichier public distinct. Jamais le MP4 privé en `preview=1`. Fichier Drive locké = `/play` signé 15 min, jamais d’URL permanente.
-31. **Dix flagships.** Coffre, Terrain, Atelier, Territoire, Maison, Scène, Arène, Labo, Plateau, Table. Spec : `Flagships.php` + `/flagships`. Surface ≠ jargon. Hôte = Ghost::speak. Passage = neighbors. Preuve = lore_proposals.
+31. **Dix flagships.** Coffre, Terrain, Atelier, Territoire, Maison, Scène, Arène, Labo, Plateau, Table. Spec : `Flagships.php` + `/flagships`. Surface ≠ jargon. Hôte = Ghost::speak. Passage = neighbors. Preuve = lore_proposals. **Flagship ≠ démarrage** : les ~50 templates d’en dessous sont des coquilles métier, pas des skins.
+32. **Carnet = salle.** `RoomCatalog` clé `carnet`. `/n/{slug}/carnet` + export JSON. Le dock la pose. Le Ghost n’y 404 pas.
+33. **Négociation Ghost** : fourchette = `min_val` / `max_val` + `prix_plancher`. Accepté dans la fourchette → **ligne panier** au prix tenu (`extra_cents`). Jamais sous le min.
+34. **Geniuspedia** : fiches pack du Node (`Geniuspedia::cards`) dans `Ghost::context['fiches']`. Pas un dump web.
+35. **`server/` n’est pas Laravel.** Chrome PWA Grok (`grok-pwa.ts`). Ignorer. Produit = `geniuspace/`.
+

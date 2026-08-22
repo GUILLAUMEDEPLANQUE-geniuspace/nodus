@@ -4,12 +4,15 @@
 
 Repo : [GUILLAUMEDEPLANQUE-geniuspace/nodus](https://github.com/GUILLAUMEDEPLANQUE-geniuspace/nodus)
 
-Deux univers en démo :
+Deux univers en démo, plus dix flagships :
 
 | Univers | C’est quoi, en clair |
 | --- | --- |
 | **Vera** | Un site d’offres d’emploi où le salaire est écrit, le délai de réponse est public, et on passe un test de 6 min avant d’envoyer un CV. |
 | **Lumen** | Une galerie : chaque œuvre a une fiche, un certificat, une vidéo de making-of. |
+| **Coffre** | Relique, hôte qui négocie, passage. `/n/coffre-celeste/p/p-cel-1` |
+
+Les 10 flagships (Coffre → Table) sont en tête de `/create`. Les ~50 templates suivants sont du **démarrage** métier, pas des skins. Chrome Grok (`server/`) : hors stack, voir `server/README.md`.
 
 ## Lancer
 

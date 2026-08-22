@@ -30,7 +30,9 @@
       <p class="muted" x-show="loading">…</p>
     </div>
     <form class="ghost-form" @submit.prevent="send">
+      <button type="button" class="ghost-mic" x-show="canListen" @click="listen()" :class="listening && 'on'" :aria-pressed="listening" aria-label="Parler" title="Parler">●</button>
       <input type="text" x-model="input" maxlength="800" placeholder="Prix, certificat, épreuve, salles…" :disabled="loading" autocomplete="off">
+      <button type="button" class="ghost-tts" @click="voice = !voice; if(!voice && window.speechSynthesis) speechSynthesis.cancel()" :class="voice && 'on'" :aria-pressed="voice" aria-label="Voix" title="Lire à voix haute">♪</button>
       <button class="btn" type="submit" :disabled="loading || !input.trim()">OK</button>
     </form>
   </div>
@@ -49,18 +51,42 @@
   .ghost-actions{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.35rem}
   .ghost-form{display:flex;gap:.4rem;padding:.65rem;border-top:1px solid var(--border,#2a2c38)}
   .ghost-form input{flex:1;background:transparent;border:1px solid var(--border,#2a2c38);border-radius:.5rem;color:inherit;padding:.5rem .65rem}
+  .ghost-mic,.ghost-tts{width:2.2rem;height:2.2rem;border-radius:.5rem;border:1px solid var(--border,#2a2c38);background:transparent;color:inherit;padding:0;font-size:.85rem}
+  .ghost-mic.on{border-color:#ef4444;color:#ef4444;animation:ghost-float .8s ease-in-out infinite}
+  .ghost-tts.on{border-color:var(--primary,#c9a36a);color:var(--primary,#c9a36a)}
   [x-cloak]{display:none!important}
 </style>
 <script>
 function ghostOrb(slug){
   return {
     open:false, boot:false, loading:false, input:'', profile:'', messages:[],
+    voice:true, listening:false, rec:null,
+    canListen: typeof window !== 'undefined' && !!(window.SpeechRecognition || window.webkitSpeechRecognition),
+    speak(text){
+      if(!this.voice || !window.speechSynthesis || !text) return;
+      const u = new SpeechSynthesisUtterance(String(text).slice(0, 400));
+      u.lang = 'fr-FR'; u.rate = 1.02;
+      speechSynthesis.cancel();
+      speechSynthesis.speak(u);
+    },
+    listen(){
+      const C = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if(!C) return;
+      if(this.listening && this.rec){ this.rec.stop(); this.listening=false; return; }
+      const r = new C();
+      r.lang = 'fr-FR'; r.interimResults = false; r.maxAlternatives = 1;
+      r.onresult = (e) => { this.input = e.results[0][0].transcript; this.send(); };
+      r.onend = () => { this.listening = false; };
+      r.onerror = () => { this.listening = false; };
+      this.rec = r; this.listening = true; r.start();
+    },
     async hello(){
       try{
         const r = await fetch('/n/'+slug+'/ghost');
         const j = await r.json();
         this.profile = j.profile || '';
         this.messages.push({role:'assistant', content:j.reply, actions:j.actions||[]});
+        this.speak(j.reply);
       }catch(e){ this.messages.push({role:'assistant', content:'Ghost indisponible un instant.'}); }
     },
     async send(){
@@ -78,6 +104,7 @@ function ghostOrb(slug){
         const j = await r.json();
         this.messages.push({role:'assistant', content:j.reply||'…', actions:j.actions||[]});
         this.profile = j.profile || this.profile;
+        this.speak(j.reply||'');
       }catch(e){
         this.messages.push({role:'assistant', content:'Je n\'ai pas pu joindre le coffre. Réessayez.'});
       }
