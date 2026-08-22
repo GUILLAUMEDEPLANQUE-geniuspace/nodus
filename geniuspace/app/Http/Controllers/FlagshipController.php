@@ -54,7 +54,7 @@ class FlagshipController extends Controller
         $neighbors = Engine::neighbors($piece ?? $node);
         $also = Engine::alsoInWorld($piece ?? $node, 4);
         $schema = self::productSchema($node, $product, $neighbors);
-        $ghost = Ghost::persona($node);
+        $ghost = Flagships::of($node)['ghost'] ?? ['name' => Ghost::hostName($node), 'wake' => ''];
         $lorePending = Lore::pending($node->id);
         $hotspots = self::hotspots($fields);
 
