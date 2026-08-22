@@ -29,12 +29,14 @@
   openId: @js($tid),
   mode: @js($mode ?: 'legacy'),
   bubbles: [],
+  skins: @json($tabs->mapWithKeys(fn($t) => [$t->key => '--room-color:'.($t->color ?? '#c9a36a').';'.(($t->bg ?? '') ? 'background-image:url('.$t->bg.');background-size:cover;background-position:center;' : '')])->all()),
+  anims: @json($tabs->mapWithKeys(fn($t) => [$t->key => (bool) ($t->animate ?? false)])->all()),
   ping(name) {
     const id = Date.now();
     this.bubbles.push({ id, name });
     setTimeout(() => { this.bubbles = this.bubbles.filter(b => b.id !== id) }, 3200);
   }
-}" class="pb-28">
+}" class="pb-28 room" :style="skins[tab] || ''" :class="anims[tab] && 'room-anim'">
 
 @if($living)
 {{-- ========== LIVING WORLD ========== --}}
@@ -311,21 +313,93 @@
             <p class="muted">Drive vide.</p>
         @endforelse
     </div>
+
+    <div x-show="tab==='boutique_expert'">
+        <p class="kicker">Boutique expert</p>
+        <h2 class="font-display" style="font-size:2.6rem;color:var(--room-color,#c9a36a)">Vitrine</h2>
+        @forelse($node->products as $p)
+            <article class="card" style="display:grid;grid-template-columns:minmax(12rem,28%) 1fr;gap:1rem;margin:.8rem 0;overflow:hidden">
+                <img src="{{ $p->image }}" alt="{{ $p->title }}" style="height:100%;object-fit:cover;min-height:12rem">
+                <div class="pad">
+                    <p class="kicker">{{ $p->rwa ? 'RWA' : 'Expert' }} · {{ $p->stock }}</p>
+                    <h3 class="font-display" style="font-size:2rem">{{ $p->title }}</h3>
+                    <p class="primary" style="font-size:2rem;font-family:var(--display)">{{ $p->price }}</p>
+                    <p class="stars">★★★★★ {{ $p->rating }}/5</p>
+                    <a class="btn" href="/n/{{ $node->slug }}/p/{{ $p->id }}">Fiche complète SEO</a>
+                </div>
+            </article>
+        @empty
+            <p class="muted">Pas encore de pièce en vitrine.</p>
+        @endforelse
+    </div>
+    <div x-show="tab==='classifieds' || tab==='merch'">
+        <h2 class="font-display">{{ $tab === 'merch' ? 'Merch' : 'Petites annonces' }}</h2>
+        @foreach($node->products as $p)
+            <p class="card" style="padding:1rem;margin:.4rem 0"><a href="/n/{{ $node->slug }}/p/{{ $p->id }}">{{ $p->title }}</a> <span class="primary">{{ $p->price }}</span></p>
+        @endforeach
+    </div>
+    <div x-show="tab==='gallery'">
+        <h2 class="font-display">Galerie</h2>
+        <div class="grid-3">
+            @foreach($files->where('kind','image') as $f)
+                <img src="{{ $f->path }}" alt="{{ $f->title }}" style="width:100%;border-radius:1rem">
+            @endforeach
+        </div>
+    </div>
+    <div x-show="tab==='audio'">
+        <h2 class="font-display">Podcasts</h2>
+        @foreach($node->media->where('kind','audio') as $m)
+            <article class="card" style="padding:1rem;margin:.5rem 0"><h3>{{ $m->title }}</h3><audio src="/{{ ltrim($m->path,'/') }}" controls></audio></article>
+        @endforeach
+    </div>
+    <div x-show="tab==='agenda'">
+        <h2 class="font-display">Agenda</h2>
+        @forelse($journal as $j)
+            <article class="card" style="padding:1rem;margin:.5rem 0"><p class="kicker">Date</p><h3>{{ $j->title }}</h3><p>{{ $j->body }}</p></article>
+        @empty<p class="muted">Pas de sortie annoncée.</p>@endforelse
+    </div>
+    <div x-show="tab==='stories'">
+        <h2 class="font-display">Stories</h2>
+        <div class="snap" style="min-height:60dvh">
+            @foreach($node->media as $m)
+                <article class="snap-card"><video src="/{{ ltrim($m->path,'/') }}" muted autoplay loop playsinline></video></article>
+            @endforeach
+        </div>
+    </div>
+    <div x-show="tab==='carte'">
+        <h2 class="font-display">Carte du club</h2>
+        @foreach($cck->where('type','geo') as $f)
+            @include('partials.cck-render', ['f'=>$f])
+        @endforeach
+        <p class="muted">Ajoute un champ Lieu dans l’atelier / Studio.</p>
+    </div>
+    <div x-show="tab==='collections'">
+        <h2 class="font-display">Collections</h2>
+        @foreach($children as $c)
+            <a class="card" href="/n/{{ $c->slug }}" style="display:block;padding:1rem;margin:.4rem 0">{{ $c->title }}</a>
+        @endforeach
+    </div>
+    <div x-show="tab==='reviews'">
+        <h2 class="font-display">Essais & avis</h2>
+        @foreach($journal as $j)
+            <article class="card" style="padding:1rem;margin:.5rem 0"><h3>{{ $j->title }}</h3><p>{{ $j->body }}</p></article>
+        @endforeach
+    </div>
+    <div x-show="tab==='offres' || tab==='epreuve'">
+        <h2 class="font-display">{{ $tab === 'epreuve' ? 'Quêtes' : 'Offres' }}</h2>
+        @foreach($node->quests as $q)
+            <article class="step"><p class="kicker">{{ $q->skill }}</p><h3>{{ $q->title }}</h3><p>{{ $q->prompt }}</p></article>
+        @endforeach
+    </div>
 </div>
 </div>
 </template>
 
 <nav class="dock">
     <template x-for="b in bubbles" :key="b.id"><span class="rise" x-text="b.name + ' vient de poster'"></span></template>
-    <button type="button" :class="tab==='vivre' && 'active'" @click="tab='vivre'">Univers</button>
-    <button type="button" :class="tab==='personnages' && 'active'" @click="tab='personnages'">Personnages</button>
-    <button type="button" :class="tab==='forum' && 'active'" @click="tab='forum'">Forum</button>
-    <button type="button" :class="tab==='journal' && 'active'" @click="tab='journal'">Journal</button>
-    <button type="button" :class="tab==='guilde' && 'active'" @click="tab='guilde'">Guilde</button>
-    <button type="button" :class="tab==='guides' && 'active'" @click="tab='guides'">Guides</button>
-    <button type="button" :class="tab==='boutique' && 'active'" @click="tab='boutique'">Boutique</button>
-    <button type="button" :class="tab==='videos' && 'active'" @click="tab='videos'">Vidéos</button>
-    <button type="button" :class="tab==='reliques' && 'active'" @click="tab='reliques'">Drive</button>
+    @foreach($tabs as $t)
+      <button type="button" :class="tab==='{{ $t->key }}' && 'active'" @click="tab='{{ $t->key }}'">{{ $t->label }}</button>
+    @endforeach
 </nav>
 
 @else

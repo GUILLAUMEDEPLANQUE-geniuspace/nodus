@@ -10,8 +10,9 @@
     <label class="muted">Le nom</label>
     <input name="title" required placeholder="Club 205 GTI, One Piece FR…" style="width:100%;margin:0.4rem 0">
     <label class="muted">C’est plutôt</label>
-    <select name="kind" style="width:100%;margin:0.4rem 0">
+    <select name="kind" style="width:100%;margin:0.4rem 0" onchange="document.getElementById('skin').value=this.value==='company'?'vera':'living'">
       <option value="series">Une passion (auto, manga, jeu…)</option>
+      <option value="boutique_expert">Une boutique expert (vitrine, pièces, luxe)</option>
       <option value="company">Une boîte / du recrutement</option>
       <option value="person">Une personne</option>
     </select>

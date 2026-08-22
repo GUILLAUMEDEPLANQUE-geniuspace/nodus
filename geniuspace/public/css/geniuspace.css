@@ -145,3 +145,8 @@ textarea { height: auto; border-radius: 1rem; padding: 0.75rem 1rem; }
 .salon { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; min-height: 16rem; }
 .salon .cell { background: var(--surface); border-radius: 1rem; display: grid; place-items: center; min-height: 5rem; border: 1px dashed var(--border); }
 .tree { width: 100%; max-width: 28rem; }
+
+[x-cloak]{display:none!important}
+.room { background-color: color-mix(in srgb, var(--room-color, var(--primary)) 8%, var(--bg)); background-repeat: no-repeat; transition: background-color .4s; }
+.room-anim { animation: roomPulse 9s ease-in-out infinite; }
+@keyframes roomPulse { 0%,100% { filter: saturate(1); } 50% { filter: saturate(1.15); } }
