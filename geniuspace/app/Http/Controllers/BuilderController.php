@@ -2,26 +2,26 @@
 
 namespace App\Http\Controllers;
 
+use App\Llm\CckCatalog;
+use App\Llm\Toolbelt;
+use App\Llm\WorldCompiler;
 use App\Models\Edge;
 use App\Models\GpNode;
-use App\Support\Acl;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Illuminate\View\View;
 
-/**
- * God Canvas — la 3D n'est qu'une peau.
- * Chaque mesh = un nœud / un type CCK / une arête parent_enfant.
- */
 class BuilderController extends Controller
 {
-    public function show(string $slug = 'one-piece'): View
+    public function show(Request $request, string $slug = 'one-piece'): View
     {
         $node = GpNode::query()->where('slug', $slug)->firstOrFail();
-        return view('builder', compact('node'));
+        $count = DB::table('spatial_nodes')->where('universe_id', $node->id)->count();
+        $fresh = $request->boolean('new') || $count <= 1;
+        $catalog = CckCatalog::all();
+        $tools = Toolbelt::schema();
+        return view('builder', compact('node', 'fresh', 'catalog', 'tools'));
     }
 
     public function state(string $slug): JsonResponse
@@ -30,28 +30,22 @@ class BuilderController extends Controller
         $spatial = DB::table('spatial_nodes')->where('universe_id', $uni->id)->get();
         if ($spatial->isEmpty()) {
             DB::table('spatial_nodes')->insert([
-                'universe_id' => $uni->id,
-                'node_id' => $uni->id,
-                'kind' => 'core',
-                'x' => 0, 'y' => 0, 'z' => 0,
-                'radius' => 0, 'angle' => 0, 'speed' => 0,
+                'universe_id' => $uni->id, 'node_id' => $uni->id, 'kind' => 'core',
+                'x' => 0, 'y' => 0, 'z' => 0, 'radius' => 0, 'angle' => 0, 'speed' => 0,
             ]);
             $spatial = DB::table('spatial_nodes')->where('universe_id', $uni->id)->get();
         }
         $ids = $spatial->pluck('node_id');
         $nodes = GpNode::query()->whereIn('id', $ids)->get()->keyBy('id');
-        $payload = $spatial->map(function ($s) use ($nodes) {
+        $cck = DB::table('cck_fields')->whereIn('node_id', $ids)->get()->groupBy('node_id');
+        $payload = $spatial->map(function ($s) use ($nodes, $cck) {
             $n = $nodes[$s->node_id] ?? null;
             return [
-                'sid' => $s->id,
-                'id' => $s->node_id,
-                'kind' => $s->kind,
-                'title' => $n->title ?? $s->kind,
-                'slug' => $n->slug ?? '',
+                'sid' => $s->id, 'id' => $s->node_id, 'kind' => $s->kind,
+                'title' => $n->title ?? $s->kind, 'slug' => $n->slug ?? '',
                 'x' => (float) $s->x, 'y' => (float) $s->y, 'z' => (float) $s->z,
-                'radius' => (float) $s->radius,
-                'angle' => (float) $s->angle,
-                'speed' => (float) $s->speed,
+                'radius' => (float) $s->radius, 'angle' => (float) $s->angle, 'speed' => (float) $s->speed,
+                'fields' => $cck->get($s->node_id, collect())->values(),
             ];
         });
         $edges = Edge::query()->whereIn('from_id', $ids)->orWhereIn('to_id', $ids)->get(['from_id', 'to_id', 'kind', 'label']);
@@ -64,81 +58,30 @@ class BuilderController extends Controller
 
     public function bang(Request $request, string $slug): JsonResponse
     {
-        $uni = GpNode::query()->where('slug', $slug)->firstOrFail();
-        $prompt = $request->validate(['prompt' => 'required|string|max:500'])['prompt'];
-        $skin = str_contains(mb_strtolower($prompt), 'job') || str_contains(mb_strtolower($prompt), 'recrut')
-            ? 'vera'
-            : 'living';
-        $uni->summary = $prompt;
-        $uni->skin = $skin;
-        $uni->save();
-        DB::table('cck_fields')->insert([
-            'node_id' => $uni->id,
-            'name' => 'Prompt Big Bang',
-            'type' => 'rich',
-            'value' => $prompt,
-            'target_kind' => 'node',
-            'target_id' => '',
-            'sort' => 0,
-        ]);
-        return $this->state($slug);
+        $prompt = $request->validate(['prompt' => 'required|string|max:800'])['prompt'];
+        $compiled = WorldCompiler::run($slug, $prompt);
+        $state = $this->state($slug)->getData(true);
+        $state['compile'] = $compiled;
+        return response()->json($state);
+    }
+
+    public function compile(Request $request, string $slug): JsonResponse
+    {
+        return $this->bang($request, $slug);
     }
 
     public function add(Request $request, string $slug): JsonResponse
     {
-        $uni = GpNode::query()->where('slug', $slug)->firstOrFail();
         $type = $request->validate(['type' => 'required|string'])['type'];
-        $map = [
-            'job' => ['kind' => 'job', 'title' => 'Offre / Quête'],
-            'crypto' => ['kind' => 'product', 'title' => 'Actif RWA'],
-            'video' => ['kind' => 'work', 'title' => 'Holo-Fiche'],
-            'character' => ['kind' => 'character', 'title' => 'Personnage'],
-            'shop' => ['kind' => 'product', 'title' => 'Produit boutique'],
-        ];
-        $meta = $map[$type] ?? ['kind' => 'concept', 'title' => 'Nœud'];
-        $id = substr(md5($type.microtime()), 0, 12);
-        $nslug = Str::slug($meta['title']).'-'.substr($id, 0, 4);
-        GpNode::query()->create([
-            'id' => $id,
-            'slug' => $nslug,
-            'kind' => $meta['kind'],
-            'title' => $meta['title'],
-            'subtitle' => $type,
-            'summary' => 'Nœud sculpté dans le God Canvas.',
-            'body' => '',
-            'hero' => $uni->hero,
-            'skin' => $uni->skin,
-            'featured' => false,
-        ]);
-        Edge::query()->create(['from_id' => $uni->id, 'to_id' => $id, 'kind' => 'parent_of', 'label' => $type]);
-        $angle = (float) ($request->input('angle', mt_rand(0, 628) / 100));
-        $radius = (float) ($request->input('radius', 50 + mt_rand(0, 40)));
-        DB::table('spatial_nodes')->insert([
-            'universe_id' => $uni->id,
-            'node_id' => $id,
-            'kind' => $type,
-            'x' => cos($angle) * $radius,
-            'y' => (mt_rand(-10, 10)),
-            'z' => sin($angle) * $radius,
-            'radius' => $radius,
-            'angle' => $angle,
-            'speed' => 0.002 + mt_rand(0, 5) / 1000,
-        ]);
-        if (Auth::id()) {
-            DB::table('node_staff')->insertOrIgnore(['node_id' => $id, 'user_id' => Auth::id(), 'role' => 'owner']);
-        }
+        $title = $request->input('title');
+        Toolbelt::spawn(['slug' => $slug, 'type' => $type, 'title' => $title]);
         return $this->state($slug);
     }
 
     public function link(Request $request, string $slug): JsonResponse
     {
         $data = $request->validate(['from' => 'required|string', 'to' => 'required|string']);
-        Edge::query()->create([
-            'from_id' => $data['from'],
-            'to_id' => $data['to'],
-            'kind' => 'parent_of',
-            'label' => 'rayon',
-        ]);
+        Toolbelt::link($data['from'], $data['to']);
         return $this->state($slug);
     }
 
@@ -148,6 +91,7 @@ class BuilderController extends Controller
             'id' => 'required|string',
             'title' => 'nullable|string',
             'summary' => 'nullable|string',
+            'field_type' => 'nullable|string',
             'field_name' => 'nullable|string',
             'field_value' => 'nullable|string',
         ]);
@@ -159,17 +103,36 @@ class BuilderController extends Controller
             $n->summary = $data['summary'];
         }
         $n->save();
-        if (! empty($data['field_name'])) {
-            DB::table('cck_fields')->insert([
+        if (! empty($data['field_type']) || ! empty($data['field_name'])) {
+            Toolbelt::field([
                 'node_id' => $n->id,
-                'name' => $data['field_name'],
-                'type' => 'text',
+                'type' => $data['field_type'] ?: 'text',
+                'name' => $data['field_name'] ?: $data['field_type'],
                 'value' => $data['field_value'] ?? '',
-                'target_kind' => 'node',
-                'target_id' => '',
-                'sort' => 0,
             ]);
         }
+        Toolbelt::seo([
+            'node_id' => $n->id,
+            'title' => $n->title.' | Geniuspace',
+            'description' => $n->summary ?: $n->title,
+        ]);
         return $this->state($slug);
+    }
+
+    public function media(Request $request, string $slug): JsonResponse
+    {
+        $request->validate(['file' => 'required|file|max:512000', 'node_id' => 'nullable|string']);
+        $uni = GpNode::query()->where('slug', $slug)->firstOrFail();
+        $target = $request->string('node_id')->toString();
+        $node = $target ? GpNode::query()->find($target) : $uni;
+        $res = Toolbelt::storeUpload($node ?? $uni, $request->file('file'));
+        $state = $this->state($slug)->getData(true);
+        $state['upload'] = $res;
+        return response()->json($state);
+    }
+
+    public function tools(): JsonResponse
+    {
+        return response()->json(['tools' => Toolbelt::schema()]);
     }
 }

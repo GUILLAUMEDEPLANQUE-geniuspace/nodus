@@ -1,73 +1,78 @@
 /**
- * God Canvas — Three.js r128.
- * Tokens or/encre (0xc9a36a). Chaque mesh = nœud Eloquent. Les lignes = edges.
+ * God Canvas — peau 3D. Les tools LLM / CCK / Drive écrivent la DB.
+ * Drop fichier → attach_media. Palette CCK → add_cck_field.
  */
 (function () {
   const GOLD = 0xc9a36a;
-  const INK = 0x07080c;
+  const INK = 0x05060a;
   const slug = window.GP_SLUG;
   const csrf = window.GP_CSRF;
   const container = document.getElementById("webgl");
   const scene = new THREE.Scene();
-  scene.fog = new THREE.FogExp2(INK, 0.002);
-  const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 2000);
-  camera.position.set(0, 50, 150);
+  scene.fog = new THREE.FogExp2(INK, 0.0018);
+  const camera = new THREE.PerspectiveCamera(55, innerWidth / innerHeight, 0.1, 2500);
+  camera.position.set(40, 70, 180);
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setSize(innerWidth, innerHeight);
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   container.appendChild(renderer.domElement);
   const controls = new THREE.OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
-  scene.add(new THREE.AmbientLight(0xffffff, 0.35));
-  const lamp = new THREE.PointLight(GOLD, 1.4, 600);
-  lamp.position.set(0, 80, 0);
-  scene.add(lamp);
+  controls.maxDistance = 700;
+  scene.add(new THREE.AmbientLight(0xf3eadc, 0.28));
+  const sun = new THREE.PointLight(GOLD, 2.2, 900);
+  sun.position.set(40, 120, 40);
+  scene.add(sun);
+  const rim = new THREE.PointLight(0x8aa4c8, 0.6, 700);
+  rim.position.set(-80, 20, -40);
+  scene.add(rim);
   const starsGeo = new THREE.BufferGeometry();
-  const pos = new Float32Array(6000);
-  for (let i = 0; i < pos.length; i++) pos[i] = (Math.random() - 0.5) * 900;
+  const pos = new Float32Array(12000);
+  for (let i = 0; i < pos.length; i++) pos[i] = (Math.random() - 0.5) * 1400;
   starsGeo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
-  const starMesh = new THREE.Points(starsGeo, new THREE.PointsMaterial({ size: 1.2, color: GOLD, opacity: 0.45, transparent: true }));
+  const starMesh = new THREE.Points(starsGeo, new THREE.PointsMaterial({ size: 1.1, color: GOLD, opacity: 0.5, transparent: true }));
   scene.add(starMesh);
 
   const meshes = [];
   const lines = [];
   let linkMode = false;
   let linkFrom = null;
+  let selected = null;
 
   function geomFor(kind) {
-    if (kind === "job") return new THREE.BoxGeometry(8, 14, 8);
-    if (kind === "crypto") return new THREE.OctahedronGeometry(8, 0);
-    if (kind === "video") return new THREE.SphereGeometry(6, 24, 24);
-    if (kind === "character") return new THREE.ConeGeometry(6, 12, 5);
-    if (kind === "shop") return new THREE.TorusGeometry(6, 2, 8, 16);
-    return new THREE.SphereGeometry(18, 48, 48);
+    if (kind === "job") return new THREE.BoxGeometry(9, 16, 9);
+    if (kind === "crypto") return new THREE.OctahedronGeometry(10, 0);
+    if (kind === "video") return new THREE.SphereGeometry(7, 28, 28);
+    if (kind === "character") return new THREE.ConeGeometry(7, 14, 6);
+    if (kind === "shop") return new THREE.TorusGeometry(7, 2.2, 10, 20);
+    return new THREE.SphereGeometry(22, 64, 64);
   }
   function colorFor(kind) {
     if (kind === "job") return 0x8aa4c8;
-    if (kind === "crypto") return 0xd4a24a;
+    if (kind === "crypto") return 0xe0b15a;
     if (kind === "video") return 0xb07cc8;
     if (kind === "character") return GOLD;
-    return 0x3d4a3a;
+    if (kind === "shop") return 0xd4c4a0;
+    return 0x1c2420;
   }
-
   function clearScene() {
     meshes.splice(0).forEach((m) => scene.remove(m));
     lines.splice(0).forEach((l) => scene.remove(l));
   }
-
   function spawn(state) {
+    if (!state || !state.nodes) return;
     clearScene();
     const byId = {};
     state.nodes.forEach(function (n) {
-      const g = geomFor(n.kind);
       const mat = new THREE.MeshStandardMaterial({
         color: colorFor(n.kind),
         emissive: GOLD,
-        emissiveIntensity: n.kind === "core" ? 0.25 : 0.12,
-        roughness: 0.35,
+        emissiveIntensity: n.kind === "core" ? 0.35 : 0.14,
+        roughness: 0.28,
+        metalness: 0.45,
         wireframe: n.kind === "core",
       });
-      const mesh = new THREE.Mesh(g, mat);
+      const mesh = new THREE.Mesh(geomFor(n.kind), mat);
       mesh.position.set(n.x, n.y, n.z);
       mesh.userData = n;
       scene.add(mesh);
@@ -75,51 +80,52 @@
       byId[n.id] = mesh;
       if (n.kind === "core") {
         const ring = new THREE.Mesh(
-          new THREE.RingGeometry(28, 28.6, 64),
-          new THREE.MeshBasicMaterial({ color: GOLD, side: THREE.DoubleSide, transparent: true, opacity: 0.45 })
+          new THREE.RingGeometry(34, 34.7, 80),
+          new THREE.MeshBasicMaterial({ color: GOLD, side: THREE.DoubleSide, transparent: true, opacity: 0.55 })
         );
         ring.rotation.x = Math.PI / 2;
         mesh.add(ring);
       }
     });
-    state.edges.forEach(function (e) {
+    (state.edges || []).forEach(function (e) {
       const a = byId[e.from_id];
       const b = byId[e.to_id];
       if (!a || !b) return;
       const geo = new THREE.BufferGeometry().setFromPoints([a.position.clone(), b.position.clone()]);
-      const line = new THREE.Line(geo, new THREE.LineBasicMaterial({ color: GOLD, transparent: true, opacity: 0.35 }));
+      const line = new THREE.Line(geo, new THREE.LineBasicMaterial({ color: GOLD, transparent: true, opacity: 0.4 }));
       line.userData = { from: e.from_id, to: e.to_id };
       scene.add(line);
       lines.push(line);
     });
   }
-
   function api(path, body) {
     return fetch(path, {
       method: body ? "POST" : "GET",
       headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": csrf, Accept: "application/json" },
       body: body ? JSON.stringify(body) : undefined,
-    }).then(function (r) {
-      return r.json();
-    });
+    }).then((r) => r.json());
   }
-
   function refresh() {
     return api("/builder/" + slug + "/state").then(spawn);
   }
-
-  const raycaster = new THREE.Raycaster();
-  const mouse = new THREE.Vector2();
   const panel = document.getElementById("panel");
   function openPanel(n) {
-    document.getElementById("ptitle").textContent = n.title + " · " + n.kind;
+    selected = n;
+    document.getElementById("ptitle").textContent = (n.title || "") + " · " + n.kind;
     document.getElementById("pid").value = n.id;
-    document.getElementById("ptit").value = n.title;
+    document.getElementById("ptit").value = n.title || "";
     document.getElementById("psum").value = "";
+    const box = document.getElementById("pfields");
+    const fs = n.fields || [];
+    box.innerHTML = fs.length
+      ? fs.map((f) => "<p>" + f.type + " · <strong>" + f.name + "</strong> " + (f.value || "") + "</p>").join("")
+      : "<p>Aucun champ — palette à gauche ou formulaire.</p>";
     panel.classList.add("on");
   }
+  const raycaster = new THREE.Raycaster();
+  const mouse = new THREE.Vector2();
   window.addEventListener("click", function (ev) {
-    if (ev.target.closest(".gdock") || ev.target.closest(".slide") || ev.target.closest(".bang") || ev.target.closest("header")) return;
+    if (ev.target.closest(".gdock") || ev.target.closest(".slide") || ev.target.closest(".bang") || ev.target.closest("header") || ev.target.closest(".palette")) return;
     mouse.x = (ev.clientX / innerWidth) * 2 - 1;
     mouse.y = -(ev.clientY / innerHeight) * 2 + 1;
     raycaster.setFromCamera(mouse, camera);
@@ -136,57 +142,108 @@
       return;
     }
     const p = hit.object.position.clone();
-    camera.position.set(p.x + 36, p.y + 18, p.z + 36);
+    camera.position.set(p.x + 42, p.y + 22, p.z + 42);
     controls.target.copy(p);
     openPanel(n);
   });
 
-  document.getElementById("pclose").onclick = function () {
-    panel.classList.remove("on");
-  };
+  function revealHud() {
+    const d = document.getElementById("dock");
+    const pal = document.getElementById("palette");
+    if (d) d.style.opacity = "1";
+    if (pal) pal.style.opacity = "1";
+    const b = document.getElementById("bang");
+    if (b) b.style.display = "none";
+  }
+
+  document.getElementById("pclose").onclick = () => panel.classList.remove("on");
   document.getElementById("psync").onsubmit = function (e) {
     e.preventDefault();
-    const fd = new FormData(e.target);
-    const body = Object.fromEntries(fd.entries());
-    api("/builder/" + slug + "/sync", body).then(function () {
+    api("/builder/" + slug + "/sync", Object.fromEntries(new FormData(e.target))).then(function (st) {
+      spawn(st);
       panel.classList.remove("on");
-      return refresh();
     });
   };
   document.querySelectorAll("[data-add]").forEach(function (btn) {
+    btn.onclick = () => api("/builder/" + slug + "/add", { type: btn.getAttribute("data-add") }).then(spawn);
+  });
+  document.querySelectorAll("[data-cck]").forEach(function (btn) {
     btn.onclick = function () {
-      api("/builder/" + slug + "/add", { type: btn.getAttribute("data-add") }).then(spawn);
+      if (!selected) {
+        alert("Cliquez d’abord un astre.");
+        return;
+      }
+      api("/builder/" + slug + "/sync", {
+        id: selected.id,
+        field_type: btn.getAttribute("data-cck"),
+        field_name: btn.textContent.trim(),
+        field_value: "",
+      }).then(function (st) {
+        spawn(st);
+        const n = (st.nodes || []).find((x) => x.id === selected.id);
+        if (n) openPanel(n);
+      });
     };
   });
-  document.getElementById("link-mode").onclick = function () {
-    linkMode = !linkMode;
-    this.style.color = linkMode ? "#c9a36a" : "";
-  };
+  const lm = document.getElementById("link-mode");
+  if (lm)
+    lm.onclick = function () {
+      linkMode = !linkMode;
+      this.style.color = linkMode ? "#c9a36a" : "";
+    };
   document.querySelectorAll(".bang .chip").forEach(function (c) {
     c.onclick = function () {
       document.getElementById("prompt").value = c.getAttribute("data-p");
     };
   });
-  document.getElementById("go-bang").onclick = function () {
-    api("/builder/" + slug + "/bang", { prompt: document.getElementById("prompt").value }).then(function (st) {
-      document.getElementById("bang").style.display = "none";
-      document.getElementById("dock").style.opacity = "1";
-      document.getElementById("cross").style.opacity = "1";
+  function compile() {
+    const p = document.getElementById("prompt");
+    return api("/builder/" + slug + "/compile", { prompt: p ? p.value : "" }).then(function (st) {
+      revealHud();
       spawn(st);
     });
+  }
+  const go = document.getElementById("go-bang");
+  if (go) go.onclick = compile;
+  const rc = document.getElementById("recompile");
+  if (rc) rc.onclick = compile;
+
+  function sendFile(file) {
+    const fd = new FormData();
+    fd.append("file", file);
+    if (selected) fd.append("node_id", selected.id);
+    fetch("/builder/" + slug + "/media", { method: "POST", headers: { "X-CSRF-TOKEN": csrf, Accept: "application/json" }, body: fd })
+      .then((r) => r.json())
+      .then(spawn);
+  }
+  document.body.addEventListener("dragover", function (e) {
+    e.preventDefault();
+    document.body.classList.add("dragging");
+  });
+  document.body.addEventListener("dragleave", function () {
+    document.body.classList.remove("dragging");
+  });
+  document.body.addEventListener("drop", function (e) {
+    e.preventDefault();
+    document.body.classList.remove("dragging");
+    if (e.dataTransfer.files[0]) sendFile(e.dataTransfer.files[0]);
+  });
+  const imp = document.getElementById("imp");
+  if (imp) imp.onchange = function () {
+    if (imp.files[0]) sendFile(imp.files[0]);
   };
 
   function tick() {
     requestAnimationFrame(tick);
-    starMesh.rotation.y += 0.0004;
+    starMesh.rotation.y += 0.00035;
     meshes.forEach(function (m) {
       const n = m.userData;
       if (n.kind === "core") {
-        m.rotation.y += 0.004;
+        m.rotation.y += 0.003;
         return;
       }
       if (n.radius > 0) {
-        n.angle += n.speed || 0.003;
+        n.angle += n.speed || 0.002;
         m.position.x = Math.cos(n.angle) * n.radius;
         m.position.z = Math.sin(n.angle) * n.radius;
       }
@@ -213,4 +270,8 @@
     camera.updateProjectionMatrix();
     renderer.setSize(innerWidth, innerHeight);
   });
+  if (!window.GP_FRESH) {
+    revealHud();
+    refresh();
+  }
 })();

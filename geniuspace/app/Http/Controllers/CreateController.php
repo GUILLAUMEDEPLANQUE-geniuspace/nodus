@@ -48,6 +48,6 @@ class CreateController extends Controller
         if (Auth::id()) {
             DB::table('node_staff')->insert(['node_id' => $id, 'user_id' => Auth::id(), 'role' => 'owner']);
         }
-        return redirect('/n/'.$slug)->with('ok', 'Univers créé. Décorer le héros via l’éditeur d’images.');
+        return redirect('/builder/'.$slug.'?new=1')->with('ok', 'Univers créé. Sculptez-le dans le God Canvas.');
     }
 }

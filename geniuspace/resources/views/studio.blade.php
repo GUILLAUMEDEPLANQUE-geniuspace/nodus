@@ -26,17 +26,22 @@
     <button class="btn" type="submit">Ajouter</button>
   </form>
 
-  <h2 class="font-display">CCK</h2>
+  <h2 class="font-display">CCK (catalogue complet)</h2>
   @foreach($cck as $f)
     <p class="card" style="padding:0.7rem;margin:0.3rem 0">{{ $f->name }} · {{ $f->type }} = {{ $f->value }}</p>
   @endforeach
   <form method="post" action="/n/{{ $node->slug }}/studio/cck">
     @csrf
     <input name="name" placeholder="Nom" required>
-    <select name="type"><option>text</option><option>number</option><option>image</option><option>bool</option><option>rich</option></select>
+    <select name="type">
+      @foreach(\App\Llm\CckCatalog::all() as $k=>$m)
+        <option value="{{ $k }}">{{ $m['g'] }} · {{ $m['label'] }}</option>
+      @endforeach
+    </select>
     <input name="value" placeholder="Valeur">
     <button class="btn" type="submit">Champ</button>
   </form>
+  <p><a class="btn" href="/builder/{{ $node->slug }}">Modifier dans le God Canvas</a></p>
 
   <h2 class="font-display">ATS (7 étapes)</h2>
   @foreach($steps as $s)

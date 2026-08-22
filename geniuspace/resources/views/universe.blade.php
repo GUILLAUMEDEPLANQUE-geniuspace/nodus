@@ -164,7 +164,7 @@
           @if($cck->count())
             <p class="kicker">CCK</p>
             @foreach($cck as $f)
-              <span class="chip">{{ $f->name }}: {{ $f->value }}</span>
+              @include('partials.cck-render', ['f' => $f])
             @endforeach
           @endif
         @endisset

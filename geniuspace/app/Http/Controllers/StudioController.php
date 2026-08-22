@@ -59,6 +59,8 @@ class StudioController extends Controller
             'target_kind' => $data['target_kind'] ?? 'node',
             'target_id' => '',
             'sort' => 0,
+            'options' => '',
+            'seo_title' => $data['name'],
         ]);
         return back()->with('ok', 'Champ CCK créé.');
     }
