@@ -13,7 +13,7 @@
     @foreach([[$left,$cckA],[$right,$cckB]] as [$n,$cck])
       <article class="card" style="padding:1rem">
         <p class="kicker">{{ $n->kind }}</p>
-        <h2 class="font-display"><a href="/n/{{ $n->slug }}">{{ $n->title }}</a></h2>
+        <h2 class="font-display"><a href="/n/{{ $node->slug }}/f/{{ $n->slug }}">{{ $n->title }}</a></h2>
         <p>{{ $n->summary }}</p>
         @foreach($cck as $f)
           @include('partials.cck-render', ['f'=>$f])

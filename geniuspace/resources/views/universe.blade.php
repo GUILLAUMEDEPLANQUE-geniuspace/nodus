@@ -340,7 +340,7 @@
             <a class="card" href="/n/{{ $node->slug }}/v/{{ \Illuminate\Support\Str::slug($m->title) }}" style="display:grid;grid-template-columns:160px 1fr;gap:1rem;padding:0.75rem;margin:0.6rem 0">
                 <video src="/{{ ltrim($m->path,'/') }}" muted style="width:160px;height:90px;object-fit:cover;border-radius:0.6rem"></video>
                 <div>
-                    <p class="kicker">{{ $m->mode }} · {{ $m->access }} · {{ $m->views }} vues</p>
+                    <p class="kicker">{{ $m->mode }} · {{ $m->access }} · {{ $m->views }} vues · {{ $m->author_name ?: 'Club' }}</p>
                     <h3 class="font-display" style="font-size:1.6rem;margin:0">{{ $m->title }}</h3>
                     <p class="muted">{{ $m->duration }} {{ $m->price }} · {{ $m->rating }}/5</p>
                     <p class="muted" style="font-size:0.85rem">{{ $m->transcript }}</p>
@@ -473,9 +473,13 @@
     @if($tab==='reviews')
     <div>
         <h2 class="font-display">Essais & avis</h2>
-        @foreach($journal as $j)
+        @forelse($node->threads->where('kind','review') as $j)
+            <article class="card" style="padding:1rem;margin:.5rem 0"><h3 class="font-display">{{ $j->title }}</h3><p>{{ $j->body }}</p></article>
+        @empty
+            @foreach($journal as $j)
             <article class="card" style="padding:1rem;margin:.5rem 0"><h3>{{ $j->title }}</h3><p>{{ $j->body }}</p></article>
-        @endforeach
+            @endforeach
+        @endforelse
     </div>
     @endif
     @if(in_array($tab, ['offres','epreuve']))

@@ -26,6 +26,9 @@
     </script>
 </head>
 <body>
+@if(session('ok'))
+  <p class="kicker wrap" style="padding:.6rem 1.25rem;background:var(--surface)">{{ session('ok') }}</p>
+@endif
 @php $white = $white ?? false; @endphp
 <header class="site-head">
     @if($white && isset($node))
@@ -42,6 +45,7 @@
         <a class="btn-ghost" href="/explore">Explorer</a>
         <a class="btn-ghost" href="/create">Créer</a>
         <a class="btn-ghost" href="/drive">Drive</a>
+        <a class="btn-ghost" href="/panier">Panier</a>
         @auth
           <a class="btn-ghost" href="/profil">{{ auth()->user()->name }}</a>
           <form method="post" action="/logout">@csrf<button class="btn-ghost" type="submit">Out</button></form>
@@ -56,5 +60,8 @@
     <p class="wrap primary" style="padding-top:0.75rem">{{ session('ok') }}</p>
 @endif
 @yield('content')
+<footer class="wrap muted" style="padding:2rem 1.25rem 6rem;font-size:.8rem">
+  <a href="/n/club-205">Club 205</a> · <a href="/bounties">Quêtes</a> · <a href="/llms.txt">llms.txt</a> · <a href="/n/club-205/sitemap.xml">Sitemap</a> · <a href="/api/v1/g/club-205">Graphe</a>
+</footer>
 </body>
 </html>

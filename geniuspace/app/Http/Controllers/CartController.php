@@ -9,8 +9,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
+use Illuminate\View\View;
+
 class CartController extends Controller
 {
+    public function index(Request $request): View
+    {
+        $cart = $request->session()->get('cart', []);
+        return view('cart', compact('cart'));
+    }
+
     public function add(Request $request): RedirectResponse
     {
         $id = $request->validate(['product_id' => 'required|string'])['product_id'];

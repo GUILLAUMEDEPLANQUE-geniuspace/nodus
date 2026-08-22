@@ -34,10 +34,15 @@ class UniverseController extends Controller
         return view('home', compact('featured', 'reco'));
     }
 
-    public function explore(): View
+    public function explore(Request $request): View
     {
-        $nodes = GpNode::query()->orderBy('title')->get();
-        return view('explore', compact('nodes'));
+        $q = trim((string) $request->query('q', ''));
+        $nodes = GpNode::query()->orderBy('title');
+        if ($q !== '') {
+            $nodes->where(fn ($w) => $w->where('title', 'like', '%'.$q.'%')->orWhere('summary', 'like', '%'.$q.'%'));
+        }
+        $nodes = $nodes->get();
+        return view('explore', compact('nodes', 'q'));
     }
 
     public function show(Request $request, string $slug): View

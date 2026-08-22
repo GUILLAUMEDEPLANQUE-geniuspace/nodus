@@ -10,6 +10,7 @@ use App\Http\Controllers\ForumController;
 use App\Http\Controllers\ImageStudioController;
 use App\Http\Controllers\LeaderController;
 use App\Http\Controllers\MediaController;
+use App\Http\Controllers\MoatController;
 use App\Http\Controllers\PilotController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StudioController;
@@ -78,6 +79,7 @@ Route::get('/robots.txt', function () {
     $txt = "User-agent: *\nAllow: /\nDisallow: /n/*/studio\nDisallow: /n/*/radar\nDisallow: /login\nSitemap: ".url('/sitemap.xml')."\n";
     return response($txt, 200, ['Content-Type' => 'text/plain']);
 });
+Route::get('/n/{slug}/radar', [LeaderController::class, 'radar']);
 Route::get('/n/{slug}/bounties', [MoatController::class, 'bounties']);
 Route::post('/n/{slug}/bounties', [MoatController::class, 'openBounty']);
 Route::post('/n/{slug}/bounties/{id}/claim', [MoatController::class, 'claim']);
@@ -119,11 +121,14 @@ Route::post('/n/{slug}/t/{tid}/fire', [ForumController::class, 'fire']);
 Route::post('/n/{slug}/t/{tid}/echo', [ForumController::class, 'echoLive']);
 Route::post('/n/{slug}/t/{tid}/award', [ForumController::class, 'award']);
 Route::post('/n/{slug}/guilde', [ForumController::class, 'guild']);
+Route::get('/panier', [CartController::class, 'index']);
 Route::post('/cart', [CartController::class, 'add'])->name('cart.add');
 Route::post('/cart/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
 Route::get('/sitemap.xml', function () {
     $nodes = \App\Models\GpNode::all();
     $xml = '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+    $xml .= '<url><loc>'.e(url('/')).'</loc></url>';
+    $xml .= '<url><loc>'.e(url('/bounties')).'</loc></url>';
     foreach ($nodes as $n) {
         $xml .= '<url><loc>'.e(url('/n/'.$n->slug)).'</loc></url>';
     }

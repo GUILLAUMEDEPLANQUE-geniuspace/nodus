@@ -36,6 +36,7 @@ class ShowcaseSeeder extends Seeder
             ['reliques', 'Drive', 11],
             ['boutique', 'Boutique', 12],
             ['reviews', 'Essais & avis', 13],
+            ['stories', 'Stories', 14],
         ];
         DB::table('node_tabs')->where('node_id', $id)->delete();
         foreach ($rooms as $t) {
@@ -74,7 +75,21 @@ class ShowcaseSeeder extends Seeder
             'peugeot-205-gti-16' => ['XU5J · 105/115 ch', 'La première. Plus légère. Phase 1. Le club la défend contre la mode 1.9.'],
             'peugeot-205-rallye' => ['1.3 · homologuée', 'Boîte courte, rayures, gravette. Pas une GTI déguisée.'],
             'joint-culasse-205-gti' => ['La panne qui rank', 'Changement joint de culasse 205 GTI 1.9 à Reims : couple, joints, erreurs. Guide à écrire — bounty ouverte.'],
+            'peugeot-205-cti' => ['Cabriolet', '205 CTI : le GTI à ciel ouvert. Mêmes trains, autre vie.'],
+            'peugeot-205-d-turbo' => ['Diesel sport', 'D Turbo. Couple bas. Le club la range à part des GTI.'],
+            '205-phase-1' => ['Première peau', 'Optiques, planche, trains Phase 1. Sans spoil Phase 2.'],
+            '205-phase-2' => ['Seconde peau', 'Pare-chocs, planche, feux. Comparer avec Phase 1.'],
+            '205-kit-rallye' => ['Homologation', 'Ce que le club accepte en meet. Pas un sticker.'],
+            'distribution-205' => ['Entretien', 'Intervalle kit distribution essence. Couple poulie.'],
+            'train-avant-205-gti' => ['Géométrie', 'Valeurs club, silent-blocs, triangles 1.9.'],
+            'jantes-speedline-205' => ['Speedline', 'Déport, pneus, erreurs d’offset.'],
+            'sieges-peugeot-205' => ['Baquets', 'Références, ancrages, ce que le CT refuse.'],
+            'echappement-205-gti' => ['Ligne', 'Diamètres, homologation, son du XU9.'],
+            'meet-alsace-205' => ['Est', 'Rassemblement Alsace. Même primitive que Reims, autre geo.'],
+            '205-gris-graphite' => ['Teinte', 'Gris Graphite d’origine. Fiche couleur, pas un Tumblr.'],
+            '205-rouge-vallelunga' => ['Teinte', 'Rouge Vallelunga. La photo du garage.'],
             'meet-reims-205' => ['Dimanche · Reims', 'Parking, pièces à vendre, géo Offer. SEO local que Leboncoin rate.'],
+            'boite-be3-205' => ['BE3', 'Rapports, synchros, fuite. Enfant de la 1.9.'],
         ];
         foreach ($img as $nid => $hero) {
             $row = ['hero' => $hero];
@@ -186,8 +201,20 @@ class ShowcaseSeeder extends Seeder
             'target' => 2000, 'current' => 740, 'reward' => 'Banc d’essai pour le club',
         ]);
 
-        DB::table('node_i18n')->updateOrInsert(['node_id' => $id, 'locale' => 'en'], [
-            'title' => 'Club 205', 'summary' => 'The indexed Peugeot 205 garage. Specs, parts in Reims, meets.',
+        DB::table('media')->where('node_id', $id)->update(['author_name' => 'Marc', 'author_avatar' => '/realms/205-dash.jpg']);
+        if (DB::table('live_messages')->where('thread_id', 'th-205-1')->count() === 0) {
+            DB::table('live_messages')->insert([
+                ['thread_id' => 'th-205-1', 'author' => 'Tom', 'body' => 'J’arrive avec le couplemètre.'],
+                ['thread_id' => 'th-205-1', 'author' => 'Léa', 'body' => 'Parking Cernay 9h30.'],
+            ]);
+        }
+        DB::table('threads')->updateOrInsert(['id' => 'th-205-r1'], [
+            'node_id' => $id, 'kind' => 'review', 'title' => 'Essai 1.9 Phase 2 — ce qui casse vraiment',
+            'author' => 'Marc', 'body' => 'Trains, BE3, conso. Fiche @peugeot-205-gti-19.',
+            'cover' => '/realms/205-gti.jpg', 'views' => 140,
+        ]);
+        DB::table('node_i18n')->updateOrInsert(['node_id' => 'peugeot-205-gti-19', 'locale' => 'en'], [
+            'title' => 'Peugeot 205 GTI 1.9', 'summary' => 'XU9J2 130 hp. The 1.9 everyone wants. Club spec sheet.',
         ]);
     }
 }

@@ -56,6 +56,11 @@ Le pilote n’est plus 3 salles vides. Garage ciné, 14 salles, graphe 1.9→pi�
 - Guides = pages `/n/{club}/guide/{slug}` + sitemap.
 - Comparateur 1.6 vs 1.9. `llms.txt`. Réponses forum seedées.
 
+## 2026-08-22 — Complet
+
+Routes radar + panier + Moat. 20 fiches rédigées. Stories, avis, live, auteurs vidéo, i18n 1.9, recherche guides, footer, explore `?q=`.
+
+
 
 
 
