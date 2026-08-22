@@ -2,7 +2,7 @@
  * URL unique par fiche vidéo — moat SEO (VideoObject + Clip hasPart).
  */
 import { createFileRoute, notFound } from "@tanstack/react-router";
-import { VideoFiche } from "@/components/video-fiche";
+import { HoloPlayer } from "@/components/holo-player";
 import { parseChapters, videoObjectLd } from "@/lib/chapters";
 import { getNodeUniverse } from "@/lib/graph-api";
 
@@ -44,9 +44,17 @@ function VideoPage() {
   const json = videoObjectLd(media, chapters, `/n/${universe.node.slug}/v/${media.id}`);
   const related = universe.media.filter((m) => m.kind === "video" && m.id !== media.id);
   return (
-    <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
+    <main>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(json) }} />
-      <VideoFiche media={media} slug={universe.node.slug} related={related} />
+      <HoloPlayer
+        slug={universe.node.slug}
+        media={media}
+        assets={universe.videoAssets.filter((a) => a.mediaId === media.id)}
+        news={universe.videoNews.filter((n) => n.mediaId === media.id)}
+        products={universe.products}
+        neighbors={universe.neighbors}
+        related={related}
+      />
     </main>
   );
 }

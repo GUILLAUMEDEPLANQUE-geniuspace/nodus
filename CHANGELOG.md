@@ -2,6 +2,15 @@
 
 Format : ce qui est **dans le code**, pas la vision PDF.
 
+## 0.8.0 — 2026-08-22
+
+### Moteur vidéo sécurisé
+- Modes : lore, formation, jeu, boutique, entretien — même cockpit, copy différente
+- Paywall teaser (freemium). URLs locked **jamais** dans le HTML public
+- Drive séquencé : PDF/zip/obj par chapitre, cadenas jusqu'au grant
+- Ticker créateur, holo-drop, console CCK, connexions graphe
+- `unlockVideo` (auth) → grant + URLs. Prod = Stripe/HLS jetons
+
 ## 0.7.0 — 2026-08-22
 
 ### Onglet Vidéos (fiches JoomCCK-grade)

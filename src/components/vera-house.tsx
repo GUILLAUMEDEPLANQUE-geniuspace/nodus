@@ -12,6 +12,7 @@ import { SalonMap } from "@/components/salon-map";
 import { SkillTree } from "@/components/skill-tree";
 import { StudioPanel } from "@/components/studio-panel";
 import { UniverseDock } from "@/components/universe-dock";
+import { VideoStudio } from "@/components/video-studio";
 import { KIND_LABEL, type NodeUniverse, type UniverseTab } from "@/lib/graph";
 import { heroOf } from "@/lib/skins";
 
@@ -24,6 +25,7 @@ const VERA_TABS: UniverseTab[] = [
   { id: "drive", key: "drive", label: "Drive", icon: "folder" },
   { id: "academie", key: "academie", label: "Académie", icon: "book" },
   { id: "forum", key: "forum", label: "Forum", icon: "messages" },
+  { id: "videos", key: "videos", label: "Vidéos", icon: "film" },
 ];
 
 function uniqueVera(tabs: UniverseTab[]) {
@@ -37,7 +39,7 @@ function uniqueVera(tabs: UniverseTab[]) {
 }
 
 export function VeraHouse({ universe }: { universe: NodeUniverse }) {
-  const { node, children, threads, messages, files, folders, cck, wiki, tabs, staff, categories, replies, live, quests, rooms, products } =
+  const { node, children, threads, messages, files, folders, cck, wiki, tabs, staff, categories, replies, live, quests, rooms, products, media, videoAssets, videoNews } =
     universe;
   const dockTabs = uniqueVera(tabs.length ? tabs : VERA_TABS);
   const [tab, setTab] = useState(node.kind === "job" ? "offres" : "maison");
@@ -62,6 +64,14 @@ export function VeraHouse({ universe }: { universe: NodeUniverse }) {
           live={live}
           products={products}
           onPosted={ping}
+        />
+      ) : tab === "videos" ? (
+        <VideoStudio
+          slug={node.slug}
+          videos={media}
+          assets={videoAssets}
+          news={videoNews}
+          products={products}
         />
       ) : (
         <>

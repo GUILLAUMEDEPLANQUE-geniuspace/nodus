@@ -62,6 +62,8 @@ export function LivingWorld({ universe }: { universe: NodeUniverse }) {
     products,
     playlists,
     heroUrl,
+    videoAssets,
+    videoNews,
   } = universe;
   const dockTabs = uniqueTabs(tabs.length ? tabs : FALLBACK_TABS);
   const [tab, setTab] = useState(dockTabs[0]?.key ?? "vivre");
@@ -104,7 +106,14 @@ export function LivingWorld({ universe }: { universe: NodeUniverse }) {
           onPosted={ping}
         />
       ) : tab === "videos" ? (
-        <VideoStudio slug={node.slug} videos={media} />
+        <VideoStudio
+          slug={node.slug}
+          videos={media}
+          assets={videoAssets}
+          news={videoNews}
+          products={products}
+          neighbors={[...children.map((c) => ({ direction: "out" as const, edgeKind: "parent_of" as const, label: "", note: "", node: c })), ...parents.map((p) => ({ direction: "in" as const, edgeKind: "parent_of" as const, label: "", note: "", node: p }))]}
+        />
       ) : (
         <>
       <section className="relative h-[78dvh] min-h-[480px] overflow-hidden">

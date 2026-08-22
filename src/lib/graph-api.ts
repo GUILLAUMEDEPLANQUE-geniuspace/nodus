@@ -38,6 +38,8 @@ import {
   type Thread,
   type TimelineEvent,
   type UniverseTab,
+  type VideoAsset,
+  type VideoNews,
   type WikiPage,
 } from "@/lib/graph";
 
@@ -147,13 +149,25 @@ export const getNodeBundle = createServerFn({ method: "GET" })
       language: string;
       difficulty: string;
       ribbon: string;
+      mode: string;
+      access_kind: string;
+      teaser_sec: number;
+      price: string;
+      views: number;
+      rating: string;
     }>(
       `select id, node_id, kind, title, url, duration, genre, chapters, transcript,
               coalesce(season, '') as season,
               coalesce(episode, '') as episode,
               coalesce(language, '') as language,
               coalesce(difficulty, '') as difficulty,
-              coalesce(ribbon, '') as ribbon
+              coalesce(ribbon, '') as ribbon,
+              coalesce(mode, 'lore') as mode,
+              coalesce(access_kind, 'free') as access_kind,
+              coalesce(teaser_sec, 0) as teaser_sec,
+              coalesce(price, '') as price,
+              coalesce(views, 0) as views,
+              coalesce(rating, '') as rating
        from node_media
        where node_id = $1
           or node_id in (select to_id from edges where from_id = $1)
@@ -175,6 +189,12 @@ export const getNodeBundle = createServerFn({ method: "GET" })
       language: m.language,
       difficulty: m.difficulty,
       ribbon: m.ribbon,
+      mode: m.mode,
+      accessKind: m.access_kind,
+      teaserSec: Number(m.teaser_sec),
+      price: m.price,
+      views: Number(m.views),
+      rating: m.rating,
     }));
 
     type EdgeRow = DbNode & {
@@ -480,6 +500,30 @@ export const getNodeUniverse = createServerFn({ method: "GET" })
       grid_x: number;
       grid_y: number;
     }>(`select id, title, kind, body, grid_x, grid_y from salon_rooms where node_id = $1`, [bundle.node.id]);
+    const assetRows = await sql.query<{
+      id: string;
+      media_id: number;
+      chapter_sec: number;
+      name: string;
+      kind: string;
+      locked: boolean;
+      url: string;
+    }>(
+      `select id, media_id, chapter_sec, name, kind, locked, url from video_assets
+       where media_id in (
+         select id from node_media
+         where node_id = $1 or node_id in (select to_id from edges where from_id = $1)
+       )`,
+      [bundle.node.id],
+    );
+    const newsRows = await sql.query<{ id: string; media_id: number; kind: string; body: string }>(
+      `select id, media_id, kind, body from video_news
+       where media_id in (
+         select id from node_media
+         where node_id = $1 or node_id in (select to_id from edges where from_id = $1)
+       )`,
+      [bundle.node.id],
+    );
     return {
       ...bundle,
       folders: folders.map(
@@ -594,6 +638,26 @@ export const getNodeUniverse = createServerFn({ method: "GET" })
           body: r.body,
           x: Number(r.grid_x),
           y: Number(r.grid_y),
+        }),
+      ),
+      // Sécurité : url jamais envoyée si locked. Le grant passe par unlockVideo.
+      videoAssets: assetRows.map(
+        (a): VideoAsset => ({
+          id: a.id,
+          mediaId: Number(a.media_id),
+          chapterSec: Number(a.chapter_sec),
+          name: a.name,
+          kind: a.kind,
+          locked: Boolean(a.locked),
+          url: a.locked ? "" : a.url,
+        }),
+      ),
+      videoNews: newsRows.map(
+        (n): VideoNews => ({
+          id: n.id,
+          mediaId: Number(n.media_id),
+          kind: n.kind,
+          body: n.body,
         }),
       ),
     };
@@ -875,6 +939,46 @@ export const promoteReply = createServerFn({ method: "POST" })
       [id, node.id, data.title, context.userId.slice(0, 8), data.body],
     );
     return { id };
+  });
+
+/**
+ * Débloque une VOD. Prod = Stripe/USDC. Ici grant auth.
+ * Les URLs locked ne sortent jamais du handler public.
+ */
+export const unlockVideo = createServerFn({ method: "POST" })
+  .middleware([authMiddleware])
+  .validator(z.object({ mediaId: z.number().int().positive() }))
+  .handler(async ({ data, context }) => {
+    const sql = await getSql();
+    await sql.query(
+      `insert into video_grants (user_id, media_id) values ($1, $2) on conflict do nothing`,
+      [context.userId, data.mediaId],
+    );
+    const rows = await sql.query<{
+      id: string;
+      media_id: number;
+      chapter_sec: number;
+      name: string;
+      kind: string;
+      locked: boolean;
+      url: string;
+    }>(`select id, media_id, chapter_sec, name, kind, locked, url from video_assets where media_id = $1`, [
+      data.mediaId,
+    ]);
+    return {
+      granted: true,
+      assets: rows.map(
+        (a): VideoAsset => ({
+          id: a.id,
+          mediaId: Number(a.media_id),
+          chapterSec: Number(a.chapter_sec),
+          name: a.name,
+          kind: a.kind,
+          locked: false,
+          url: a.url,
+        }),
+      ),
+    };
   });
 
 

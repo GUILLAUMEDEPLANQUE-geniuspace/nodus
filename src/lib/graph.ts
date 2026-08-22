@@ -85,6 +85,30 @@ export type GraphMedia = {
   language?: string;
   difficulty?: string;
   ribbon?: string;
+  mode?: string;
+  accessKind?: string;
+  teaserSec?: number;
+  price?: string;
+  views?: number;
+  rating?: string;
+};
+
+/** Fichier lié à un chapitre. `url` est vide si locked et pas de grant. */
+export type VideoAsset = {
+  id: string;
+  mediaId: number;
+  chapterSec: number;
+  name: string;
+  kind: string;
+  locked: boolean;
+  url: string;
+};
+
+export type VideoNews = {
+  id: string;
+  mediaId: number;
+  kind: string;
+  body: string;
 };
 
 export type Neighbor = {
@@ -255,6 +279,8 @@ export type NodeUniverse = NodeBundle & {
   heroUrl: string;
   quests: Quest[];
   rooms: SalonRoom[];
+  videoAssets: VideoAsset[];
+  videoNews: VideoNews[];
 };
 
 

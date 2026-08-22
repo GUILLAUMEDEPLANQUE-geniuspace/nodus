@@ -30,7 +30,8 @@ maison-orion           --parent_of-->  lead-game-designer
 | `src/components/salon-map.tsx` | Salon 2D recruteur (Gather-like) |
 | `src/components/quest-path.tsx` | Quêtes à la place du CV |
 | `src/components/skill-tree.tsx` | Arbre de talents / offres |
-| `src/components/holo-forum.tsx` | Forum Scroll & Dive (Legacy SEO / Live) |
+| `src/components/holo-player.tsx` | Cockpit VOD sécurisé (modes) |
+| `src/lib/video-mode.ts` | Copy formation / jeu / shop / entretien |
 | `src/lib/theme.tsx` | Dark / light |
 | `migrations/*.sql` | Schéma + seed. Ne jamais editer une migration déjà appliquée : en ajouter une. |
 

@@ -16,4 +16,5 @@ Tu travailles sur NODUS. Avant de coder :
 12. Recrutement : quêtes + salon + skill tree. Ne jamais revenir à une liste d'annonces LinkedIn.
 13. CCK builder : `CckBuilder` dans le Studio. Pas de colonne SQL métier.
 14. Forum = `HoloForum` (cartes + Legacy/Live). Pas de liste wpForo. Chaque sujet a `/n/:slug/t/:id`.
-15. Toujours dark **et** light (`ThemeToggle`). Tokens uniquement.
+16. Vidéo : `HoloPlayer`. Modes `lore|formation|game|shop|interview`. Assets locked → `url` vide. Grant = `unlockVideo` (auth).
+17. Drive séquencé = fichiers par chapitre, pas un dump. Prod = signed URL / HLS.
