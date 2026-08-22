@@ -2,6 +2,15 @@
 
 Format : ce qui est **dans le code**, pas la vision PDF.
 
+## 2.0.0 — 2026-08-22 — Laravel
+
+Refonte Blade + Alpine (SSR). App dans `geniuspace/`.
+
+- SEO : title / canonical / JSON-LD / sitemap générés serveur
+- Vidéo : jetons HMAC, fichiers dans `storage/app/media` (prod = R2)
+- Pas YouTube. Pas Bagisto. Shop Geniuspace + Command Center
+- o2switch = PHP ; MP4 = R2 / VPS, jamais le mutualisé
+
 ## 1.0.0 — 2026-08-22 — Geniuspace
 
 Rebrand. Command Center produit. Player HTML5 réel.

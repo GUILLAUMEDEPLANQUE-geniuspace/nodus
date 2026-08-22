@@ -1,0 +1,189 @@
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Outfit:wght@320;400;500;600&display=swap");
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #07080c;
+  --color-surface: #10131a;
+  --color-surface-2: #181c26;
+  --color-fg: #f3eadc;
+  --color-muted: #8d8794;
+  --color-primary: #c9a36a;
+  --color-primary-fg: #1a140c;
+  --color-border: #2a2c38;
+  --color-line: #c9a36a;
+  --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Cormorant Garamond", ui-serif, Georgia, serif;
+  --radius-lg: 1.25rem;
+  --radius-md: 0.85rem;
+  --shadow-border: 0 0 0 1px rgba(255, 255, 255, 0.06);
+  --shadow-border-hover: 0 0 0 1px rgba(201, 163, 106, 0.45);
+}
+
+html[data-theme="light"] {
+  --color-bg: #f4efe6;
+  --color-surface: #fffaf2;
+  --color-surface-2: #ebe4d6;
+  --color-fg: #1c1814;
+  --color-muted: #6b645c;
+  --color-primary: #8a6a32;
+  --color-primary-fg: #fff8eb;
+  --color-border: #d9d0c0;
+  --color-line: #8a6a32;
+  --shadow-border: 0 0 0 1px rgba(28, 24, 20, 0.08);
+  --shadow-border-hover: 0 0 0 1px rgba(138, 106, 50, 0.45);
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background: var(--color-bg);
+    color: var(--color-fg);
+  }
+  body {
+    font-family: var(--font-sans);
+    background: var(--color-bg);
+    min-height: 100dvh;
+  }
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    text-wrap: balance;
+    letter-spacing: -0.02em;
+  }
+  p {
+    text-wrap: pretty;
+  }
+}
+
+@keyframes spin-orbit {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes core-breathe {
+  0%,
+  100% {
+    box-shadow: 0 0 40px rgba(201, 163, 106, 0.18), 0 0 120px rgba(201, 163, 106, 0.08);
+  }
+  50% {
+    box-shadow: 0 0 70px rgba(201, 163, 106, 0.32), 0 0 160px rgba(201, 163, 106, 0.12);
+  }
+}
+
+@keyframes holo-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) rotateX(8deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes drift {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(0, -24px, 0);
+  }
+}
+
+.orbit-spin {
+  animation: spin-orbit 90s linear infinite;
+}
+
+.orbit-spin.is-paused {
+  animation-play-state: paused;
+}
+
+.core-breathe {
+  animation: core-breathe 4.5s ease-in-out infinite;
+}
+
+.holo-in {
+  animation: holo-in 0.4s ease-out both;
+  transform-origin: bottom center;
+}
+
+.star-drift {
+  animation: drift 12s ease-in-out infinite alternate;
+}
+
+@keyframes rise-bubble {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-70vh);
+  }
+}
+
+.rise-bubble {
+  animation: rise-bubble 3s ease-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orbit-spin,
+  .core-breathe,
+  .star-drift,
+  .holo-in,
+  .rise-bubble {
+    animation: none;
+  }
+}
+
+.sanctuary-sea {
+  --realm-glow: rgba(40, 110, 140, 0.35);
+  --realm-deep: #061018;
+}
+.sanctuary-gate {
+  --realm-glow: rgba(70, 130, 160, 0.28);
+  --realm-deep: #070b14;
+}
+.sanctuary-gold {
+  --realm-glow: rgba(201, 163, 106, 0.22);
+  --realm-deep: #0a0908;
+}
+.sanctuary-atelier {
+  --realm-glow: rgba(160, 120, 80, 0.28);
+  --realm-deep: #0c0a0c;
+}
+
+.salon-grid {
+  background-image:
+    linear-gradient(to right, rgba(201, 163, 106, 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(201, 163, 106, 0.08) 1px, transparent 1px);
+  background-size: 6.25% 10%;
+  min-height: 280px;
+  background-color: var(--color-surface);
+}
+
+.holo-floor {
+  background-image:
+    linear-gradient(rgba(201, 163, 106, 0.16) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(201, 163, 106, 0.16) 1px, transparent 1px);
+  background-size: 40px 40px;
+  transform: rotateX(70deg);
+  transform-origin: center bottom;
+}
+
+.ar-wall {
+  background: linear-gradient(180deg, var(--color-surface-2), var(--color-surface));
+  border: 1px solid var(--color-border);
+  border-radius: 1.25rem;
+  perspective: 800px;
+}
