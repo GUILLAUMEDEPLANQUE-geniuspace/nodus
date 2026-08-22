@@ -88,6 +88,9 @@
     <p class="wrap primary" style="padding-top:0.75rem">{{ session('ok') }}</p>
 @endif
 @yield('content')
+@isset($node)
+  @include('partials.ghost-orb')
+@endisset
 <footer class="wrap muted" style="padding:2rem 1.25rem 6rem;font-size:.8rem">
   <a href="/n/vera">Vera</a> · <a href="/n/lumen">Lumen</a> · <a href="/create">Créer</a> · <a href="/llms.txt">llms.txt</a>
 </footer>

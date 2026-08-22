@@ -9,6 +9,7 @@ use App\Http\Controllers\DriveController;
 use App\Http\Controllers\EmbedController;
 use App\Http\Controllers\EngineController;
 use App\Http\Controllers\ForumController;
+use App\Http\Controllers\GhostController;
 use App\Http\Controllers\GrantController;
 use App\Http\Controllers\ImageStudioController;
 use App\Http\Controllers\LeaderController;
@@ -137,9 +138,15 @@ Route::get('/n/{slug}/guide/{wid}', [UniverseController::class, 'guide']);
 Route::get('/n/{slug}/f/{fiche}', [UniverseController::class, 'fiche']);
 Route::get('/n/{slug}/llms.txt', function (string $slug) {
     $n = \App\Models\GpNode::query()->where('slug', $slug)->firstOrFail();
-    $txt = "# {$n->title}\n\n{$n->summary}\n\nPages: ".url('/n/'.$slug)."\nFiche: ".url('/v1/nodes/'.$slug.'/fields')."\n";
+    $txt = "# {$n->title}\n\n{$n->summary}\n\nPages: ".url('/n/'.$slug)."\nFiche: ".url('/v1/nodes/'.$slug.'/fields')."\nGhost: ".url('/n/'.$slug.'/ghost')."\n";
     return response($txt, 200, ['Content-Type' => 'text/plain; charset=utf-8']);
 });
+
+// Ghost OS — agent ancré par lieu (avant les routes catch-all /n/{slug}/…)
+Route::get('/n/{slug}/ghost', [GhostController::class, 'hello']);
+Route::get('/n/{slug}/ghost/context', [GhostController::class, 'context']);
+Route::post('/n/{slug}/ghost', [GhostController::class, 'chat']);
+
 Route::get('/n/vera/offres/{job}', [VeraController::class, 'jobShow']);
 Route::get('/n/vera/viviers/{vivier}', [VeraController::class, 'vivier']);
 Route::get('/n/vera/savoirs/{cat}/{article}', [VeraController::class, 'savoirCat']);

@@ -2,6 +2,16 @@
 
 Format : ce qui est **dans le code**, pas la vision PDF.
 
+## 2026-08-22 — Ghost OS (agent ancré par lieu)
+
+- **Un Ghost par Node.** Profil marchand (Lumen) / RH (Vera) / guide (living).
+- **Répond depuis le coffre** : champs, voisins, produits, vidéos, grants, salles — pas le web entier.
+- **Tools lecture** : list_products, neighbors, media, grants, rooms. Aucun grant écrit par le modèle.
+- **API** `GET|POST /n/{slug}/ghost`, `GET /n/{slug}/ghost/context`.
+- **UI** orbe fixe sur les pages de lieu (Alpine).
+- **Ollama optionnel** via `GHOST_LLM_URL` / `OLLAMA_BASE_URL` — sinon mode grounded pur.
+- **Journal** table `ghost_logs`. Tests `GhostTest`.
+
 ## 2026-08-22 — Grant réel, coffre, options d’achat
 
 - **Plus de bandeau.** Sans preuve en base, le player sert le teaser public. L’URL signée du full → 403. `preview=1` ne livre plus le MP4 privé.
