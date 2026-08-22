@@ -2,7 +2,21 @@
 
 Format : ce qui est **dans le code**, pas la vision PDF.
 
+## 2026-08-22 — Ghost Action (éditeur + business)
+
+- **DSL.** `field.add` / `media.insert` / `playlist.insert` / `field.move`. Jamais `DB::insert` depuis le LLM. Position = `after` / `before`, pas `sort = 17`.
+- **Blocks.** La fiche est une composition (texte, champ, image, playlist, vidéo). `read_editor` avant toute écriture.
+- **PLAN ≠ APPLY.** Preview, Appliquer, Annuler. Table `ghost_actions` = transaction + snapshot.
+- **Curseur Ghost.** `editor_context.cursor` : « ici » a une ancre. Sinon Ghost demande « Où ? ».
+- **Médias / playlists.** `search_media` / `search_playlist`. Plusieurs hits → « Laquelle ? ». Jamais inventer.
+- **CckCatalog::capabilities.** Contrat de capacité (insert/move/delete, placement field|block).
+- **EditorManifest.** Ce que Ghost a le droit de faire sur cette page.
+- **Business.** READ (143 acheteurs) / PREPARE (campagne 15 %) / ACT (envoi). Volume ≥ 100 ou remise > 10 % → confirm. Remboursement, suppression client, paiement → deny.
+- **API.** `GET /n/{slug}/ghost/editor` · `POST /n/{slug}/ghost/plan` · `apply` · `undo`. Apply = staff admin.
+- **Studio.** Copilote Blade + Alpine. Le LLM propose. Le moteur exécute.
+
 ## 2026-08-22 — Ghost croissance (V2)
+
 
 - **Boucle.** Chaque tour laisse un fait, une expérience, parfois une erreur. Pas un dump de chat.
 - **Cycle de vie.** unknown → observed → supported → verified → trusted. contradicted → stale → revoked. `GhostLearn::promote`.

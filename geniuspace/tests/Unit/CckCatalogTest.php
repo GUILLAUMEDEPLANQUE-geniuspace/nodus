@@ -27,4 +27,14 @@ class CckCatalogTest extends TestCase
         $this->assertSame('Galerie', $all['gallery']['label']);
         $this->assertSame('Payant à télécharger', $all['pay_download']['label']);
     }
+
+    public function test_capabilities_are_the_ghost_contract(): void
+    {
+        $caps = CckCatalog::capabilities();
+        $this->assertTrue($caps['image']['can_insert']);
+        $this->assertSame('block', $caps['image']['placement']);
+        $this->assertSame(['media'], $caps['image']['requires']);
+        $this->assertSame('field', $caps['digits']['placement']);
+        $this->assertSame('number', $caps['digits']['value_type']);
+    }
 }

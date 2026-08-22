@@ -108,6 +108,44 @@ class GhostSkills
                     ['tool' => 'match_user_job', 'level' => self::OBSERVE],
                 ],
             ],
+            'edit_page' => [
+                'name' => 'edit_page',
+                'description' => 'Observer la fiche, proposer un DSL, preview. APPLY ailleurs.',
+                'level' => self::PREPARE,
+                'required_tools' => ['read_editor', 'list_field_types', 'search_media', 'search_playlist'],
+                'procedure' => [
+                    ['tool' => 'read_editor', 'level' => self::OBSERVE],
+                    ['tool' => 'list_field_types', 'level' => self::OBSERVE],
+                ],
+            ],
+            'segment_customers' => [
+                'name' => 'segment_customers',
+                'description' => 'Compter, filtrer. Ne pas écrire.',
+                'level' => self::OBSERVE,
+                'required_tools' => ['customers.segment', 'orders.filter'],
+                'procedure' => [
+                    ['tool' => 'customers.segment', 'level' => self::OBSERVE],
+                ],
+            ],
+            'run_campaign' => [
+                'name' => 'run_campaign',
+                'description' => 'Préparer une campagne. Envoi = ACT.',
+                'level' => self::PREPARE,
+                'required_tools' => ['customers.segment', 'campaign.preview'],
+                'procedure' => [
+                    ['tool' => 'customers.segment', 'level' => self::OBSERVE],
+                    ['tool' => 'campaign.preview', 'level' => self::PREPARE],
+                ],
+            ],
+            'send_tracking' => [
+                'name' => 'send_tracking',
+                'description' => 'Préparer le suivi. Volume ≥ 100 = confirmation.',
+                'level' => self::PREPARE,
+                'required_tools' => ['orders.filter'],
+                'procedure' => [
+                    ['tool' => 'orders.filter', 'level' => self::OBSERVE],
+                ],
+            ],
         ];
     }
 
@@ -121,8 +159,10 @@ class GhostSkills
     public static function toolLevel(string $tool): string
     {
         return match ($tool) {
-            'purchase', 'send_application', 'unlock_content', 'modify_graph' => self::ACT,
-            'build_cart', 'create_draft' => self::PREPARE,
+            'purchase', 'send_application', 'unlock_content', 'modify_graph',
+            'campaign.launch', 'message.send', 'order.refund', 'customer.delete', 'payment.modify' => self::ACT,
+            'build_cart', 'create_draft', 'field.add', 'media.insert', 'playlist.insert',
+            'template.apply', 'campaign.create' => self::PREPARE,
             default => self::OBSERVE,
         };
     }

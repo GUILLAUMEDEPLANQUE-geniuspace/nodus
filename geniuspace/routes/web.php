@@ -152,6 +152,10 @@ Route::get('/n/{slug}/ghost/gym', [GhostController::class, 'gym']);
 Route::post('/n/{slug}/ghost/gym', [GhostController::class, 'gymRun']);
 Route::get('/n/{slug}/ghost/maturity', [GhostController::class, 'maturity']);
 Route::post('/n/{slug}/ghost/skills', [GhostController::class, 'approveSkill']);
+Route::get('/n/{slug}/ghost/editor', [GhostController::class, 'editor']);
+Route::post('/n/{slug}/ghost/plan', [GhostController::class, 'plan']);
+Route::post('/n/{slug}/ghost/apply', [GhostController::class, 'apply']);
+Route::post('/n/{slug}/ghost/undo', [GhostController::class, 'undo']);
 Route::post('/n/{slug}/ghost', [GhostController::class, 'chat']);
 
 Route::get('/n/vera/offres/{job}', [VeraController::class, 'jobShow']);

@@ -73,4 +73,31 @@ class CckCatalog
         }
         return $out;
     }
+
+    /**
+     * Contrat de capacité pour Ghost. Pas un dump SQL.
+     *
+     * @return array<string, array<string, mixed>>
+     */
+    public static function capabilities(): array
+    {
+        $out = [];
+        foreach (self::all() as $type => $meta) {
+            $fieldish = in_array($type, ['digits', 'select', 'email', 'checkbox', 'radio', 'boolean', 'datetime', 'telephone'], true);
+            $needsMedia = in_array($type, ['image', 'video', 'gallery', 'audio'], true);
+            $out[$type] = [
+                'label' => $meta['label'],
+                'can_insert' => true,
+                'can_move' => true,
+                'can_delete' => true,
+                'requires' => $needsMedia ? ['media'] : [],
+                'placement' => $fieldish ? 'field' : 'block',
+                'value_type' => $type === 'digits' ? 'number' : null,
+                'seo' => $meta['seo'] ?? 'none',
+                'pro' => ! empty($meta['pro']),
+            ];
+        }
+
+        return $out;
+    }
 }

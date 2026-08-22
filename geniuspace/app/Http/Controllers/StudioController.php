@@ -27,7 +27,10 @@ class StudioController extends Controller
         $splits = DB::table('product_splits')->get()->groupBy('product_id');
         $templates = \App\Support\FieldTemplates::all();
         $orphans = \App\Support\Engine::orphans();
-        return view('studio', compact('node', 'tabs', 'cck', 'seo', 'steps', 'staff', 'pending', 'bans', 'cats', 'role', 'products', 'splits', 'templates', 'orphans'));
+        $blocks = \App\Support\GhostEdit::read($node);
+        $manifest = \App\Support\GhostManifest::of($node, $blocks);
+        $ledger = \App\Support\GhostBiz::ledger();
+        return view('studio', compact('node', 'tabs', 'cck', 'seo', 'steps', 'staff', 'pending', 'bans', 'cats', 'role', 'products', 'splits', 'templates', 'orphans', 'blocks', 'manifest', 'ledger'));
     }
 
     public function tab(Request $request, string $slug): RedirectResponse

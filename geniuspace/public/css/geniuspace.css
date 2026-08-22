@@ -285,3 +285,57 @@ textarea { height: auto; border-radius: 1rem; padding: 0.75rem 1rem; }
 .we-row { display: flex; gap: .4rem; align-items: center; flex-wrap: wrap; margin: .35rem 0; }
 .we-row input, .we-row select { height: 2.4rem; }
 
+.ghost-copilot {
+  display: grid;
+  gap: 1rem;
+  margin: 1.5rem 0 2rem;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 900px) {
+  .ghost-copilot { grid-template-columns: 1.05fr 0.95fr; align-items: start; }
+}
+.ghost-copilot__fiche, .ghost-copilot__chat {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 1.5rem;
+  padding: 1.1rem 1.15rem;
+}
+.ghost-block {
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  padding: 0.7rem 0.85rem;
+  background: var(--bg);
+}
+.ghost-block.is-on { border-color: color-mix(in srgb, var(--fg) 40%, transparent); }
+.ghost-cursor {
+  display: block;
+  width: 100%;
+  height: 1.6rem;
+  margin: 0.15rem 0;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.65rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.ghost-cursor.is-on { color: var(--fg); }
+.ghost-log { max-height: 16rem; overflow: auto; }
+.ghost-log p {
+  display: block;
+  max-width: 94%;
+  margin: 0.25rem 0;
+  padding: 0.45rem 0.7rem;
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+}
+.ghost-log .host { border: 1px solid var(--border); background: var(--bg); }
+.ghost-log .you { margin-left: auto; background: var(--surface-2); text-align: right; }
+.ghost-preview {
+  margin-top: 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  padding: 0.85rem;
+  background: var(--bg);
+}
+

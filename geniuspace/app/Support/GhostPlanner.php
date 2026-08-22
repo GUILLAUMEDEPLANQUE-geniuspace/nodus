@@ -85,6 +85,21 @@ class GhostPlanner
             return ['name' => 'verify_claim', 'skill' => 'verify_claim', 'intent' => $intent, 'constraints' => [], 'confidence' => 0.88];
         }
 
+        if (\App\Support\GhostEdit::looksLike($message) && ! preg_match('/rembourse/u', $m)) {
+            return ['name' => 'edit_page', 'skill' => 'edit_page', 'intent' => 'studio', 'constraints' => $constraints, 'confidence' => 0.9];
+        }
+
+        $biz = \App\Support\GhostBiz::route($message);
+        if ($biz === 'tracking') {
+            return ['name' => 'send_tracking', 'skill' => 'send_tracking', 'intent' => 'tracking', 'constraints' => [], 'confidence' => 0.92];
+        }
+        if ($biz === 'relance' || $biz === 'campaign') {
+            return ['name' => 'run_campaign', 'skill' => 'run_campaign', 'intent' => 'campaign', 'constraints' => [], 'confidence' => 0.9];
+        }
+        if ($biz === 'orders') {
+            return ['name' => 'segment_customers', 'skill' => 'segment_customers', 'intent' => 'orders', 'constraints' => [], 'confidence' => 0.9];
+        }
+
         if (preg_match('/dossier|candidat|postule|envoie ma/u', $m)) {
             return ['name' => 'build_application', 'skill' => 'build_application', 'intent' => 'jobs', 'constraints' => [], 'confidence' => 0.8];
         }

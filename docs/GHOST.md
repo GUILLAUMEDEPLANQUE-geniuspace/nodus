@@ -2,8 +2,55 @@
 
 > Ghost **ne possède pas la vérité.** Il observe, raisonne et agit sur un monde vérifiable.
 > Le LLM (optionnel) comprend, planifie, explique. Le graphe Nodus décide de ce qui est vrai.
+> **Le LLM propose. Le moteur Nodus décide et exécute.**
+
+## V3 livrée — GhostAction (éditeur + business)
+
+```
+INTENT → CONTEXT → PLAN (DSL) → PREVIEW → APPLY → UNDO
+                                         ↘ VERIFY
+```
+
+Ghost ne parle plus seulement du lieu. Il **manipule** la fiche et **prépare** le commerce — jamais en SQL, jamais sans preview.
+
+| Pièce | Fichier | Contrat |
+| --- | --- | --- |
+| GhostAction | `GhostAction.php` | action, actor, target, ops, preview, execution, audit |
+| DSL | `GhostEdit.php` | `field.add` `after=contrat` — le moteur calcule `sort` |
+| Blocks | `read_editor` | composition, pas une liste plate de champs |
+| Curseur | `editor_context` | « ici » = ancre spatiale |
+| Catalogue | `CckCatalog::capabilities` | vocabulaire, pas un dump |
+| Manifest | `GhostManifest` | ce que Ghost peut faire **ici** |
+| Business | `GhostBiz.php` | READ / PREPARE / ACT + autonomie volume/remise |
+| Transactions | `ghost_actions` | snapshot → undo |
+
+Niveaux :
+
+| Niveau | Exemple | Auto ? |
+| --- | --- | --- |
+| READ | « J’ai 143 clients. » | oui |
+| PREPARE | « Campagne prête, 15 %. » | oui (rien n’est envoyé) |
+| ACT | « Lance. » | confirm si volume ≥ 100 ou remise > 10 % |
+
+Refusés : remboursement, suppression de client, modification de paiement.
+
+Outils **lecture** : `read_editor`, `list_field_types`, `search_media`, `search_playlist`, `customers.segment`, `orders.filter`, `campaign.preview`.
+
+Outils **écriture** (`field.add`, `campaign.launch`, …) : **null** dans `GhostTools::call`. L’écriture passe par `POST /ghost/apply` après preview.
+
+API V3 :
+
+| Méthode | URL | Rôle |
+| --- | --- | --- |
+| `GET` | `/n/{slug}/ghost/editor` | Structure + manifest |
+| `POST` | `/n/{slug}/ghost/plan` | DSL, **n’écrit pas** la fiche |
+| `POST` | `/n/{slug}/ghost/apply` | Staff. Transaction |
+| `POST` | `/n/{slug}/ghost/undo` | Restaure le snapshot |
+
+Pas dans V3 (volontaire) : vector DB, 10 000 cas gym, auto-skills en prod, ACT sans confirm hors règle volume/remise, Critic LLM.
 
 ## V1 livrée — cerveau, pas un intent unique
+
 
 Avant :
 

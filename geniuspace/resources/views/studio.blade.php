@@ -7,7 +7,10 @@
   <h1 class="font-display" style="font-size:2.6rem">Configurer {{ $node->title }}</h1>
   <p class="muted">L’éditeur de monde habille le lieu (scène, boutons, salles). Ici : SEO, champs de fiche, étapes.</p>
   <p><a class="btn" href="/n/{{ $node->slug }}/monde">Ouvrir l’éditeur de monde</a>
-     <a class="primary" href="/studio/image?src={{ urlencode($node->hero) }}&target=hero&slug={{ $node->slug }}">Éditer le héros</a></p>
+     <a class="primary" href="/studio/image?src={{ urlencode($node->hero) }}&target=hero&slug={{ $node->slug }}">Éditer le héros</a>
+     <a class="btn-line" href="/n/{{ $node->slug }}/ghost/gym">Salle d’épreuve</a></p>
+
+  @include('partials.ghost-copilot')
 
   <h2 class="font-display">SEO (owner/admin)</h2>
   <form method="post" action="/n/{{ $node->slug }}/studio/seo" class="card" style="padding:1rem;max-width:36rem">

@@ -181,9 +181,10 @@ class Ghost
 
     /**
      * @param  list<array{role: string, content: string}>  $history
+     * @param  array<string, mixed>  $opts
      * @return array<string, mixed>
      */
-    public static function reply(GpNode $node, string $message, array $history = []): array
+    public static function reply(GpNode $node, string $message, array $history = [], array $opts = []): array
     {
         $message = trim(Str::limit($message, 800));
         $ctx = self::context($node);
@@ -209,6 +210,21 @@ class Ghost
             GhostLearn::afterTurn($node, $message, ['skill' => 'verify_claim'], ['tools' => []], ['valid' => true], 'grounded');
 
             return $blocked;
+        }
+
+        $editorCtx = $opts['editor_context'] ?? [];
+        if (GhostBiz::route($message) || GhostEdit::looksLike($message)) {
+            $action = GhostBiz::route($message)
+                ? GhostBiz::plan($message)
+                : GhostEdit::parse($message, GhostEdit::read($node), is_array($editorCtx) ? $editorCtx : []);
+            if (GhostEdit::looksLike($message) && empty($editorCtx) && ! empty($action['ops'])) {
+                $action['preview'][] = 'Rien n’est écrit. Ouvrez le Studio pour Appliquer.';
+            }
+            GhostEdit::store($node, $action);
+            $out = self::fromAction($node, $action);
+            GhostLearn::afterTurn($node, $message, ['skill' => $out['skill']], ['tools' => $out['tools']], ['valid' => true], 'grounded');
+
+            return $out;
         }
 
         $plan = GhostPlanner::plan($node, $message, $ctx, $working);
@@ -257,6 +273,41 @@ class Ghost
             'memory' => GhostMemory::publicFacts($node),
             'permission' => $exec['ceiling'] ?? GhostSkills::OBSERVE,
             'maturity' => GhostMaturity::of($node),
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $action
+     * @return array<string, mixed>
+     */
+    private static function fromAction(GpNode $node, array $action): array
+    {
+        $skill = match ($action['action'] ?? '') {
+            'campaign.create', 'campaign.launch' => 'run_campaign',
+            'message.send', 'orders.filter' => 'send_tracking',
+            'customers.segment' => 'segment_customers',
+            default => 'edit_page',
+        };
+        $reply = implode(' ', $action['preview'] ?? []);
+        if (! empty($action['ask'])) {
+            $reply .= ' '.$action['ask'];
+        }
+
+        return [
+            'reply' => $reply,
+            'citations' => $action['citations'] ?? [],
+            'tools' => ['read_editor'],
+            'actions' => [['label' => 'Studio', 'href' => '/n/'.$node->slug.'/studio']],
+            'profile' => self::profile($node),
+            'mode' => 'grounded',
+            'goal' => $action['action'] ?? 'observe',
+            'skill' => $skill,
+            'plan' => $action['ops'] ?? [],
+            'verify' => ['valid' => ($action['status'] ?? '') !== 'blocked', 'status' => ($action['status'] ?? '') === 'blocked' ? 'contradicted' : 'known'],
+            'memory' => GhostMemory::publicFacts($node),
+            'permission' => $action['level'] ?? GhostSkills::OBSERVE,
+            'maturity' => GhostMaturity::of($node),
+            'ghost_action' => $action,
         ];
     }
 

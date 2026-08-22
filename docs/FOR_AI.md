@@ -39,6 +39,7 @@ Tu travailles sur **Geniuspace**. Stack unique : Laravel dans `geniuspace/`.
 36. **Omni-média.** Chapitre Labo / Mixer / Tactique → le player **bascule le cadre** (`Omni::beats`, overlay `omni-frame`). Tenir l’exo = grant `omni`. Prod = 03:15. Démo courte = 0:03 + remap si `duration < at`.
 38. **Ghost = agent cognitif.** Le LLM n’est pas le cerveau. Pipeline : Understand → Memory → Plan → Observe (multi-outils) → Verify → Respond. Faits structurés, jamais un transcript comme vérité. ACT (achat, candidature, unlock, graphe) exige une confirmation humaine. `GhostVerifier` bloque les affirmations hors coffre. Skills dans `GhostSkills.php`.
 40. **Ghost croissance.** `GhostLearn` / `GhostGym` / `GhostMaturity`. Une hallucination n’entre jamais en mémoire. Une skill nouvelle = candidat, pas prod. Gym : `/n/{slug}/ghost/gym`. Autonomie plafonnée à 54. Pas de crawl, pas d’embeddings comme coffre.
+41. **GhostAction.** Le LLM ne touche pas SQL. DSL (`field.add` after/before). Blocks + curseur Ghost (`editor_context`). PLAN ≠ APPLY (`/ghost/plan` puis `/ghost/apply`). Undo = snapshot `ghost_actions`. `CckCatalog::capabilities` = vocabulaire. Business : READ / PREPARE / ACT. Volume ≥ 100 ou remise > 10 % = confirm. Refund / delete customer / payment = deny. Copilote Studio Blade.
 
 38. **Maison neuve.** `/n/vera` reste le flagship historique. `WorldTemplates::apply('maison-rh')` pose les 35 missions (`Maison::attachCatalog`). Pas un second Vera.
 39. **Paiement.** `Pay::cents` = prix tenu. Stripe Checkout Session HTTP (pas de SDK). Retour `/panier/retour`.

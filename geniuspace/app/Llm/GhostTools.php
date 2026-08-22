@@ -2,9 +2,13 @@
 
 namespace App\Llm;
 
+use App\Llm\CckCatalog;
 use App\Models\GpNode;
 use App\Support\Chrome;
 use App\Support\Engine;
+use App\Support\GhostBiz;
+use App\Support\GhostEdit;
+use App\Support\GhostManifest;
 use App\Support\Grantor;
 use App\Support\Order;
 
@@ -29,6 +33,13 @@ class GhostTools
             ['name' => 'match_user_job', 'description' => 'Score mission × preuves du carnet'],
             ['name' => 'search_graph', 'description' => 'Cherche dans fiches, champs, voisins, produits'],
             ['name' => 'find_path', 'description' => 'Chemin d\'un lieu vers un voisin'],
+            ['name' => 'read_editor', 'description' => 'Structure actuelle de la fiche (blocs)'],
+            ['name' => 'list_field_types', 'description' => 'Types du catalogue et leurs capacités'],
+            ['name' => 'search_media', 'description' => 'Cherche une image ou une vidéo dans le coffre'],
+            ['name' => 'search_playlist', 'description' => 'Cherche une playlist'],
+            ['name' => 'customers.segment', 'description' => 'Segmente les clients (lecture)'],
+            ['name' => 'orders.filter', 'description' => 'Filtre les commandes (lecture)'],
+            ['name' => 'campaign.preview', 'description' => 'Prépare une campagne sans l\'envoyer'],
         ];
     }
 
@@ -54,7 +65,14 @@ class GhostTools
             'match_user_job' => self::matchUserJob($node, $ctx),
             'search_graph' => self::searchGraph($node, $ctx, (string) ($args['message'] ?? '')),
             'find_path' => self::findPath($node, $ctx, (string) ($args['message'] ?? '')),
-            'purchase', 'send_application', 'unlock_content', 'modify_graph' => null,
+            'read_editor' => self::readEditor($node),
+            'list_field_types' => self::listFieldTypes(),
+            'search_media' => self::searchMedia((string) ($args['q'] ?? '')),
+            'search_playlist' => self::searchPlaylist((string) ($args['q'] ?? '')),
+            'customers.segment', 'orders.filter', 'campaign.preview' => self::bizRead((string) ($args['message'] ?? $name)),
+            'purchase', 'send_application', 'unlock_content', 'modify_graph',
+            'create_field', 'update_field', 'delete_field', 'field.add', 'media.insert',
+            'campaign.launch', 'message.send', 'order.refund', 'customer.delete', 'payment.modify' => null,
             default => self::runIntent($node, $name, (string) ($args['message'] ?? ''), $ctx),
         };
     }
@@ -344,6 +362,70 @@ class GhostTools
             'data' => ['path' => $path],
             'citations' => array_map(fn ($p) => ['label' => $p['titre'], 'url' => $p['url']], $path),
             'actions' => count($path) > 1 ? [['label' => $path[1]['titre'], 'href' => $path[1]['url']]] : [],
+        ];
+    }
+
+    public static function readEditor(GpNode $node): array
+    {
+        $blocks = GhostEdit::read($node);
+
+        return [
+            'tool' => 'read_editor',
+            'data' => GhostManifest::of($node, $blocks),
+            'citations' => array_map(fn ($b) => ['label' => $b['label'], 'url' => '/n/'.$node->slug.'/studio'], array_slice($blocks, 0, 8)),
+            'actions' => [['label' => 'Studio', 'href' => '/n/'.$node->slug.'/studio']],
+        ];
+    }
+
+    public static function listFieldTypes(): array
+    {
+        $caps = CckCatalog::capabilities();
+        $simple = [];
+        foreach (CckCatalog::simple() as $type => $meta) {
+            $simple[] = ['type' => $type] + ($caps[$type] ?? ['label' => $meta['label']]);
+        }
+
+        return [
+            'tool' => 'list_field_types',
+            'data' => ['types' => $simple],
+            'citations' => [],
+            'actions' => [],
+        ];
+    }
+
+    public static function searchMedia(string $q): array
+    {
+        $hits = GhostEdit::searchMedia($q);
+
+        return [
+            'tool' => 'search_media',
+            'data' => ['hits' => $hits],
+            'citations' => array_map(fn ($h) => ['label' => $h['title'], 'url' => '#'.$h['id']], $hits),
+            'actions' => [],
+        ];
+    }
+
+    public static function searchPlaylist(string $q): array
+    {
+        $hits = GhostEdit::searchPlaylist($q);
+
+        return [
+            'tool' => 'search_playlist',
+            'data' => ['hits' => $hits],
+            'citations' => array_map(fn ($h) => ['label' => $h['title'], 'url' => '#'.$h['id']], $hits),
+            'actions' => [],
+        ];
+    }
+
+    public static function bizRead(string $message): array
+    {
+        $action = GhostBiz::plan($message);
+
+        return [
+            'tool' => $action['action'] ?? 'customers.segment',
+            'data' => $action,
+            'citations' => $action['citations'] ?? [],
+            'actions' => [],
         ];
     }
 }
