@@ -27,7 +27,7 @@
 @endphp
 <div x-data="{
   tab: @js($defaultTab),
-  openId: @js($tid),
+  openId: @js($tid ?: optional($forumThreads->first())->id),
   mode: @js($mode ?: 'legacy'),
   bubbles: [],
   skins: @json($tabs->mapWithKeys(fn($t) => [$t->key => '--room-color:'.($t->color ?? '#c9a36a').';'.(($t->bg ?? '') ? 'background-image:url('.$t->bg.');background-size:cover;background-position:center;' : '')])->all()),
@@ -42,99 +42,7 @@
 @if($living)
 {{-- ========== LIVING WORLD ========== --}}
 @if($tab === 'forum')
-<div>
-  <div class="forum-split" :class="openId && 'is-open'">
-    <div class="snap">
-      @foreach($forumThreads as $t)
-        <article class="snap-card">
-          <img src="{{ $t->cover ?: $node->hero }}" alt="">
-          <div class="veil"></div>
-          <div class="relative z-10 wrap" style="display:flex;justify-content:space-between;align-items:flex-end;gap:1rem;width:100%">
-            <div style="max-width:36rem">
-              <p class="kicker" style="display:flex;align-items:center;gap:.5rem">
-                <img src="{{ $t->author_avatar ?: \App\Support\Faces::of($t->author) }}" alt="" style="width:1.6rem;height:1.6rem;border-radius:999px;object-fit:cover">
-                Sujet · {{ $t->author }}
-              </p>
-              <h2 class="font-display" style="font-size:clamp(2rem,6vw,3.4rem);margin:0.3rem 0;line-height:0.95">{{ $t->title }}</h2>
-              <p>{!! \App\Support\Linker::html($node, $t->body) !!}</p>
-              <p class="muted" style="font-size:0.8rem">{{ $t->views }} vues · {{ $t->fires }} feux · {{ $t->replies_count }} réponses</p>
-            </div>
-            <div class="side-btns">
-              <form method="post" action="/n/{{ $node->slug }}/t/{{ $t->id }}/fire"><input type="hidden" name="_token" value="{{ csrf_token() }}"><button type="submit" class="orb">🔥 {{ $t->fires }}</button></form>
-              <button type="button" class="orb pri" @click="openId='{{ $t->id }}'">💬 {{ $t->replies_count }}</button>
-              <a class="orb" href="/n/{{ $node->slug }}/t/{{ $t->id }}" aria-label="Fiche SEO">↗</a>
-              <a class="orb" href="/studio/image?src={{ urlencode($t->cover ?: $node->hero) }}&target=thread&id={{ $t->id }}&slug={{ $node->slug }}">✎</a>
-            </div>
-          </div>
-        </article>
-      @endforeach
-      <div class="snap-card" style="background:var(--surface);align-items:center">
-        <form method="post" action="/forum" class="wrap" style="max-width:32rem;position:relative;z-index:2">
-          @csrf
-          <input type="hidden" name="slug" value="{{ $node->slug }}">
-          <p class="kicker">Nouveau sujet — indexé Google</p>
-          <input name="title" required placeholder="Titre du débat" style="width:100%;margin:0.5rem 0">
-          <select name="category" style="width:100%;margin-bottom:.4rem">
-            <option value="">Catégorie</option>
-            <option>Technique</option>
-            <option>Meets</option>
-            <option>Pièces</option>
-            <option>Annonces</option>
-          </select>
-          <textarea name="body" required placeholder="Accroche Legacy" style="width:100%;min-height:6rem"></textarea>
-          <button class="btn" type="submit" style="margin-top:0.75rem">Publier le sujet</button>
-        </form>
-      </div>
-    </div>
-    <aside class="dive" x-show="openId" x-cloak>
-      <header style="display:flex;justify-content:space-between;padding:0.75rem 1rem;border-bottom:1px solid var(--border)">
-        <div>
-          <button type="button" :class="mode==='legacy' && 'primary'" @click="mode='legacy'">Top (SEO)</button>
-          <button type="button" :class="mode==='live' && 'primary'" @click="mode='live'" class="btn-ghost">Live</button>
-        </div>
-        <button type="button" class="btn-ghost" @click="openId=null">Fermer</button>
-      </header>
-      <div style="flex:1;overflow:auto;padding:1rem">
-        @foreach($forumThreads as $t)
-          <div x-show="openId==='{{ $t->id }}' && mode==='legacy'">
-            @forelse($replies->get($t->id, collect()) as $r)
-              <article class="legacy-card">
-                <p class="kicker" style="display:flex;align-items:center;gap:.4rem">
-                  <img src="{{ $r->author_avatar ?: \App\Support\Faces::of($r->author) }}" alt="" style="width:1.4rem;height:1.4rem;border-radius:999px;object-fit:cover">
-                  {{ $r->author }} · {{ $r->votes }} votes
-                </p>
-                <p>{{ $r->body }}</p>
-              </article>
-            @empty
-              <p class="muted">Pas encore de réponse indexable.</p>
-            @endforelse
-            <form method="post" action="/n/{{ $node->slug }}/t/{{ $t->id }}/reply" @submit="ping('Toi')">
-              @csrf
-              <input name="body" required placeholder="Réponse Legacy (Google indexe)" style="width:100%;margin-top:0.5rem">
-            </form>
-          </div>
-          <div x-show="openId==='{{ $t->id }}' && mode==='live'">
-            @foreach($live->get($t->id, collect()) as $l)
-              <div class="live-row">
-                <img src="{{ \App\Support\Faces::of($l->author) }}" alt="" style="width:2rem;height:2rem;border-radius:999px;object-fit:cover">
-                <p class="bubble"><span class="primary" style="font-size:0.75rem">{{ $l->author }}</span> {{ $l->body }}</p>
-                <form method="post" action="/n/{{ $node->slug }}/t/{{ $t->id }}/echo">
-                  @csrf
-                  <input type="hidden" name="live_id" value="{{ $l->id }}">
-                  <button class="chip" type="submit">Écho → Legacy</button>
-                </form>
-              </div>
-            @endforeach
-            <form method="post" action="/n/{{ $node->slug }}/t/{{ $t->id }}/live" @submit="ping('Toi')">
-              @csrf
-              <input name="body" required placeholder="Live…" style="width:100%;margin-top:0.5rem">
-            </form>
-          </div>
-        @endforeach
-      </div>
-    </aside>
-  </div>
-</div>
+@include('partials.holo-forum')
 @else
 <div>
 @if($tab === 'vivre')
@@ -175,7 +83,7 @@
               <a class="btn-line" href="/n/{{ $node->slug }}/vs/{{ $vsA->slug }}/{{ $vsB->slug }}">Comparer 1.6 vs 1.9</a>
             @endif
             <a class="btn-ghost" href="/n/{{ $node->slug }}/digest">Digest</a>
-            <a class="btn" href="/n/{{ $node->slug }}/forum">Parler</a>
+            <a class="btn" href="/n/{{ $node->slug }}/forum">Forum</a>
             <a class="btn-line" href="/n/{{ $node->slug }}/personnages">Les fiches</a>
             <a class="btn-line" href="/n/{{ $node->slug }}/classifieds">Pièces</a>
             <a class="btn-line" href="/studio/image?src={{ urlencode($node->hero) }}&target=hero&slug={{ $node->slug }}">Éditer le héros</a>

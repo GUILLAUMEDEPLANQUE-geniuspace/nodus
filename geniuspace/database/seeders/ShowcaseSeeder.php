@@ -23,7 +23,7 @@ class ShowcaseSeeder extends Seeder
 
         $rooms = [
             ['vivre', 'Univers', 0],
-            ['forum', 'Parler', 1],
+            ['forum', 'Forum', 1],
             ['personnages', 'Les voitures', 2],
             ['classifieds', 'Pièces', 3],
             ['videos', 'Essais', 4],
@@ -122,12 +122,28 @@ class ShowcaseSeeder extends Seeder
         foreach ([['Cylindrée', 'text', '1580 cm³'], ['Puissance', 'text', '115 ch DIN'], ['Années', 'text', '1984–1992'], ['Boîte', 'text', 'BE1 / BE3'], ['Poids', 'digits', '850']] as $i => $f) {
             DB::table('cck_fields')->insert(['node_id' => 'peugeot-205-gti-16', 'name' => $f[0], 'type' => $f[1], 'value' => $f[2], 'sort' => $i]);
         }
-        if (DB::table('replies')->where('thread_id', 'th-205-1')->count() === 0) {
-            DB::table('replies')->insert([
-                ['thread_id' => 'th-205-1', 'author' => 'Marc', 'body' => 'Fait à Reims. Couple 2.0 puis 2.2. Voir @joint-culasse-205-gti.', 'votes' => 12],
-                ['thread_id' => 'th-205-1', 'author' => 'Léa', 'body' => 'Le @p-205-joint du club était bon. Pas de fuite à 800 km.', 'votes' => 7],
-            ]);
-        }
+        DB::table('replies')->where('thread_id', 'th-205-1')->delete();
+        DB::table('replies')->insert([
+            [
+                'thread_id' => 'th-205-1', 'author' => 'Marc', 'body' => 'Le couple de serrage n’est pas une opinion. 2.0 puis 2.2, dans l’ordre. J’ai mis l’analyse vidéo (chapitre 2) et la fiche @joint-culasse-205-gti.',
+                'votes' => 86, 'badge' => 'Expert moteur', 'product_id' => '',
+                'file_title' => '', 'file_path' => '', 'file_locked' => 0,
+                'video_title' => 'Changement joint — making-of', 'video_path' => 'media/atelier.mp4', 'video_meta' => '3 chapitres · 00:16 · Drive club',
+            ],
+            [
+                'thread_id' => 'th-205-1', 'author' => 'Léa', 'body' => 'Le PDF couple est locké premium. Le joint du club est en stock à Reims — @p-205-joint. Dimanche au parking.',
+                'votes' => 41, 'badge' => 'Guilde Reims', 'product_id' => 'p-205-joint',
+                'file_title' => 'Couple de serrage XU9.pdf', 'file_path' => '/realms/205-joint.jpg', 'file_locked' => 1,
+                'video_title' => '', 'video_path' => '', 'video_meta' => '',
+            ],
+            [
+                'thread_id' => 'th-205-1', 'author' => 'Tom', 'body' => 'D’accord avec Marc. Sans le maillage vers la fiche, ce sujet meurt dans un groupe Facebook.',
+                'votes' => 12, 'badge' => '', 'product_id' => '',
+                'file_title' => '', 'file_path' => '', 'file_locked' => 0,
+                'video_title' => '', 'video_path' => '', 'video_meta' => '',
+            ],
+        ]);
+        DB::table('threads')->where('id', 'th-205-1')->update(['replies_count' => 3, 'fires' => 24, 'views' => 856]);
 
         $threads = [
             ['th-205-1', 'Joint de culasse 205 GTI 1.9 à Reims — retours', 'Club', 'Qui a déjà changé le joint de culasse 205 GTI à Reims ? La fiche @joint-culasse-205-gti est encore trop mince. @p-205-joint est en stock.', '/realms/205-joint.jpg'],

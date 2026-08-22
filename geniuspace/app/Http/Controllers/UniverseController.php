@@ -103,9 +103,11 @@ class UniverseController extends Controller
     {
         $node = GpNode::query()->where('slug', $slug)->firstOrFail();
         $thread = $node->threads()->where('id', $tid)->firstOrFail();
+        $node->load(['products', 'media']);
         $replies = Reply::query()->where('thread_id', $tid)->orderByDesc('votes')->get();
         $live = LiveMessage::query()->where('thread_id', $tid)->get();
-        return view('thread', compact('node', 'thread', 'replies', 'live'));
+        $files = DriveFile::query()->where('node_id', $node->id)->get();
+        return view('thread', compact('node', 'thread', 'replies', 'live', 'files'));
     }
 
     public function product(string $slug, string $pid): View

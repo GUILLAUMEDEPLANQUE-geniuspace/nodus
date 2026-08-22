@@ -60,6 +60,11 @@ Le pilote n’est plus 3 salles vides. Garage ciné, 14 salles, graphe 1.9→pi�
 
 Routes radar + panier + Moat. 20 fiches rédigées. Stories, avis, live, auteurs vidéo, i18n 1.9, recherche guides, footer, explore `?q=`.
 
+## 2026-08-22 — Holo-forum (split + pièces jointes natives)
+
+Le dock dit **Forum** (plus « Parler »). Split héros / pane claire. Réponse = texte + vidéo Drive + PDF locké + relique panier. Composer Relique / Vidéo / Fichier. Page `/t/{id}` identique, JSON-LD DiscussionForumPosting.
+
+
 
 
 

@@ -42,20 +42,32 @@ class ForumController extends Controller
             'fires' => 0,
             'replies_count' => 0,
         ]);
-        return redirect('/n/'.$node->slug.'?tab=forum&tid='.$id)->with('ok', 'Sujet publié (Legacy SEO).');
+        return redirect('/n/'.$node->slug.'/t/'.$id)->with('ok', 'Sujet publié (Legacy SEO).');
     }
 
     public function reply(Request $request, string $slug, string $tid): RedirectResponse
     {
         $data = $request->validate(['body' => 'required|string|max:4000']);
         $nodeId = GpNode::query()->where('slug', $slug)->value('id');
+        $vid = (string) $request->input('video_path', '');
+        $media = $vid ? DB::table('media')->where('node_id', $nodeId)->where('path', $vid)->first() : null;
+        $fp = (string) $request->input('file_path', '');
+        $file = $fp ? DB::table('drive_files')->where('node_id', $nodeId)->where('path', $fp)->first() : null;
         Reply::query()->create([
             'thread_id' => $tid,
             'author' => $this->author($nodeId),
             'body' => $data['body'],
             'votes' => 0,
             'pending' => 0,
-            'media_path' => '',
+            'media_path' => $vid,
+            'product_id' => (string) $request->input('product_id', ''),
+            'video_path' => $vid,
+            'video_title' => $media->title ?? '',
+            'video_meta' => $media ? ($media->duration.' · '.$media->mode) : '',
+            'file_path' => $fp,
+            'file_title' => $file->title ?? '',
+            'file_locked' => (bool) ($file->locked ?? false),
+            'badge' => '',
         ]);
         Thread::query()->where('id', $tid)->increment('replies_count');
         if (preg_match_all('/@([a-z0-9][a-z0-9\-]+)/i', $data['body'], $mm)) {
