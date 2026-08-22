@@ -4,7 +4,8 @@
  */
 import { useState } from "react";
 import { CckBuilder } from "@/components/cck-builder";
-import type { CckField, DriveFile, StaffMember, UniverseTab } from "@/lib/graph";
+import { SeoStudio } from "@/components/seo-studio";
+import type { CckField, DriveFile, NodeSeo, StaffMember, UniverseTab } from "@/lib/graph";
 import { addStaffMember, addUniverseTab } from "@/lib/graph-api";
 
 export function StudioPanel({
@@ -13,12 +14,14 @@ export function StudioPanel({
   staff,
   files,
   cck = [],
+  seo = null,
 }: {
   slug: string;
   tabs: UniverseTab[];
   staff: StaffMember[];
   files: DriveFile[];
   cck?: CckField[];
+  seo?: NodeSeo | null;
 }) {
   const [label, setLabel] = useState("");
   const [name, setName] = useState("");
@@ -140,6 +143,7 @@ export function StudioPanel({
           ) : null}
         </ul>
       </section>
+      <SeoStudio slug={slug} seo={seo} />
       <CckBuilder slug={slug} fields={cck} />
     </div>
   );

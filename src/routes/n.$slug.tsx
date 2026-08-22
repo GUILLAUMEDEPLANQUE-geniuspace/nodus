@@ -19,13 +19,13 @@ export const Route = createFileRoute("/n/$slug")({
   },
   head: ({ loaderData }) => {
     if (!loaderData) return {};
-    const s = seoForNode(loaderData.node);
+    const s = seoForNode(loaderData.node, loaderData.seo);
     return {
       meta: [
         { title: s.title },
         { name: "description", content: s.description },
         { name: "keywords", content: s.keywords },
-        { name: "robots", content: "index,follow,max-image-preview:large" },
+        { name: "robots", content: s.noindex ? "noindex,nofollow" : "index,follow,max-image-preview:large" },
         { property: "og:title", content: s.title },
         { property: "og:description", content: s.description },
         { property: "og:type", content: s.ogType },

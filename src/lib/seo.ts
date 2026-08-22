@@ -3,7 +3,7 @@
  * Ne jamais réutiliser le title global "NODUS" sur une fiche : Google et les LLM
  * doivent voir UN document par univers / offre / produit / perso.
  */
-import type { CckField, GraphNode, NodeUniverse, ShopProduct, WikiPage } from "@/lib/graph";
+import type { CckField, GraphNode, NodeSeo, NodeUniverse, ShopProduct, WikiPage } from "@/lib/graph";
 
 const KIND_SEO: Record<string, (n: GraphNode) => { title: string; description: string; ogType: string }> = {
   series: (n) => ({
@@ -48,7 +48,7 @@ const KIND_SEO: Record<string, (n: GraphNode) => { title: string; description: s
   }),
 };
 
-export function seoForNode(node: GraphNode) {
+export function seoForNode(node: GraphNode, override?: NodeSeo | null) {
   const make = KIND_SEO[node.kind];
   const base = make
     ? make(node)
@@ -61,9 +61,12 @@ export function seoForNode(node: GraphNode) {
     .filter(Boolean)
     .join(", ");
   return {
-    ...base,
-    keywords,
+    title: override?.title || base.title,
+    description: override?.description || base.description,
+    ogType: base.ogType,
+    keywords: override?.keywords || keywords,
     canonical: `/n/${node.slug}`,
+    noindex: Boolean(override?.noindex),
   };
 }
 

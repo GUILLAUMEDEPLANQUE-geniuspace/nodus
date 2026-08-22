@@ -37,6 +37,7 @@ import {
   type StaffMember,
   type Thread,
   type TimelineEvent,
+  type NodeSeo,
   type UniverseTab,
   type VideoAsset,
   type VideoNews,
@@ -580,6 +581,20 @@ export const getNodeUniverse = createServerFn({ method: "GET" })
        )`,
       [bundle.node.id],
     );
+    const seoRows = await sql.query<{
+      title: string;
+      description: string;
+      keywords: string;
+      noindex: boolean;
+    }>(`select title, description, keywords, noindex from node_seo where node_id = $1`, [bundle.node.id]);
+    const seoRow: NodeSeo | null = seoRows[0]
+      ? {
+          title: seoRows[0].title,
+          description: seoRows[0].description,
+          keywords: seoRows[0].keywords,
+          noindex: Boolean(seoRows[0].noindex),
+        }
+      : null;
     return {
       ...bundle,
       folders: folders.map(
@@ -719,6 +734,7 @@ export const getNodeUniverse = createServerFn({ method: "GET" })
           body: n.body,
         }),
       ),
+      seo: seoRow,
     };
   });
 

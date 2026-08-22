@@ -264,6 +264,13 @@ export type SalonRoom = {
   y: number;
 };
 
+export type NodeSeo = {
+  title: string;
+  description: string;
+  keywords: string;
+  noindex: boolean;
+};
+
 export type NodeUniverse = NodeBundle & {
   folders: DriveFolder[];
   files: DriveFile[];
@@ -284,6 +291,7 @@ export type NodeUniverse = NodeBundle & {
   rooms: SalonRoom[];
   videoAssets: VideoAsset[];
   videoNews: VideoNews[];
+  seo: NodeSeo | null;
 };
 
 

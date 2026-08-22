@@ -412,3 +412,43 @@ export const listRecentForHome = createServerFn({ method: "GET" }).handler(async
     `select slug, title, kind from nodes where featured = true order by title limit 6`,
   );
 });
+
+/** Rôle du visiteur connecté. Pour cacher l'éditeur SEO / Studio. */
+export const getMyRole = createServerFn({ method: "GET" })
+  .middleware([authMiddleware])
+  .validator(z.object({ slug: z.string().min(1) }))
+  .handler(async ({ data, context }) => {
+    const { sql, node } = await nodeBySlug(data.slug);
+    if (!node) return { role: null as string | null };
+    const { roleOnNode } = await import("@/lib/acl");
+    const role = await roleOnNode(sql, node.id, context.userId);
+    return { role };
+  });
+
+/**
+ * Écriture meta SEO. Owner / admin seulement.
+ * Le rendu public (head + JSON-LD) lit la même table — Google voit le résultat, pas le formulaire.
+ */
+export const saveNodeSeo = createServerFn({ method: "POST" })
+  .middleware([authMiddleware])
+  .validator(
+    z.object({
+      slug: z.string().min(1),
+      title: z.string().trim().max(70),
+      description: z.string().trim().max(160),
+      keywords: z.string().trim().max(200),
+      noindex: z.boolean().optional().default(false),
+    }),
+  )
+  .handler(async ({ data, context }) => {
+    const { sql, node } = await nodeBySlug(data.slug);
+    if (!node) throw new Error("Univers introuvable");
+    await assertMinRole(sql, node.id, context.userId, "admin");
+    await sql.query(
+      `insert into node_seo (node_id, title, description, keywords, noindex)
+       values ($1, $2, $3, $4, $5)
+       on conflict (node_id) do update set title = $2, description = $3, keywords = $4, noindex = $5`,
+      [node.id, data.title, data.description, data.keywords, data.noindex ?? false],
+    );
+    return { ok: true };
+  });

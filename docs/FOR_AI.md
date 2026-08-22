@@ -20,4 +20,4 @@ Tu travailles sur NODUS. Avant de coder :
 18. Plateforme 0.9 : ACL `src/lib/acl.ts`. Blobs locked hors payload public. Checkout démo ≠ Stripe.
 19. Panier / notifs / inbox / profil = `src/lib/platform-api.ts`.
 20. Quêtes ATS : `startOrAdvanceCandidate`. Ne pas re-stocker les choix en local uniquement.
-21. i18n chrome seulement (`src/lib/i18n.ts`). Pas de traduction auto des fiches (SEO).
+22. SEO : pages publiques. Éditeur meta = owner/admin (`SeoStudio`). Ne jamais noindex un univers publié.

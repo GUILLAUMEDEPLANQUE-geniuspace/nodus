@@ -76,7 +76,7 @@ export function ShopFloor({
                 search={{ view: "fiche" }}
                 className="inline-flex h-11 items-center rounded-full border border-border px-3 text-sm"
               >
-                Fiche SEO
+                Fiche produit
               </Link>
             </div>
             <div className="mt-3">

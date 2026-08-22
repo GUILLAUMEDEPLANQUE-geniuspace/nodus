@@ -64,6 +64,7 @@ export function LivingWorld({ universe }: { universe: NodeUniverse }) {
     heroUrl,
     videoAssets,
     videoNews,
+    seo,
   } = universe;
   const dockTabs = uniqueTabs(tabs.length ? tabs : FALLBACK_TABS);
   const [tab, setTab] = useState(dockTabs[0]?.key ?? "vivre");
@@ -202,7 +203,7 @@ export function LivingWorld({ universe }: { universe: NodeUniverse }) {
         ) : null}
 
         {tab === "studio" ? (
-          <StudioPanel slug={node.slug} tabs={dockTabs} staff={staff} files={files} cck={cck} />
+          <StudioPanel slug={node.slug} tabs={dockTabs} staff={staff} files={files} cck={cck} seo={seo} />
         ) : null}
       </div>
         </>

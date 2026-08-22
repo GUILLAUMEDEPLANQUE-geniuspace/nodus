@@ -2,6 +2,13 @@
 
 Format : ce qui est **dans le code**, pas la vision PDF.
 
+## 0.9.1 — 2026-08-22
+
+### SEO : public vs éditeur
+- La **page** (`/n/:slug`, `/p/:id`, `/v/:id`, `/t/:id`) reste publique et indexable — c'est le moat
+- L'**éditeur** title/description/keywords/noindex est owner/admin (`saveNodeSeo` + ACL)
+- Boutique : lien « Fiche produit » (publique), plus le faux bouton « Fiche SEO »
+
 ## 0.9.0 — 2026-08-22
 
 Couche plateforme. Lectures toujours publiques (SEO). Écritures auth + ACL.
