@@ -8,6 +8,7 @@ use App\Http\Controllers\CreateController;
 use App\Http\Controllers\DriveController;
 use App\Http\Controllers\EmbedController;
 use App\Http\Controllers\EngineController;
+use App\Http\Controllers\FlagshipController;
 use App\Http\Controllers\ForumController;
 use App\Http\Controllers\GhostController;
 use App\Http\Controllers\GrantController;
@@ -31,8 +32,10 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [UniverseController::class, 'home'])->name('home');
 Route::get('/explore', [UniverseController::class, 'explore'])->name('explore');
+Route::get('/flagships', [FlagshipController::class, 'bible']);
 Route::get('/create', [CreateController::class, 'form']);
 Route::post('/create', [CreateController::class, 'store']);
+Route::post('/n/{slug}/preuve-lore', [FlagshipController::class, 'lore']);
 Route::get('/atelier/{slug}', [AtelierController::class, 'show']);
 Route::post('/atelier/{slug}', [AtelierController::class, 'save']);
 Route::get('/login', [AuthController::class, 'form']);

@@ -1,9 +1,9 @@
 @extends('layouts.app')
 @section('title', $count.' templates d’univers — Geniuspace')
-@section('description', 'Cinquante univers uniques : manga, Vera, jeux, pays, formation, annonces. SEO d’entité, tout customisable.')
+@section('description', 'Dix flagships : Coffre, Terrain, Atelier, Territoire, Maison, Scène, Arène, Labo, Plateau, Table. Puis 50 métiers.')
 @section('content')
 <main class="wrap" style="padding:2rem 1.25rem 8rem" x-data="{
-  g: 'Tous',
+  g: 'Flagship',
   pick: null,
   choose(t) {
     this.pick = t;
@@ -15,8 +15,8 @@
   }
 }">
   <p class="kicker">Création de monde</p>
-  <h1 class="font-display" style="font-size:clamp(2rem,6vw,3.4rem);line-height:.95">Clique un template.<br>Le formulaire s’ouvre.</h1>
-  <p class="lede">Une carte = un moteur (schema + salles + curseur). Tu nommes — l’éditeur de monde s’ouvre.</p>
+  <h1 class="font-display" style="font-size:clamp(2rem,6vw,3.4rem);line-height:.95">Dix flagships.<br>Pas des skins. Des moteurs.</h1>
+  <p class="lede">Coffre, Terrain, Atelier, Territoire, Maison, Scène, Arène, Labo, Plateau, Table. Chaque carte a un hôte, des passages, des preuves. <a href="/flagships">Bible →</a></p>
 
   <div class="rel" style="margin:1rem 0;flex-wrap:wrap">
     <button type="button" class="chip" @click="g='Tous'" :class="g==='Tous' && 'primary'">Tous</button>
@@ -30,7 +30,7 @@
       <p class="kicker">{{ $name }}</p>
       <div class="tpl-grid">
         @foreach($list as $t)
-          <button type="button" class="tpl" style="--tpl:{{ $t['primary'] }}"
+          <button type="button" class="tpl {{ !empty($t['flagship']) ? 'flag' : '' }}" style="--tpl:{{ $t['primary'] }}"
             @click="choose({id:@js($t['id']), label:@js($t['label']), pitch:@js($t['innovation']), schema:@js($t['schema'])})"
             :class="pick && pick.id===@js($t['id']) && 'on'">
             <img src="/tpl/{{ $t['id'] }}.svg" alt="{{ $t['label'] }}" width="320" height="180">

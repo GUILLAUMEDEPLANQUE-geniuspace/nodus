@@ -16,6 +16,7 @@ class DualWorldsSeeder extends Seeder
         $this->lumen();
         $this->chrome();
         $this->seedMediaEngine();
+        $this->call(FlagshipSeeder::class);
     }
 
     private function forgetClub205(): void

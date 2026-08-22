@@ -2,6 +2,12 @@
 
 Format : ce qui est **dans le code**, pas la vision PDF.
 
+## 2026-08-22 — 10 flagships
+
+Coffre, Terrain, Atelier, Territoire, Maison, Scène, Arène, Labo, Plateau, Table.
+Chacun a un hôte (négocie / présélectionne), des passages (voisins, pas des liens bleus), une preuve stakée, un schema.org.
+Le Coffre : canvas infini, cel City Hunter, JSON-LD Product. Bible : `/flagships`.
+
 ## 2026-08-22 — Ghost OS (agent ancré par lieu)
 
 - **Un Ghost par Node.** Profil marchand (Lumen) / RH (Vera) / guide (living).

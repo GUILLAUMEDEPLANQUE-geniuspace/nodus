@@ -67,8 +67,9 @@ class WorldTemplates
             DB::table('node_arcs')->insert(['node_id' => $node->id, 'label' => $label, 'ord' => $i + 1]);
         }
         $pack = match (true) {
-            str_contains($id, 'vera') => 'maison',
-            str_contains($id, 'galerie') || str_contains($id, 'merch') || str_contains($id, 'rwa') => 'produit',
+            str_contains($id, 'vera') || $id === 'maison-rh' => 'maison',
+            str_contains($id, 'galerie') || str_contains($id, 'merch') || str_contains($id, 'rwa') || $id === 'vault' || $id === 'table' => 'produit',
+            $id === 'atelier-anime' => 'personnage',
             default => null,
         };
         if ($pack) {
@@ -139,7 +140,7 @@ class WorldTemplates
             ['cuisine', 'Création', 'Cuisine / terroir club', 'Recettes HowTo, mag', 'Recipe + Place resto', 'series', 'living', '#b45309', $h['m'], 'Recipe', ['guides', 'journal', 'videos', 'forum', 'agenda', 'gallery'], [['Plat', 'text'], ['Allergènes', 'text']], [], '{name} — recettes, magazine', 'Recipe + FAQ.'],
             ['club-sport', 'Création', 'Club sport', 'Équipes, matchs, mag', 'SportsEvent + Person joueur', 'series', 'living', '#16a34a', $h['m'], 'SportsTeam', ['agenda', 'personnages', 'journal', 'videos', 'forum', 'gallery'], [['Division', 'text'], ['Stade', 'geo']], ['Aller', 'Retour'], '{name} — club, matchs', 'SportsEvent + Person.'],
         ];
-        $out = [];
+        $out = Flagships::asTemplates();
         foreach ($rows as $r) {
             $out[] = [
                 'id' => $r[0], 'group' => $r[1], 'label' => $r[2], 'pitch' => $r[3], 'innovation' => $r[4],

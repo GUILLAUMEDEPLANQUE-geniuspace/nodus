@@ -30,6 +30,9 @@ class Chrome
 
     public static function presetFromTemplate(string $id): string
     {
+        if (Flagships::has($id)) {
+            return Flagships::preset($id);
+        }
         if (str_contains($id, 'vera') || str_contains($id, 'recrut') || str_contains($id, 'job')) {
             return 'vera';
         }
@@ -288,7 +291,7 @@ class Chrome
 
     public static function presets(): array
     {
-        return [
+        return Flagships::chromePresets() + [
             'living' => [
                 'theme' => ['primary' => '#c9a36a', 'bg' => '#07080c', 'fg' => '#f3eadc', 'muted' => '#8d8794', 'hero' => '/realms/sea-hero.jpg', 'skin' => 'living', 'dock' => 'bottom'],
                 'actions' => [

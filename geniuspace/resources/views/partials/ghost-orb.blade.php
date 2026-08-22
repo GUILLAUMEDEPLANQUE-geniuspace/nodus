@@ -2,11 +2,7 @@
 @isset($node)
 @php
   $ghostProfile = \App\Support\Ghost::profile($node);
-  $ghostLabel = match ($ghostProfile) {
-    'marchand' => 'Ghost marchand',
-    'rh' => 'Ghost RH',
-    default => 'Ghost du lieu',
-  };
+  $ghostLabel = \App\Support\Ghost::hostName($node);
 @endphp
 <div class="ghost-root" x-data="ghostOrb('{{ $node->slug }}')" x-cloak>
   <button type="button" class="ghost-orb" @click="open = !open; if(open && !boot){boot=true; hello()}" :title="ghostLabel" aria-label="{{ $ghostLabel }}">

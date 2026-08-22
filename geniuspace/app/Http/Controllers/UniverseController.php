@@ -136,6 +136,9 @@ class UniverseController extends Controller
     {
         $node = GpNode::query()->where('slug', $slug)->firstOrFail();
         $product = Product::query()->where('id', $pid)->where('node_id', $node->id)->firstOrFail();
+        if (in_array(\App\Support\Flagships::canvas($node), ['vault', 'table'], true)) {
+            return FlagshipController::vaultPage($node, $product);
+        }
         $products = $node->products;
         $media = $node->media->first();
         $src = $media ? SignedMedia::url($media) : '/media/atelier.mp4';

@@ -401,6 +401,9 @@
 </div>
 @endif
 
+@include('partials.wormholes', ['node' => $node])
+@include('partials.ghost-orb', ['node' => $node])
+
 <nav class="dock dock-{{ $theme->dock ?? 'bottom' }}">
     <template x-for="b in bubbles" :key="b.id"><span class="rise" x-text="b.name + ' vient de poster'"></span></template>
     @foreach($tabs as $t)

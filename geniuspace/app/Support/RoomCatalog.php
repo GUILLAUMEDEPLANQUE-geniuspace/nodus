@@ -9,6 +9,7 @@ class RoomCatalog
     {
         $g = [
             'Vie du club' => [
+                'vivre' => ['Entrée', 'Le lieu, pas une home. Hero, hôte, passages.', 'CreativeWork'],
                 'forum' => ['Parler ensemble', 'Holo-forum : Dive + Legacy SEO + live + relique in-thread', 'DiscussionForumPosting'],
                 'journal' => ['Magazine', 'Moule chef-de-secteur : résumé, FAQPage, speakable, cluster', 'Blog'],
                 'guilde' => ['Les membres', 'Passport cross-node : grades voyagent d’un univers à l’autre', 'Organization'],

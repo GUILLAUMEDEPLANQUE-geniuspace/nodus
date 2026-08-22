@@ -20,12 +20,33 @@ class Ghost
 {
     public static function profile(GpNode $node): string
     {
+        $flag = Flagships::of($node);
+        if ($flag) {
+            $id = $flag['id'] ?? '';
+            if (in_array($id, ['vault', 'table', 'scene'], true)) {
+                return 'marchand';
+            }
+            if ($id === 'maison-rh') {
+                return 'rh';
+            }
+
+            return 'guide';
+        }
         $preset = Chrome::presetFor($node);
 
         return match ($preset) {
             'vera' => 'rh',
-            'merch' => 'marchand',
+            'merch', 'vault', 'table', 'scene' => 'marchand',
             default => 'guide',
+        };
+    }
+
+    public static function hostName(GpNode $node): string
+    {
+        return Flagships::of($node)['ghost']['name'] ?? match (self::profile($node)) {
+            'marchand' => 'L’hôte',
+            'rh' => 'L’accueil',
+            default => 'Le guide',
         };
     }
 
@@ -186,7 +207,7 @@ class Ghost
     public static function intent(string $message, array $ctx): string
     {
         $m = mb_strtolower($message);
-        if (preg_match('/prix|co[uû]t|combien|offre|n[eé]goc|rabais|r[eé]duc/u', $m)) {
+        if (preg_match('/prix|co[uû]t|combien|offre|n[eé]goc|rabais|r[eé]duc|propose|€|euro/u', $m)) {
             return 'price';
         }
         if (preg_match('/certificat|rwa|authent|preuve mat[eé]riel/u', $m)) {
@@ -226,17 +247,23 @@ class Ghost
 
         if ($intent === 'hello') {
             $cta = $ctx['actions'][0]['label'] ?? 'Explorer';
+            $name = self::hostName($node);
+            $wake = Flagships::of($node)['ghost']['wake'] ?? "Je réponds uniquement avec ce qui est dans ce lieu.";
 
             return [
-                'reply' => "Bonjour — je suis le Ghost de {$node->title}. Je réponds uniquement avec ce qui est dans ce lieu. Essayez « prix », « certificat », « épreuve » ou « {$cta} ».",
+                'reply' => "{$name} · {$node->title}. {$wake} Essayez « prix », « certificat », « épreuve » ou « {$cta} ».",
                 'citations' => [['label' => $node->title, 'url' => $ctx['lieu']['url']]],
                 'actions' => $ctx['actions'],
             ];
         }
 
-        if ($intent === 'price' && $data) {
+        if ($intent === 'price') {
+            $neg = self::negotiate($node, $message, $ctx);
+            if ($neg) {
+                return $neg;
+            }
             $lines = [];
-            foreach (($data['produits'] ?? []) as $p) {
+            foreach (($data['produits'] ?? $ctx['produits'] ?? []) as $p) {
                 $lines[] = "· {$p['titre']} — {$p['prix']}";
             }
             if (! $lines) {
@@ -248,7 +275,7 @@ class Ghost
             }
 
             return [
-                'reply' => "Tarifs affichés dans ce lieu :\n".implode("\n", $lines)."\nJe ne sors pas de ces montants.",
+                'reply' => "Tarifs affichés dans ce lieu :\n".implode("\n", $lines)."\nJe ne sors pas de ces montants — proposez un chiffre, je tiens la fourchette.",
                 'citations' => $citations,
                 'actions' => $actions,
             ];
@@ -363,6 +390,64 @@ class Ghost
             'citations' => [['label' => $node->title, 'url' => $ctx['lieu']['url']]],
             'actions' => array_slice($ctx['actions'], 0, 3),
         ];
+    }
+
+    /** Négociation dans la fourchette (plancher en fiche). Jamais sous le plancher. */
+    private static function negotiate(GpNode $node, string $message, array $ctx): ?array
+    {
+        if (! preg_match('/(\d+(?:[.,]\d+)?)/u', $message, $m)) {
+            return null;
+        }
+        $offer = (int) round((float) str_replace(',', '.', $m[1]));
+        if ($offer < 20) {
+            return null;
+        }
+        $products = $ctx['produits'] ?? [];
+        $p = $products[0] ?? null;
+        if (! $p) {
+            return null;
+        }
+        $list = (int) round((float) preg_replace('/[^\d.,]/', '', (string) ($p['prix'] ?? '0')));
+        $fields = Engine::fields($node->id);
+        $floor = $list ? (int) round($list * 0.9) : 0;
+        foreach ($fields as $key => $f) {
+            if (in_array($key, ['prix_plancher', 'plancher'], true) || mb_strtolower((string) $f->name) === 'plancher') {
+                if (is_numeric($f->value)) {
+                    $floor = (int) $f->value;
+                }
+            }
+        }
+        $shop = [['label' => 'Voir l’œuvre', 'href' => $p['url'] ?? Chrome::shopPath($node)]];
+        if ($list && $offer >= $list) {
+            return [
+                'reply' => "Oui. À {$list} €, je clos. L’œuvre « {$p['titre']} » vous attend — le certificat s’ouvre au paiement.",
+                'citations' => [['label' => $p['titre'], 'url' => $p['url'] ?? '']],
+                'actions' => $shop,
+            ];
+        }
+        if ($floor && $offer >= $floor) {
+            return [
+                'reply' => "J’ai la fourchette. {$offer} €, c’est tenu pour « {$p['titre']} ». Je prépare l’écrin.",
+                'citations' => [['label' => $p['titre'], 'url' => $p['url'] ?? '']],
+                'actions' => $shop,
+            ];
+        }
+        if ($floor && $offer >= (int) round($floor * 0.85)) {
+            return [
+                'reply' => "Trop bas pour ce que c’est. Je peux descendre à {$floor} €, pas en dessous. Le plancher est écrit.",
+                'citations' => [['label' => $p['titre'], 'url' => $p['url'] ?? '']],
+                'actions' => $shop,
+            ];
+        }
+        if ($floor) {
+            return [
+                'reply' => "Non. {$offer} € ne tient pas pour « {$p['titre']} ». Le plancher est {$floor} €.",
+                'citations' => [['label' => $p['titre'], 'url' => $p['url'] ?? '']],
+                'actions' => $shop,
+            ];
+        }
+
+        return null;
     }
 
     private static function maybeLlm(GpNode $node, string $message, array $history, array $ctx, array $grounded): ?string

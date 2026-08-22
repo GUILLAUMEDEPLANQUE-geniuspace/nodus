@@ -25,6 +25,8 @@
       a{color:inherit;text-decoration:none} button{cursor:pointer}
     </style>
     <link rel="stylesheet" href="/css/geniuspace.css">
+    <link rel="stylesheet" href="/css/flagships.css">
+    @stack('head')
     @isset($node)
       @php
         $chromeTheme = $chromeTheme ?? ($chrome['theme'] ?? null);

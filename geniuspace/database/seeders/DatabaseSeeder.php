@@ -17,4 +17,5 @@ class DatabaseSeeder extends Seeder
         $this->call(ShowcaseSeeder::class);
         $this->call(DualWorldsSeeder::class);
     }
+    }
 }
