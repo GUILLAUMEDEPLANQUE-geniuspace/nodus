@@ -17,6 +17,7 @@
     <meta property="og:type" content="@yield('og_type', 'website')">
     <meta property="og:image" content="@yield('og_image', url('/realms/205-garage.jpg'))">
     <meta name="twitter:card" content="summary_large_image">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="icon" href="/favicon.svg">
     <style>
       :root{--bg:#07080c;--fg:#f3eadc;--primary:#c9a36a;--muted:#8d8794;--border:#2a2c38;--font:system-ui,sans-serif;--display:Georgia,serif}

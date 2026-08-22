@@ -13,6 +13,7 @@
   <meta property="og:type" content="@yield('og_type', 'website')">
   <meta property="og:image" content="@yield('og_image', url('/offer/releve-atelier.jpg'))">
   <meta name="twitter:card" content="summary_large_image">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
   <link rel="icon" href="/favicon.svg">
   <link rel="stylesheet" href="/css/vera.css">
   @stack('jsonld')

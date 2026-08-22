@@ -22,6 +22,19 @@ Un univers se compose A→Z sans code : thème (tokens, logo, fond vidéo), calq
 
 Handlers figés : `addToCart`, unlock, grants, checkout. Custom = label, ordre, présence, style.
 
+## Médias = preuves = lieux
+
+Le player, le Drive et l’éditeur d’images ne sont pas trois outils. Un chapitre ouvre une fiche. Un teaser fini tamponne le carnet. Un drop pose une relique. Un fichier locké se mérite (épreuve, achat, rôle).
+
+| Visible | Derrière |
+| --- | --- |
+| « Continuer l’épreuve » | `POST /n/{slug}/v/{id}/unlock` → `grants` |
+| « Kit consignation » à 0:04 | `media_doors` kind `drop` → relique + carnet |
+| Brief locké | `drive_files.lock_kind=quest` + coffre `private/` |
+| Widget carrière | `/embed/{slug}` teaser + délai + CTA |
+
+Code : `Grantor.php`, `SignedMedia.php`, `MediaController`, `GrantController`. HLS plus tard (`Hls.php`).
+
 UI : `/n/{slug}/monde` (Structure / Design / Action / Motion).
 
 | Visible | Derrière |

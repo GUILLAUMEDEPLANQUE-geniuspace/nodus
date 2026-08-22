@@ -77,6 +77,7 @@ class CartController extends Controller
                     'label' => $p->title, 'meta' => $p->id,
                 ]);
             }
+            \App\Support\Grantor::grantProduct((string) $pid, (string) $p->node_id, $p->title);
             $koc = (int) $request->session()->get('koc');
             if ($koc && $request->session()->get('koc_product') === $pid && $koc !== $buyer) {
                 $cut = max(1, (int) floor($cents * 0.05));

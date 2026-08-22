@@ -85,10 +85,15 @@ class UniverseController extends Controller
         $tids = $node->threads->pluck('id');
         $replies = Reply::query()->whereIn('thread_id', $tids)->orderByDesc('votes')->get()->groupBy('thread_id');
         $live = LiveMessage::query()->whereIn('thread_id', $tids)->get()->groupBy('thread_id');
-        $files = DriveFile::query()->where('node_id', $node->id)->get();
+        $files = DriveFile::query()->where('node_id', $node->id)->get()
+            ->filter(fn ($f) => Spoiler::ok((int) ($f->appear_order ?? 0), $node->id))
+            ->values();
         $guild = GuildMessage::query()->where('node_id', $node->id)->get();
         $tabs = \Illuminate\Support\Facades\DB::table('node_tabs')->where('node_id', $node->id)->where('enabled', 1)->orderBy('sort')->get();
         $tab = $tab ?: ($tabs->first()->key ?? ($node->skin === 'vera' ? 'maison' : 'vivre'));
+        if (in_array($tab, ['carnet', 'passport', 'guilde'], true)) {
+            return app(GrantController::class)->carnet($request, $slug);
+        }
         $tid = $request->query('tid');
         $mode = $request->query('mode', 'legacy');
         $cck = \Illuminate\Support\Facades\DB::table('cck_fields')->where('node_id', $node->id)->get();
@@ -135,7 +140,8 @@ class UniverseController extends Controller
         $media = $node->media->first();
         $src = $media ? SignedMedia::url($media) : '/media/atelier.mp4';
         $goal = CrowdGoal::query()->find($node->id);
-        return view('command-center', compact('node', 'product', 'products', 'media', 'src', 'goal'));
+        $granted = $media ? \App\Support\Grantor::canSeeMedia($media) : true;
+        return view('command-center', compact('node', 'product', 'products', 'media', 'src', 'goal', 'granted'));
     }
 
     public function fiche(string $slug, string $fiche): View
@@ -165,13 +171,19 @@ class UniverseController extends Controller
         $node->load(['products', 'media']);
         $media = $node->media->first(fn ($m) => (string) $m->id === $vid || \Illuminate\Support\Str::slug($m->title) === $vid);
         abort_unless($media, 404);
-        $src = SignedMedia::url($media);
+        $granted = \App\Support\Grantor::canSeeMedia($media);
+        $src = SignedMedia::url($media, ! $granted);
         $related = $node->media->where('id', '!=', $media->id);
         $childIds = Edge::query()->where('from_id', $node->id)->pluck('to_id');
         $children = GpNode::query()->whereIn('id', $childIds)->get();
-        $files = DriveFile::query()->where('node_id', $node->id)->get();
+        $files = DriveFile::query()->where('node_id', $node->id)->get()
+            ->filter(fn ($f) => Spoiler::ok((int) ($f->appear_order ?? 0), $node->id))
+            ->values();
         $chrome = \App\Support\Chrome::bag($node);
-        return view('video', compact('node', 'media', 'src', 'related', 'children', 'files', 'chrome'));
+        $doors = \App\Support\Grantor::doors($media);
+        $chapters = \App\Support\Chapters::parse($media->chapters);
+
+        return view('video', compact('node', 'media', 'src', 'related', 'children', 'files', 'chrome', 'granted', 'doors', 'chapters'));
     }
 
     public function guide(string $slug, string $wid): View

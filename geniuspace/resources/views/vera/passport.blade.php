@@ -33,6 +33,25 @@
   </div>
   @endif
 
+  @if(!empty($mine) || !empty($carnet['unlocks']))
+  <div class="v-card" style="margin-top:1.4rem">
+    <p class="vera-kicker">Déblocages sur cet appareil</p>
+    <p style="font-size:.9rem;color:var(--muted)">Films ouverts, fichiers mérités, reliques. Pas un ZIP.</p>
+    <ul style="list-style:none;padding:0;margin:.8rem 0">
+      @foreach(($mine ?: $carnet['unlocks'] ?? []) as $p)
+        <li style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding:.7rem 0;gap:1rem">
+          <div>
+            <p style="font-weight:500;margin:0"><a href="{{ $p['href'] }}">{{ $p['titre'] }}</a></p>
+            <p style="font-size:.75rem;color:var(--muted);margin:0">{{ $p['maison'] }} · {{ $p['quoi'] }}</p>
+          </div>
+          <p style="font-family:var(--display);font-size:1.1rem;color:var(--good);margin:0">Tenu</p>
+        </li>
+      @endforeach
+    </ul>
+    <a class="vera-btn ghost" href="/n/vera/carnet.json">Exporter JSON</a>
+  </div>
+  @endif
+
   <div class="v-card" style="margin-top:1.6rem">
     <p class="vera-kicker">Preuves tenues sur cet appareil</p>
     <p x-show="held.length===0" style="color:var(--muted)">Aucune encore. Passez un test. <a href="/n/vera/preuve" style="color:var(--primary)">Tests métier</a></p>

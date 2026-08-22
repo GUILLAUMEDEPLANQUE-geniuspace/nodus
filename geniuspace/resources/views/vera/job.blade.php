@@ -189,6 +189,7 @@
       <section style="margin-top:2rem">
         <p class="vera-kicker">Épreuve métier</p>
         <h2>Le geste avant le CV</h2>
+        <p><a href="/n/vera/videos" style="color:var(--primary)">Voir l’épreuve filmée · 6 min → preuve dans le carnet</a></p>
         <div class="sim-box">
           <p class="kicker">Simulation · {{ $p['sim']['kind'] }} · 6 min</p>
           <p>{{ $p['sim']['brief'] }}</p>

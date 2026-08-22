@@ -240,9 +240,9 @@
         <h2 class="font-display" style="font-size:2.4rem">Studio vidéo</h2>
         @forelse($node->media as $m)
             <a class="card" href="/n/{{ $node->slug }}/v/{{ \Illuminate\Support\Str::slug($m->title) }}" style="display:grid;grid-template-columns:160px 1fr;gap:1rem;padding:0.75rem;margin:0.6rem 0">
-                <video src="/{{ ltrim($m->path,'/') }}" muted style="width:160px;height:90px;object-fit:cover;border-radius:0.6rem"></video>
+                <img src="{{ $node->hero }}" alt="" style="width:160px;height:90px;object-fit:cover;border-radius:0.6rem">
                 <div>
-                    <p class="kicker">{{ $m->mode }} · {{ $m->access }} · {{ $m->views }} vues · {{ $m->author_name ?: 'Club' }}</p>
+                    <p class="kicker">{{ $m->mode === 'interview' ? 'Épreuve' : ($m->mode === 'shop' ? 'Making-of' : 'Film') }} · {{ \App\Support\Grantor::canSeeMedia($m) ? 'Ouvert' : 'Teaser' }} · {{ $m->views }} vues</p>
                     <h3 class="font-display" style="font-size:1.6rem;margin:0">{{ $m->title }}</h3>
                     <p class="muted">{{ $m->duration }} {{ $m->price }} · {{ $m->rating }}/5</p>
                     <p class="muted" style="font-size:0.85rem">{{ $m->transcript }}</p>
@@ -259,9 +259,14 @@
         <h2 class="font-display" style="font-size:2.4rem">Drive / reliques</h2>
         <p class="muted">Fichiers sur le disque du serveur (mutu / VPS). <a class="primary" href="/drive">Uploader</a></p>
         @forelse($files as $f)
+            @php $open = \App\Support\Grantor::canSeeFile($f); @endphp
             <p class="card" style="padding:0.9rem;margin:0.4rem 0;display:flex;justify-content:space-between">
-                <span>{{ $f->locked ? '🔒' : '📄' }} {{ $f->title }}</span>
-                <a class="primary" href="{{ $f->path }}">ouvrir</a>
+                <span>{{ $open ? '📄' : '🔒' }} {{ $f->title }}</span>
+                @if($open)
+                  <a class="primary" href="{{ \App\Support\Grantor::fileHref($f) }}">ouvrir</a>
+                @else
+                  <span class="muted">se mérite</span>
+                @endif
             </p>
         @empty
             <p class="muted">Drive vide.</p>

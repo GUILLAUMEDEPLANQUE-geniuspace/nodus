@@ -6,8 +6,10 @@ Le dépôt n’a plus d’app React / TanStack. Voir le [README racine](../READM
 
 ## Médias (souverain, pas YouTube)
 
-- Démo : `storage/app/media/*.mp4` + jetons HMAC (`SignedMedia`).
-- Prod : disque `r2` (Cloudflare R2). Les MP4 restent **hors** mutualisé o2switch.
+- Libre : `public/media/*.mp4`
+- Mérité : `storage/app/private/media` + jeton HMAC (`SignedMedia`) + table `grants`
+- JSON-LD gated : `embedUrl` seulement, jamais le MP4 full
+- Prod : disque `r2` (Cloudflare R2). HLS : `Hls.php` (pas avant VPS / Bunny)
 
 ```
 composer install --no-dev

@@ -2,6 +2,16 @@
 
 Format : ce qui est **dans le code**, pas la vision PDF.
 
+## 2026-08-22 — Médias = preuves = lieux
+
+- **Grant serveur.** Débloquer une vidéo écrit une preuve en base (user/session × média). Plus de `granted=true` en JS.
+- **Coffre privé.** MP4 et fichiers mérités dans `storage/app/private`. URL signée seulement si teaser ou grant. JSON-LD gated sans `contentUrl`.
+- **Carnet d’unlocks.** Films ouverts, briefs d’épreuve, reliques de chapitre, certificats d’achat. Export JSON. Ça voyage d’un lieu à l’autre.
+- **Portes.** Un chapitre `@slug` ouvre une fiche. Un drop à 0:04 pose une relique. Un calque image clique vers un lieu.
+- **Embed.** `/embed/{slug}` : teaser + une preuve (délai) + un CTA. Widget de lieu, pas un player.
+- **RH démo.** `/n/vera/videos` — épreuve consignation Karim → brief + tampon carnet.
+- **IP démo.** Making-of Cristal Lumen → éclat en drop, certificat à l’achat.
+
 ## 2026-08-22 — Éditeur de monde (A→Z)
 
 - **Thème, scène, boutons, salles, presets.** Tables `node_theme`, `node_scene_layers`, `node_actions`, `node_tabs.enabled`.

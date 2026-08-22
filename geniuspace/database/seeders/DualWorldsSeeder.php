@@ -15,6 +15,7 @@ class DualWorldsSeeder extends Seeder
         $this->vera();
         $this->lumen();
         $this->chrome();
+        $this->seedMediaEngine();
     }
 
     private function forgetClub205(): void
@@ -226,6 +227,7 @@ class DualWorldsSeeder extends Seeder
             ['gallery', 'Cimaises', '#c4b5fd', 'Lumen', 'ImageGallery EXIF.'],
             ['guides', 'Certificats', '#c4b5fd', 'Lumen', 'HowTo authenticité.'],
             ['classifieds', 'Secondaire', '#c4b5fd', 'Lumen', 'Reventes Offer + geo.'],
+            ['carnet', 'Carnet', '#c4b5fd', 'Lumen', 'Films ouverts, reliques méritées.'],
         ]);
         DB::table('node_seo')->updateOrInsert(['node_id' => $id], [
             'title' => 'Lumen — galerie hologramme | Geniuspace',
@@ -288,6 +290,126 @@ class DualWorldsSeeder extends Seeder
         ]);
 
         $this->seedLumenPieces($id);
+    }
+
+    /**
+     * Médias = portes. Fichiers mérités dans le coffre privé.
+     * Jamais de MP4 gated dans public/.
+     */
+    private function seedMediaEngine(): void
+    {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('grants')) {
+            return;
+        }
+        $this->seedVeraMedia();
+        $this->seedLumenMedia();
+    }
+
+    private function vault(string $publicRel, string $name): string
+    {
+        return \App\Support\SignedMedia::vaultFromPublic($publicRel, $name);
+    }
+
+    private function seedVeraMedia(): void
+    {
+        $id = 'vera';
+        $full = $this->vault('offer/v/karim.mp4', 'epreuve-karim.mp4');
+        $kit = $this->vault('offer/tool-consignation.jpg', 'kit-consignation.jpg');
+        $brief = $this->vault('offer/releve-atelier.jpg', 'brief-releve.jpg');
+        DB::table('media')->where('node_id', $id)->delete();
+        DB::table('media')->insert([
+            'node_id' => $id,
+            'title' => 'Épreuve consignation — Relève',
+            'path' => $full,
+            'mode' => 'interview',
+            'access' => 'freemium',
+            'teaser_sec' => 6,
+            'price' => '',
+            'duration' => '00:16',
+            'chapters' => "00:00 — L’atelier @technicien-maintenance-releve\n00:08 — Le geste",
+            'transcript' => 'Teaser 6 min. Continuer l’épreuve ouvre le brief et tamponne le carnet.',
+            'kind' => 'video',
+            'views' => 410,
+            'rating' => '4.9',
+            'author_name' => 'Karim',
+            'author_avatar' => '/offer/karim.jpg',
+        ]);
+        $mid = (int) DB::table('media')->where('node_id', $id)->value('id');
+        if (\Illuminate\Support\Facades\Schema::hasTable('media_doors')) {
+            DB::table('media_doors')->where('media_id', $mid)->delete();
+            DB::table('media_doors')->insert([
+                ['media_id' => $mid, 'at_sec' => 0, 'kind' => 'door', 'label' => 'L’offre Relève', 'target_slug' => 'technicien-maintenance-releve', 'relic_title' => '', 'relic_path' => ''],
+                ['media_id' => $mid, 'at_sec' => 4, 'kind' => 'drop', 'label' => 'Kit consignation', 'target_slug' => '', 'relic_title' => 'Kit consignation', 'relic_path' => $kit],
+            ]);
+        }
+        DB::table('drive_files')->where('node_id', $id)->whereIn('title', ['Brief consignation Relève', 'Kit consignation'])->delete();
+        $extra = \Illuminate\Support\Facades\Schema::hasColumn('drive_files', 'lock_kind');
+        $row = function (array $r) use ($extra) {
+            if ($extra) {
+                $r += ['lock_kind' => $r['lock_kind'] ?? '', 'lock_ref' => $r['lock_ref'] ?? '', 'thumb_path' => $r['thumb_path'] ?? '', 'appear_order' => 0];
+            } else {
+                unset($r['lock_kind'], $r['lock_ref'], $r['thumb_path']);
+            }
+
+            return $r;
+        };
+        DB::table('drive_files')->insert($row([
+            'node_id' => $id, 'title' => 'Brief consignation Relève', 'path' => $brief, 'kind' => 'file', 'locked' => 1,
+            'lock_kind' => 'quest', 'lock_ref' => '', 'thumb_path' => '/offer/releve-atelier.jpg',
+        ]));
+        DB::table('drive_files')->insert($row([
+            'node_id' => $id, 'title' => 'Kit consignation', 'path' => $kit, 'kind' => 'image', 'locked' => 1,
+            'lock_kind' => 'drop', 'lock_ref' => '', 'thumb_path' => '/offer/tool-consignation.jpg',
+        ]));
+    }
+
+    private function seedLumenMedia(): void
+    {
+        $id = 'lumen';
+        $full = $this->vault('media/atelier.mp4', 'cristal-full.mp4');
+        $cert = $this->vault('realms/actor-hero.jpg', 'certificat-rwa.jpg');
+        $eclat = $this->vault('realms/portal-hero.jpg', 'eclat-cristal.jpg');
+        DB::table('media')->where('node_id', $id)->delete();
+        DB::table('media')->insert([
+            'node_id' => $id,
+            'title' => 'Making-of Cristal #01',
+            'path' => $full,
+            'mode' => 'shop',
+            'access' => 'freemium',
+            'teaser_sec' => 6,
+            'price' => '15 €',
+            'duration' => '00:16',
+            'chapters' => "00:00 — Atelier @lumen\n00:08 — Pièce @cristal-lumen-01",
+            'transcript' => 'Teaser. Le making-of s’ouvre ici. Le certificat s’ouvre à l’achat.',
+            'kind' => 'video',
+            'views' => 640,
+            'rating' => '4.9',
+            'author_name' => 'Inès',
+            'author_avatar' => '/realms/actor-hero.jpg',
+        ]);
+        $mid = (int) DB::table('media')->where('node_id', $id)->value('id');
+        if (\Illuminate\Support\Facades\Schema::hasTable('media_doors')) {
+            DB::table('media_doors')->where('media_id', $mid)->delete();
+            DB::table('media_doors')->insert([
+                ['media_id' => $mid, 'at_sec' => 0, 'kind' => 'door', 'label' => 'La galerie', 'target_slug' => 'lumen', 'relic_title' => '', 'relic_path' => ''],
+                ['media_id' => $mid, 'at_sec' => 8, 'kind' => 'door', 'label' => 'Cristal #01', 'target_slug' => 'cristal-lumen-01', 'relic_title' => '', 'relic_path' => ''],
+                ['media_id' => $mid, 'at_sec' => 4, 'kind' => 'drop', 'label' => 'Éclat de cristal', 'target_slug' => '', 'relic_title' => 'Éclat de cristal', 'relic_path' => $eclat],
+            ]);
+        }
+        $extra = \Illuminate\Support\Facades\Schema::hasColumn('drive_files', 'lock_kind');
+        DB::table('drive_files')->where('node_id', $id)->whereIn('title', ['Certificat RWA.pdf', 'Éclat de cristal'])->delete();
+        $certRow = [
+            'node_id' => $id, 'title' => 'Certificat RWA.pdf', 'path' => $cert, 'kind' => 'file', 'locked' => 1,
+        ];
+        $eclatRow = [
+            'node_id' => $id, 'title' => 'Éclat de cristal', 'path' => $eclat, 'kind' => 'image', 'locked' => 1,
+        ];
+        if ($extra) {
+            $certRow += ['lock_kind' => 'purchase', 'lock_ref' => 'p-lu-1', 'thumb_path' => '/realms/actor-hero.jpg', 'appear_order' => 0];
+            $eclatRow += ['lock_kind' => 'drop', 'lock_ref' => '', 'thumb_path' => '/realms/portal-hero.jpg', 'appear_order' => 0];
+        }
+        DB::table('drive_files')->insert($certRow);
+        DB::table('drive_files')->insert($eclatRow);
     }
 
     /** Presets chrome : Vera papier, Lumen galerie. Copy-on-write ensuite. */

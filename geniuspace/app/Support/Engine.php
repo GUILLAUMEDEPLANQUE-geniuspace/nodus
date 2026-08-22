@@ -399,4 +399,37 @@ class Engine
 
         return $n;
     }
+
+    /** Carnet visiteur : preuves graphe (si maison) + déblocages mérités. */
+    public static function myCarnet(GpNode $lieu): array
+    {
+        $graph = $lieu->slug === 'vera'
+            ? self::passport('carnet-karim')
+            : ['titre' => 'Carnet · '.$lieu->title, 'preuves' => [], 'details' => []];
+        $mine = Grantor::mine($lieu->id);
+        $all = Grantor::mine();
+        $graph['unlocks'] = $mine ?: $all;
+        $graph['export'] = '/n/'.$lieu->slug.'/carnet.json';
+
+        return $graph;
+    }
+
+    public static function publicMedia(GpNode $n): array
+    {
+        $rows = [];
+        foreach (\App\Models\Media::query()->where('node_id', $n->id)->get() as $m) {
+            $gated = Grantor::isGated($m);
+            $rows[] = [
+                'titre' => $m->title,
+                'mode' => $m->mode,
+                'duree' => $m->duration,
+                'url' => url('/n/'.$n->slug.'/v/'.$m->id),
+                'embed' => url('/embed/'.$n->slug),
+                'ouvert' => Grantor::canSeeMedia($m),
+                'teaser' => $gated,
+            ];
+        }
+
+        return $rows;
+    }
 }

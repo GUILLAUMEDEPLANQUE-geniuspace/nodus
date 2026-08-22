@@ -167,6 +167,10 @@ class Chrome
             if (str_starts_with($t, 'http') || str_starts_with($t, '/')) {
                 return $t;
             }
+            $cible = GpNode::query()->where('slug', $t)->orWhere('id', $t)->first();
+            if ($cible) {
+                return Engine::href($cible);
+            }
 
             return '/n/'.$node->slug.'/'.$t;
         }
@@ -356,6 +360,7 @@ class Chrome
                 'layers' => [
                     ['kind' => 'text', 'label' => 'Accroche', 'body' => 'Œuvre unique. Certificat. Making-of.', 'x' => 8, 'y' => 62, 'w' => 42, 'h' => 12, 'motion' => 'fade'],
                     ['kind' => 'button', 'label' => 'Vitrine', 'body' => 'Entrer dans la cimaise', 'x' => 8, 'y' => 78, 'w' => 22, 'h' => 8, 'action' => 'open_shop', 'motion' => 'slide'],
+                    ['kind' => 'image', 'label' => 'Cristal', 'src' => '/realms/actor-hero.jpg', 'x' => 58, 'y' => 22, 'w' => 28, 'h' => 42, 'target' => 'cristal-lumen-01', 'motion' => 'fade', 'delay' => 200],
                 ],
             ],
             'vera' => [
@@ -389,6 +394,7 @@ class Chrome
                 ],
                 'layers' => [
                     ['kind' => 'text', 'label' => 'Accroche', 'body' => 'Le salaire est écrit. Le délai aussi.', 'x' => 8, 'y' => 68, 'w' => 50, 'h' => 10, 'motion' => 'fade'],
+                    ['kind' => 'image', 'label' => 'Karim', 'src' => '/offer/karim.jpg', 'x' => 66, 'y' => 18, 'w' => 22, 'h' => 38, 'target' => 'technicien-maintenance-releve', 'motion' => 'fade'],
                 ],
             ],
         ];

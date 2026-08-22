@@ -23,17 +23,26 @@
 @endpush
 @section('content')
 <div class="cc" x-data="{
-  t: 0, granted: {{ $media && $media->access === 'free' ? 'true' : 'false' }},
-  teaser: {{ $media->teaser_sec ?? 0 }},
+  t: 0, granted: {{ !empty($granted) ? 'true' : 'false' }},
+  teaser: {{ optional($media)->teaser_sec ?? 0 }},
   energy: 0, loot: false,
-  add(el) { this.energy = Math.min(100, this.energy + parseInt(el.dataset.energy||'20')); if(this.energy>=100){ this.loot=true; this.energy=0 } }
+  csrf: document.querySelector('meta[name=csrf-token]')?.content || '',
+  add(el) { this.energy = Math.min(100, this.energy + parseInt(el.dataset.energy||'20')); if(this.energy>=100){ this.loot=true; this.energy=0 } },
+  async unlock(){
+    const r = await fetch('/n/{{ $node->slug }}/v/{{ $media->id ?? 0 }}/unlock', {method:'POST', headers:{'X-CSRF-TOKEN':this.csrf,'Accept':'application/json'}, credentials:'same-origin'});
+    const d = await r.json();
+    this.granted = true;
+    const v = document.getElementById('ccVid');
+    if (d.src) v.src = d.src;
+    v.play();
+  }
 }">
     <section class="cc-col cc-left">
         <div class="video-box">
             <video id="ccVid" src="{{ $src }}" poster="{{ $product->image }}" playsinline
                 @timeupdate="t = $event.target.currentTime; if(!granted && teaser && t >= teaser){ $event.target.pause() }"></video>
-            <div class="paywall" x-show="!granted && teaser && t >= teaser">
-                <button class="btn" type="button" @click="granted=true; document.getElementById('ccVid').play()">Débloquer {{ $media->price ?? '' }}</button>
+            <div class="paywall" x-show="!granted && teaser && t>=teaser" x-cloak>
+                <button class="btn" type="button" @click="unlock()">Débloquer {{ $media->price ?? '' }}</button>
             </div>
         </div>
         <p class="kicker" style="padding:0.75rem">{{ $media->title ?? 'Masterclass' }} · {{ $media->mode ?? 'shop' }}</p>

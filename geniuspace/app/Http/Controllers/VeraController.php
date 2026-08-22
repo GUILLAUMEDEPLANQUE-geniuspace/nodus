@@ -27,10 +27,16 @@ class VeraController extends Controller
             'guilde', 'passport', 'carnet' => view('vera.passport', [
                 'node' => $node,
                 'tab' => 'passport',
-                'carnet' => Engine::passport('carnet-karim'),
+                'carnet' => Engine::myCarnet($node),
+                'mine' => \App\Support\Grantor::mine(),
             ]),
             'journal', 'blog' => app(MagazineController::class)->index($request, $node->slug),
             'reliques', 'drive' => view('vera.drive', ['node' => $node, 'tab' => 'reliques']),
+            'videos' => view('vera.videos', [
+                'node' => $node,
+                'tab' => 'videos',
+                'medias' => \App\Models\Media::query()->where('node_id', $node->id)->get(),
+            ]),
             'pacte', 'delais' => view('vera.pacte', ['node' => $node, 'tab' => 'pacte']),
             'ppqc', 'tarif' => view('vera.ppqc', ['node' => $node, 'tab' => 'ppqc']),
             'entreprises', 'maisons' => view('vera.companies', ['node' => $node, 'tab' => 'entreprises']),

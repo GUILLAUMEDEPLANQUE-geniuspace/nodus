@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\GpNode;
 use App\Support\Engine;
+use App\Support\Grantor;
 use Illuminate\Http\JsonResponse;
 
 /**
@@ -24,6 +25,16 @@ class EngineController extends Controller
         $n = GpNode::query()->where('slug', $slug)->firstOrFail();
         $payload = Engine::publicFields($n);
         $payload['liens'] = Engine::neighbors($n);
+
+        return response()->json($payload);
+    }
+
+    public function media(string $slug): JsonResponse
+    {
+        $n = GpNode::query()->where('slug', $slug)->firstOrFail();
+        $payload = Engine::publicFields($n);
+        $payload['medias'] = Engine::publicMedia($n);
+        $payload['preuves'] = Grantor::mine($n->id);
 
         return response()->json($payload);
     }

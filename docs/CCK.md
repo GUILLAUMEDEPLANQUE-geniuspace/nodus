@@ -36,6 +36,7 @@ Code : `Engine::surface($field, 'badge'|'fiche'|'compare'|'jsonld')`.
 ```
 GET /v1/nodes/{slug}/fields
 GET /v1/nodes/{slug}/neighbors
+GET /v1/nodes/{slug}/media
 ```
 
 JSON humain : `fiche`, `details`, `liens.fait_partie_de`. Jamais `CCK`, `parent_of`, `node`.

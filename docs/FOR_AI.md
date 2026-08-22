@@ -27,3 +27,6 @@ Tu travailles sur **Geniuspace**. Stack unique : Laravel dans `geniuspace/`.
 23. **Éditeur de monde** : `/n/{slug}/monde`, modes Structure / Design / Action / Motion. Blade, pas React. Presets `living` | `merch` | `vera` à la création.
 24. Custom total sur identité, scène, navigation, actions, champs, contenus, droits. Contraint sur player, panier, grants, graphe.
 25. Le flagship `/n/vera` reste le jobboard éditorial (slug exact). Une maison née du template Vera passe par l’éditeur de monde.
+26. **Médias = portes, pas des fichiers.** Unlock = ligne `grants` (user/session × média), jamais `granted=true` en JS. JSON-LD gated : pas de `contentUrl`. Fichiers lockés dans `storage/app/private`, servis par `/play` si grant ou staff.
+27. **Carnet = déblocages + export JSON.** Relique d’un chapitre, brief d’épreuve, certificat d’achat : même coffre. Surface : « tenu », jamais « grant ».
+28. Un calque image / un chapitre `@slug` ouvre un lieu. Pas un timecode mort.
