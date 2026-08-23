@@ -22,6 +22,7 @@ class CreateController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        \App\Support\Acl::mustUser();
         $data = $request->validate([
             'title' => 'required|string|max:120',
             'kind' => 'nullable|string',

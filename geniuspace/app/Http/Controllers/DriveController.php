@@ -45,10 +45,11 @@ class DriveController extends Controller
             'node_slug' => 'nullable|string',
             'folder_id' => 'nullable|integer',
         ]);
+        $slug = $request->string('node_slug')->toString() ?: 'lumen';
+        $n = Acl::nodeOfSlug($slug);
+        Acl::guard($n->id, 'mod');
         $locked = $request->boolean('locked');
         $path = SignedMedia::storeUpload($request->file('file'), $locked);
-        $slug = $request->string('node_slug')->toString() ?: 'lumen';
-        $n = GpNode::query()->where('slug', $slug)->first();
         $mime = $request->file('file')->getClientOriginalExtension();
         $mimeType = $request->file('file')->getMimeType() ?: 'application/octet-stream';
         $kind = str_starts_with($mimeType, 'image/') ? 'image' : (str_starts_with($mimeType, 'video/') ? 'video' : 'file');
@@ -88,7 +89,8 @@ class DriveController extends Controller
 
     public function folder(Request $request): RedirectResponse
     {
-        $node = GpNode::query()->where('slug', $request->string('slug'))->firstOrFail();
+        $node = Acl::nodeOfSlug($request->string('slug')->toString());
+        Acl::guard($node->id, 'mod');
         DB::table('folders')->insert([
             'node_id' => $node->id,
             'parent_id' => $request->integer('parent_id') ?: null,
@@ -100,7 +102,10 @@ class DriveController extends Controller
 
     public function rename(Request $request): RedirectResponse
     {
-        DriveFile::query()->where('id', $request->integer('id'))->update([
+        $f = DriveFile::query()->findOrFail($request->integer('id'));
+        $node = GpNode::query()->findOrFail($f->node_id);
+        Acl::guard($node->id, 'mod');
+        DriveFile::query()->where('id', $f->id)->update([
             'title' => $request->validate(['title' => 'required|string'])['title'],
         ]);
 
@@ -110,6 +115,8 @@ class DriveController extends Controller
     public function lock(Request $request): RedirectResponse
     {
         $f = DriveFile::query()->findOrFail($request->integer('id'));
+        $node = GpNode::query()->findOrFail($f->node_id);
+        Acl::guard($node->id, 'mod');
         $f->locked = ! $f->locked;
         if ($f->locked && ! $f->lock_kind) {
             $f->lock_kind = 'quest';

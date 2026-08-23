@@ -2,6 +2,17 @@
 
 Format : ce qui est **dans le code**, pas la vision PDF.
 
+## 2026-08-23 — Invariants (stop concepts)
+
+- **ACL.** `Acl::canWrite` n’écrit plus `node_staff`. Pas d’auto-owner. Forum, Drive, Magazine, Image, Create, weave, lore : authentifié. GET studio / monde / builder / gym / editor / plan : staff.
+- **Routes dev.** `/login/demo` et `/llm/tools` : local / tests. Plus de bouton Créateur en prod.
+- **Kernel.** `Engine::myCarnet` / `publicMedia` → `Grantor`. Engine n’appelle plus Grantor. `docs/KERNEL.md`. Ghost n’écrit pas un grant.
+- **Coffre.** `/play` refuse `..`. `preview=1` refuse `private/`.
+- **Prix.** `Pay::cents` passe par `Invariants::heldCents` (jamais sous le plancher).
+- **Ghost.** `/ghost/context`, `/skills`, `/editor`, `/plan`, `/gym` = staff. Chat public. Autonomie = `Invariants::AUTONOMY_CAP`.
+- **Docs.** `docs/INVARIANTS.md` (15 règles). FOR_AI numéroté 1–42, plus de doublons. `Ghost::speak` → `Ghost::reply`. URLs Vera `/n/vera/tarif` `/n/vera/carnet` `/n/vera/delais`.
+- **Tests.** `InvariantTest` + `KernelBoundaryTest`. Suite PHPUnit.
+
 ## 2026-08-22 — Ghost Action (éditeur + business)
 
 - **DSL.** `field.add` / `media.insert` / `playlist.insert` / `field.move`. Jamais `DB::insert` depuis le LLM. Position = `after` / `before`, pas `sort = 17`.

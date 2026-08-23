@@ -147,7 +147,8 @@ class WorldEditorTest extends TestCase
 
     public function test_editor_has_four_modes(): void
     {
-        $this->get('/n/lumen/monde')
+        $this->actingAs($this->user)
+            ->get('/n/lumen/monde')
             ->assertOk()
             ->assertSee('Structure', false)
             ->assertSee('Design', false)

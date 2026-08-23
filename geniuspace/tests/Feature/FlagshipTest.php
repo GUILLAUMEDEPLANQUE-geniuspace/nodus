@@ -148,8 +148,9 @@ class FlagshipTest extends TestCase
 
     public function test_lore_stake_writes_a_proposal(): void
     {
-        $this->get('/');
-        $this->postJson('/n/coffre-celeste/preuve-lore', [
+        $user = \App\Models\User::factory()->create();
+        \Illuminate\Support\Facades\DB::table('users')->where('id', $user->id)->update(['nodecoins' => 500]);
+        $this->actingAs($user)->postJson('/n/coffre-celeste/preuve-lore', [
             'field' => 'Épisode',
             'value' => '13',
             'stake' => 0,
@@ -198,7 +199,9 @@ class FlagshipTest extends TestCase
     public function test_atelier_concierge_filters_beyond_the_arc(): void
     {
         $this->get('/');
-        $ctx = $this->getJson('/n/atelier-clamp/ghost/context')->assertOk()->json('context');
+        $this->getJson('/n/atelier-clamp/ghost/context')->assertStatus(403);
+        $node = \App\Models\GpNode::query()->where('slug', 'atelier-clamp')->firstOrFail();
+        $ctx = Ghost::context($node);
         $titles = collect($ctx['liens']['contient'] ?? [])->pluck('titre')->implode(' ');
         $this->assertStringContainsString('Sakura', $titles);
         $this->assertStringNotContainsString('Yue', $titles);
@@ -210,7 +213,8 @@ class FlagshipTest extends TestCase
 
         $ok = $this->postJson('/n/atelier-clamp/ghost', ['message' => 'fiche Sakura']);
         $ok->assertOk();
-        $this->assertStringNotContainsString('n’existe pas encore', $ok->json('reply'));
+        $this->assertStringContainsString('Sakura', $ok->json('reply'));
+        $this->assertStringNotContainsString('Yue', $ok->json('reply'));
     }
 
     public function test_new_maison_rh_receives_vera_jobs(): void

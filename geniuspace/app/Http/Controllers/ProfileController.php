@@ -43,9 +43,16 @@ class ProfileController extends Controller
 
     public function addToPlaylist(Request $request): RedirectResponse
     {
+        abort_unless(Auth::check(), 403, 'Connectez-vous pour écrire.');
+        $data = $request->validate([
+            'playlist_id' => 'required|integer',
+            'media_id' => 'required|integer',
+        ]);
+        $pl = DB::table('playlists')->where('id', $data['playlist_id'])->where('user_id', Auth::id())->first();
+        abort_unless($pl, 403);
         DB::table('playlist_items')->insert([
-            'playlist_id' => $request->integer('playlist_id'),
-            'media_id' => $request->integer('media_id'),
+            'playlist_id' => $pl->id,
+            'media_id' => $data['media_id'],
         ]);
         return back()->with('ok', 'Ajouté à la playlist.');
     }
@@ -59,6 +66,7 @@ class ProfileController extends Controller
 
     public function dm(Request $request): RedirectResponse
     {
+        abort_unless(Auth::check(), 403, 'Connectez-vous pour écrire.');
         DB::table('dm_messages')->insert([
             'from_id' => Auth::id(),
             'to_id' => $request->integer('to_id'),

@@ -60,14 +60,19 @@ class SignedMedia
 
     public static function fullPath(string $path): ?string
     {
-        $path = ltrim($path, '/');
-        foreach ([
-            storage_path('app/'.$path),
-            storage_path('app/private/'.$path),
-            public_path($path),
-        ] as $full) {
-            if (is_file($full)) {
-                return $full;
+        $path = ltrim(str_replace('\\', '/', $path), '/');
+        if (! Invariants::safeRel($path)) {
+            return null;
+        }
+        $candidates = [
+            [storage_path('app/'.$path), storage_path('app')],
+            [storage_path('app/private/'.$path), storage_path('app/private')],
+            [public_path($path), public_path()],
+        ];
+        foreach ($candidates as [$full, $root]) {
+            $ok = Invariants::contained($full, $root);
+            if ($ok) {
+                return $ok;
             }
         }
 

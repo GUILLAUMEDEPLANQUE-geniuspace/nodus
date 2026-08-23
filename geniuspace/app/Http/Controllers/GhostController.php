@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\GpNode;
+use App\Support\Acl;
 use App\Support\Ghost;
 use App\Support\GhostGym;
 use App\Support\GhostLearn;
@@ -42,6 +43,7 @@ class GhostController extends Controller
     public function context(string $slug): JsonResponse
     {
         $node = GpNode::query()->where('slug', $slug)->firstOrFail();
+        Acl::guard($node->id, 'admin');
 
         return response()->json([
             'profile' => Ghost::profile($node),
@@ -60,6 +62,7 @@ class GhostController extends Controller
     public function gym(string $slug): View
     {
         $node = GpNode::query()->where('slug', $slug)->firstOrFail();
+        Acl::guard($node->id, 'admin');
 
         return view('ghost-gym', [
             'node' => $node,
@@ -72,6 +75,7 @@ class GhostController extends Controller
     public function gymRun(string $slug): View
     {
         $node = GpNode::query()->where('slug', $slug)->firstOrFail();
+        Acl::guard($node->id, 'admin');
         $run = GhostGym::run($node);
 
         return view('ghost-gym', [
@@ -91,7 +95,8 @@ class GhostController extends Controller
 
     public function approveSkill(Request $request, string $slug): JsonResponse
     {
-        GpNode::query()->where('slug', $slug)->firstOrFail();
+        $node = GpNode::query()->where('slug', $slug)->firstOrFail();
+        Acl::guard($node->id, 'admin');
         $name = $request->validate(['name' => 'required|string|max:80'])['name'];
 
         return response()->json(['ok' => GhostLearn::approve($name), 'name' => $name]);
@@ -100,6 +105,7 @@ class GhostController extends Controller
     public function editor(string $slug): JsonResponse
     {
         $node = GpNode::query()->where('slug', $slug)->firstOrFail();
+        Acl::guard($node->id, 'admin');
         $blocks = \App\Support\GhostEdit::read($node);
 
         return response()->json(\App\Support\GhostManifest::of($node, $blocks) + ['blocks' => $blocks]);
@@ -108,6 +114,7 @@ class GhostController extends Controller
     public function plan(Request $request, string $slug): JsonResponse
     {
         $node = GpNode::query()->where('slug', $slug)->firstOrFail();
+        Acl::guard($node->id, 'admin');
         $data = $request->validate([
             'message' => 'required|string|max:800',
             'editor_context' => 'nullable|array',
@@ -131,7 +138,7 @@ class GhostController extends Controller
     public function apply(Request $request, string $slug): JsonResponse
     {
         $node = GpNode::query()->where('slug', $slug)->firstOrFail();
-        \App\Support\Acl::guard($node->id, 'admin');
+        Acl::guard($node->id, 'admin');
         $id = $request->validate(['id' => 'required|string'])['id'];
         $action = \App\Support\GhostEdit::load($id);
         abort_unless($action, 404);
@@ -146,7 +153,7 @@ class GhostController extends Controller
     public function undo(Request $request, string $slug): JsonResponse
     {
         $node = GpNode::query()->where('slug', $slug)->firstOrFail();
-        \App\Support\Acl::guard($node->id, 'admin');
+        Acl::guard($node->id, 'admin');
         $id = $request->validate(['id' => 'required|string'])['id'];
         $action = \App\Support\GhostEdit::load($id);
         abort_unless($action, 404);

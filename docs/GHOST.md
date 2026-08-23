@@ -42,10 +42,15 @@ API V3 :
 
 | Méthode | URL | Rôle |
 | --- | --- | --- |
-| `GET` | `/n/{slug}/ghost/editor` | Structure + manifest |
-| `POST` | `/n/{slug}/ghost/plan` | DSL, **n’écrit pas** la fiche |
-| `POST` | `/n/{slug}/ghost/apply` | Staff. Transaction |
-| `POST` | `/n/{slug}/ghost/undo` | Restaure le snapshot |
+| `GET` | `/n/{slug}/ghost/editor` | Staff admin. Structure + manifest |
+| `POST` | `/n/{slug}/ghost/plan` | Staff admin. DSL, **n’écrit pas** la fiche |
+| `POST` | `/n/{slug}/ghost/apply` | Staff admin. Transaction |
+| `POST` | `/n/{slug}/ghost/undo` | Staff admin. Restaure le snapshot |
+| `GET` | `/n/{slug}/ghost/context` | Staff admin. Pack de vérité |
+| `POST` | `/n/{slug}/ghost/skills` | Staff admin. Valide un candidat |
+| `GET`/`POST` | `/n/{slug}/ghost/gym` | Staff admin. Salle d’épreuve |
+| `GET` | `/n/{slug}/ghost/maturity` | Public. Jauges, autonomie = 54 |
+| `GET`/`POST` | `/n/{slug}/ghost` | Public. Chat. N’écrit pas la fiche |
 
 Pas dans V3 (volontaire) : vector DB, 10 000 cas gym, auto-skills en prod, ACT sans confirm hors règle volume/remise, Critic LLM.
 
@@ -116,9 +121,9 @@ Pas dans V2 (volontaire) :
 
 | Méthode | URL | Rôle |
 | --- | --- | --- |
-| `GET` | `/n/{slug}/ghost` | Hello + profil + CTAs |
-| `GET` | `/n/{slug}/ghost/context` | Pack de vérité (debug / staff) |
-| `POST` | `/n/{slug}/ghost` | `{ "message": "…", "history": [] }` |
+| `GET` | `/n/{slug}/ghost` | Hello + profil + CTAs (public) |
+| `GET` | `/n/{slug}/ghost/context` | Pack de vérité — **staff admin** |
+| `POST` | `/n/{slug}/ghost` | `{ "message": "…", "history": [] }` (public) |
 
 Réponse chat :
 

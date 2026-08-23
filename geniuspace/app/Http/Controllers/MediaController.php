@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\DriveFile;
 use App\Models\Media;
 use App\Support\Grantor;
+use App\Support\Invariants;
 use App\Support\SignedMedia;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -24,6 +25,9 @@ class MediaController extends Controller
         $preview = (int) $request->query('preview') === 1;
         $ref = (string) $request->query('ref', '');
         abort_unless($path && SignedMedia::valid($path, $exp, $sig, $preview, $ref), 403, 'Jeton expiré');
+        abort_unless(Invariants::safeRel($path), 403, 'Lien invalide.');
+        $path = ltrim(str_replace('\\', '/', $path), '/');
+        abort_if($preview && str_starts_with($path, 'private/'), 403, 'Le teaser n’est pas le fichier.');
 
         $this->authorizeRef($path, $preview, $ref);
 

@@ -17,7 +17,7 @@ Tu travailles sur **Geniuspace**. Stack unique : Laravel dans `geniuspace/`.
 13. Forum = holo-forum Blade. Chaque sujet a `/n/{slug}/t/{id}`.
 14. Vidéo : `<video>` réel, fichiers souverains, pas YouTube.
 15. Marque = Geniuspace. Vera = jobboard. Lumen = galerie.
-16. Interface : français d’abord. Les mots internes (PPQC, Pacte, Passport, CCK, Node, edge, graphe) s’expliquent ou se traduisent. URLs publiques : `/tarif`, `/carnet`, `/delais`.
+16. Interface : français d’abord. Les mots internes (PPQC, Pacte, Passport, CCK, Node, edge, graphe) s’expliquent ou se traduisent. URLs publiques Vera : `/n/vera/tarif`, `/n/vera/carnet`, `/n/vera/delais`. Carnet d’un lieu : `/n/{slug}/carnet`.
 17. Toute nouvelle info métier = champ de fiche (`cck_fields`, `field_key` stable) **ou** arête typée. Une PR qui ajoute une colonne SQL métier (`salary`, `remote`, `fruit`) est refusée, sauf migration d’infra.
 18. Toute nouvelle UI lit le moteur (`Engine::fields` / `neighbors` / `inherit` / `alignment`). Pas de `salary={55000}` magique.
 19. Le jargon graphe / CCK / Node / edge / parent_of est **interdit en copy produit**. Autorisé : code, docs techniques, commentaires.
@@ -31,16 +31,17 @@ Tu travailles sur **Geniuspace**. Stack unique : Laravel dans `geniuspace/`.
 27. **Carnet = déblocages + export JSON.** Relique d’un chapitre, brief d’épreuve, certificat d’achat : même coffre. Surface : « tenu », jamais « grant ».
 28. Un calque image / un chapitre `@slug` ouvre un lieu. Pas un timecode mort.
 29. **Unlock = grant en base, sinon 403.** Le teaser est un fichier public distinct. Jamais le MP4 privé en `preview=1`. Fichier Drive locké = `/play` signé 15 min, jamais d’URL permanente.
-31. **Dix flagships.** Coffre, Terrain, Atelier, Territoire, Maison, Scène, Arène, Labo, Plateau, Table. Spec : `Flagships.php` + `/flagships`. Surface ≠ jargon. Hôte = Ghost::speak. Passage = neighbors. Preuve = lore_proposals. **Flagship ≠ démarrage** : les ~50 templates d’en dessous sont des coquilles métier, pas des skins.
-32. **Carnet = salle.** `RoomCatalog` clé `carnet`. `/n/{slug}/carnet` + export JSON. Le dock la pose. Le Ghost n’y 404 pas.
+30. **Rideau.** `Spoiler` filtre aussi le Ghost (`context.rideau.caches`). Une fiche au-delà de l’arc n’existe pas encore. Geniuspedia ne sort pas du lieu.
+31. **Dix flagships.** Coffre, Terrain, Atelier, Territoire, Maison, Scène, Arène, Labo, Plateau, Table. Spec : `Flagships.php` + `/flagships`. Surface ≠ jargon. Hôte = `Ghost::reply`. Passage = neighbors. Preuve = lore_proposals. **Flagship ≠ démarrage** : les ~50 templates d’en dessous sont des coquilles métier, pas des skins.
+32. **Carnet = salle.** `RoomCatalog` clé `carnet`. `/n/{slug}/carnet` + export JSON. Le dock la pose. Le Ghost n’y 404 pas. Vera : `/n/vera/carnet` (alias `passport`).
 33. **Négociation Ghost** : fourchette = `min_val` / `max_val` + `prix_plancher`. Accepté dans la fourchette → **ligne panier** au prix tenu (`held_cents`). Checkout encaisse **ce** montant (Stripe si `STRIPE_SECRET`, sinon ledger). Jamais sous le min.
 34. **Geniuspedia** : fiches pack du Node (`Geniuspedia::cards`) dans `Ghost::context['fiches']`. URLs locales seulement. **Pas de crawl web.**
 35. **`server/` n’est pas Laravel.** Chrome PWA Grok (`grok-pwa.ts`). Ignorer. Produit = `geniuspace/`.
 36. **Omni-média.** Chapitre Labo / Mixer / Tactique → le player **bascule le cadre** (`Omni::beats`, overlay `omni-frame`). Tenir l’exo = grant `omni`. Prod = 03:15. Démo courte = 0:03 + remap si `duration < at`.
-38. **Ghost = agent cognitif.** Le LLM n’est pas le cerveau. Pipeline : Understand → Memory → Plan → Observe (multi-outils) → Verify → Respond. Faits structurés, jamais un transcript comme vérité. ACT (achat, candidature, unlock, graphe) exige une confirmation humaine. `GhostVerifier` bloque les affirmations hors coffre. Skills dans `GhostSkills.php`.
-40. **Ghost croissance.** `GhostLearn` / `GhostGym` / `GhostMaturity`. Une hallucination n’entre jamais en mémoire. Une skill nouvelle = candidat, pas prod. Gym : `/n/{slug}/ghost/gym`. Autonomie plafonnée à 54. Pas de crawl, pas d’embeddings comme coffre.
-41. **GhostAction.** Le LLM ne touche pas SQL. DSL (`field.add` after/before). Blocks + curseur Ghost (`editor_context`). PLAN ≠ APPLY (`/ghost/plan` puis `/ghost/apply`). Undo = snapshot `ghost_actions`. `CckCatalog::capabilities` = vocabulaire. Business : READ / PREPARE / ACT. Volume ≥ 100 ou remise > 10 % = confirm. Refund / delete customer / payment = deny. Copilote Studio Blade.
-
-38. **Maison neuve.** `/n/vera` reste le flagship historique. `WorldTemplates::apply('maison-rh')` pose les 35 missions (`Maison::attachCatalog`). Pas un second Vera.
-39. **Paiement.** `Pay::cents` = prix tenu. Stripe Checkout Session HTTP (pas de SDK). Retour `/panier/retour`.
+37. **Maison neuve.** `/n/vera` reste le flagship historique. `WorldTemplates::apply('maison-rh')` pose les 35 missions (`Maison::attachCatalog`). Pas un second Vera.
+38. **Ghost = agent cognitif.** Le LLM n’est pas le cerveau. Pipeline : Understand → Memory → Plan → Observe (multi-outils) → Verify → Respond. Faits structurés, jamais un transcript comme vérité. ACT (achat, candidature, unlock, graphe) exige une confirmation humaine. `GhostVerifier` bloque les affirmations hors coffre. Skills dans `GhostSkills.php`. Chat public : `POST /n/{slug}/ghost`. Copilote (plan/apply/gym/editor/context) = staff.
+39. **Paiement.** `Pay::cents` = prix tenu, jamais sous `Invariants::heldCents`. Stripe Checkout Session HTTP (pas de SDK). Retour `/panier/retour`.
+40. **Ghost croissance.** `GhostLearn` / `GhostGym` / `GhostMaturity`. Une hallucination n’entre jamais en mémoire. Une skill nouvelle = candidat, pas prod. Gym : `/n/{slug}/ghost/gym` (staff). Autonomie plafonnée à `Invariants::AUTONOMY_CAP` (54). Pas de crawl, pas d’embeddings comme coffre.
+41. **GhostAction.** Le LLM ne touche pas SQL. DSL (`field.add` after/before). Blocks + curseur Ghost (`editor_context`). PLAN ≠ APPLY (`/ghost/plan` puis `/ghost/apply`, tous deux staff admin). Undo = snapshot `ghost_actions`. `CckCatalog::capabilities` = vocabulaire. Business : READ / PREPARE / ACT. Volume ≥ 100 ou remise > 10 % = confirm. Refund / delete customer / payment = deny. Copilote Studio Blade.
+42. **Invariants.** Quinze règles, pas un seizième concept. `docs/INVARIANTS.md` + `App\Support\Invariants`. Kernel : Engine ↛ Ghost/Grantor/Chrome. `Acl` n’auto-promouvoit plus. `/login/demo` et `/llm/tools` : local/tests. Tests : `InvariantTest`, `KernelBoundaryTest`. Une PR qui en casse une est refusée.
 

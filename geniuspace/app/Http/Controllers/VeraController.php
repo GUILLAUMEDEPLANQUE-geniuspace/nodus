@@ -27,7 +27,7 @@ class VeraController extends Controller
             'guilde', 'passport', 'carnet' => view('vera.passport', [
                 'node' => $node,
                 'tab' => 'passport',
-                'carnet' => Engine::myCarnet($node),
+                'carnet' => \App\Support\Grantor::myCarnet($node),
                 'mine' => \App\Support\Grantor::mine(),
             ]),
             'journal', 'blog' => app(MagazineController::class)->index($request, $node->slug),

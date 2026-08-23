@@ -33,7 +33,7 @@ class EngineController extends Controller
     {
         $n = GpNode::query()->where('slug', $slug)->firstOrFail();
         $payload = Engine::publicFields($n);
-        $payload['medias'] = Engine::publicMedia($n);
+        $payload['medias'] = Grantor::publicMedia($n);
         $payload['preuves'] = Grantor::mine($n->id);
 
         return response()->json($payload);

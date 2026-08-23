@@ -72,7 +72,8 @@ class GhostGymTest extends TestCase
 
     public function test_gym_page_and_maturity_json(): void
     {
-        $this->get('/n/lumen/ghost/gym')->assertOk()->assertSee('Salle d’épreuve', false);
+        $this->actingAsStaff()
+            ->get('/n/lumen/ghost/gym')->assertOk()->assertSee('Salle d’épreuve', false);
         $this->getJson('/n/lumen/ghost/maturity')->assertOk()->assertJsonPath('autonomy', 54);
     }
 

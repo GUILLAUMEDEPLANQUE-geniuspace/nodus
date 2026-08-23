@@ -14,6 +14,7 @@ class Lore
 {
     public static function propose(GpNode $node, string $field, string $value, int $stake = 0): array
     {
+        Acl::mustUser();
         $field = trim($field);
         $value = trim($value);
         abort_unless($field !== '' && $value !== '', 422, 'Il faut un champ et une valeur.');

@@ -80,7 +80,9 @@
           <a class="btn-ghost" href="/profil">{{ auth()->user()->name }}</a>
           <form method="post" action="/logout">@csrf<button class="btn-ghost" type="submit">Out</button></form>
         @else
+        @if(app()->environment('local'))
           <a class="btn-line" href="/login/demo">Créateur</a>
+        @endif
         @endauth
         <button class="btn-line" type="button" onclick="document.documentElement.setAttribute('data-theme',document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');localStorage.setItem('nodus-theme',document.documentElement.getAttribute('data-theme'))">Thème</button>
     </nav>

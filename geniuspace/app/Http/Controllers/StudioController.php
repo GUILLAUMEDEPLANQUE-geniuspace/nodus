@@ -14,6 +14,7 @@ class StudioController extends Controller
     public function show(string $slug): View
     {
         $node = Acl::nodeOfSlug($slug);
+        Acl::guard($node->id, 'mod');
         $tabs = DB::table('node_tabs')->where('node_id', $node->id)->orderBy('sort')->get();
         $cck = DB::table('cck_fields')->where('node_id', $node->id)->orderBy('sort')->get();
         $seo = DB::table('node_seo')->where('node_id', $node->id)->first();
@@ -156,6 +157,7 @@ class StudioController extends Controller
     public function weave(string $slug): RedirectResponse
     {
         $node = Acl::nodeOfSlug($slug);
+        Acl::guard($node->id, 'admin');
         $bodies = DB::table('threads')->where('node_id', $node->id)->pluck('body')->implode(' ');
         $words = array_count_values(array_filter(preg_split('/\W+/u', mb_strtolower($bodies)), fn ($w) => mb_strlen($w) > 5));
         arsort($words);

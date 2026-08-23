@@ -384,4 +384,47 @@ class Grantor
             }
         }
     }
+
+    /**
+     * Carnet visiteur : graphe (si maison) + déblocages mérités.
+     * Pas dans Engine : Engine ne connaît pas les grants.
+     *
+     * @return array<string, mixed>
+     */
+    public static function myCarnet(GpNode $lieu): array
+    {
+        $graph = $lieu->slug === 'vera'
+            ? Engine::passport('carnet-karim')
+            : ['titre' => 'Carnet · '.$lieu->title, 'preuves' => [], 'details' => []];
+        $mine = self::mine($lieu->id);
+        $all = self::mine();
+        $graph['unlocks'] = $mine ?: $all;
+        $graph['export'] = '/n/'.$lieu->slug.'/carnet.json';
+
+        return $graph;
+    }
+
+    /**
+     * Liste publique des médias. `ouvert` dépend du visiteur (grant).
+     *
+     * @return list<array<string, mixed>>
+     */
+    public static function publicMedia(GpNode $n): array
+    {
+        $rows = [];
+        foreach (Media::query()->where('node_id', $n->id)->get() as $m) {
+            $gated = self::isGated($m);
+            $rows[] = [
+                'titre' => $m->title,
+                'mode' => $m->mode,
+                'duree' => $m->duration,
+                'url' => url('/n/'.$n->slug.'/v/'.$m->id),
+                'embed' => url('/embed/'.$n->slug),
+                'ouvert' => self::canSeeMedia($m),
+                'teaser' => $gated,
+            ];
+        }
+
+        return $rows;
+    }
 }

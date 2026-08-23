@@ -67,7 +67,7 @@ class GhostPlanner
         $hasOffer = isset($constraints['amount']) && preg_match('/offre|propose|prend|n[eé]goc|rabais|r[eé]duc/u', $m);
         $hasPriceTalk = preg_match('/prix|co[uû]t|combien|€|euro/u', $m);
         if ($hasOffer) {
-            $constraints['max_price'] = $constraints['amount'];
+            $constraints['offer'] = $constraints['amount'];
 
             return ['name' => 'negotiate', 'skill' => 'negotiate', 'intent' => 'price', 'constraints' => $constraints, 'confidence' => 0.9];
         }

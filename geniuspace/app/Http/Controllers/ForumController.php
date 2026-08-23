@@ -7,6 +7,7 @@ use App\Models\GuildMessage;
 use App\Models\LiveMessage;
 use App\Models\Reply;
 use App\Models\Thread;
+use App\Support\Acl;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,7 +17,8 @@ class ForumController extends Controller
 {
     private function author(string $nodeId): string
     {
-        $name = Auth::user()->name ?? 'Toi';
+        Acl::mustUser();
+        $name = Auth::user()->name;
         abort_if(DB::table('forum_bans')->where('node_id', $nodeId)->where('author', $name)->exists(), 403, 'Banni de ce forum');
         return $name;
     }
@@ -110,13 +112,15 @@ class ForumController extends Controller
 
     public function fire(string $slug, string $tid): RedirectResponse
     {
+        Acl::mustUser();
         Thread::query()->where('id', $tid)->increment('fires');
-        DB::table('forum_awards')->insert(['thread_id' => $tid, 'kind' => 'feu', 'author' => Auth::user()->name ?? 'Toi']);
+        DB::table('forum_awards')->insert(['thread_id' => $tid, 'kind' => 'feu', 'author' => Auth::user()->name]);
         return redirect('/n/'.$slug.'?tab=forum&tid='.$tid);
     }
 
     public function echoLive(Request $request, string $slug, string $tid): RedirectResponse
     {
+        Acl::mustUser();
         $id = $request->integer('live_id');
         $row = DB::table('live_messages')->where('id', $id)->first();
         abort_unless($row, 404);
@@ -135,7 +139,8 @@ class ForumController extends Controller
 
     public function award(string $slug, string $tid): RedirectResponse
     {
-        DB::table('forum_awards')->insert(['thread_id' => $tid, 'kind' => 'relique', 'author' => Auth::user()->name ?? 'Toi']);
+        Acl::mustUser();
+        DB::table('forum_awards')->insert(['thread_id' => $tid, 'kind' => 'relique', 'author' => Auth::user()->name]);
         return redirect('/n/'.$slug.'/t/'.$tid)->with('ok', 'Relique posée.');
     }
 }

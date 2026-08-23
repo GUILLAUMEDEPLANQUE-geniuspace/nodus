@@ -43,6 +43,7 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout']);
 Route::get('/login/demo', function () {
+    abort_unless(\App\Support\Invariants::demoLoginAllowed(), 404);
     $u = User::query()->where('email', 'creator@geniuspace.test')->firstOrFail();
     Auth::login($u);
     return redirect('/')->with('ok', 'Connecté en créateur.');

@@ -56,7 +56,8 @@ class EngineSurfaceTest extends TestCase
 
     public function test_studio_offers_metier_templates(): void
     {
-        $this->get('/n/lumen/studio')
+        $this->actingAsStaff()
+            ->get('/n/lumen/studio')
             ->assertOk()
             ->assertSee('Modèles de fiche', false)
             ->assertSee('Offre tech', false)

@@ -8,6 +8,7 @@
 Le graphe (`nodes` + `edges`) et les champs de fiche (`cck_fields`) sont **l’unique source de vérité métier**. Toute valeur produit (fiabilité, alignement, carnet, héritage, reco) en est dérivée. Aucune surface utilisateur n’expose Node, edge, CCK, parent_of ou « graphe » : elle affiche des lieux, des preuves et des décisions.
 
 Code : `geniuspace/app/Support/Engine.php`, `Vocab.php`, `FieldTemplates.php`, `Chrome.php`.
+Dépendances : `docs/KERNEL.md`. Contrat : `docs/INVARIANTS.md`.
 
 ## Éditeur de monde
 
@@ -82,4 +83,4 @@ Il n’y a plus d’app TanStack / React dans ce dépôt.
 
 ## Auth
 
-Lectures publiques (SEO). Écritures (forum, Drive, studio) : utilisateur connecté. Prod : `node_staff`.
+Lectures publiques (SEO). Écritures (forum, Drive, studio, magazine, builder, create, lore) : utilisateur connecté **et** `node_staff` pour sculpter. GET `/studio`, `/monde`, `/builder`, `/ghost/gym`, `/ghost/editor`, `/ghost/plan` : staff. `Acl` n’auto-promouvoit plus. `/login/demo` : local seulement. Créer un lieu pose le compte comme owner.

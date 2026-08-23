@@ -254,7 +254,10 @@ class Ghost
         self::logTurn($node, $message, $grounded['reply'], $exec['tools'] ?? [], $mode);
 
         $citations = array_values(array_unique(array_merge($exec['citations'] ?? [], $grounded['citations'] ?? []), SORT_REGULAR));
-        $actions = ($exec['actions'] ?? []) ?: ($grounded['actions'] ?? []);
+        $actions = $grounded['actions'] ?? [];
+        if ($actions === []) {
+            $actions = $exec['actions'] ?? [];
+        }
         if ($exec['pending'] ?? []) {
             $actions[] = ['label' => 'Confirmer l’action', 'href' => $ctx['lieu']['url'] ?? '/'];
         }
@@ -495,6 +498,19 @@ class Ghost
 
         if ($intent === 'fiches') {
             $cards = $ctx['fiches'] ?? [];
+            $voisins = $ctx['liens']['contient'] ?? [];
+            foreach (array_merge($voisins, $cards) as $c) {
+                $titre = (string) ($c['titre'] ?? '');
+                if ($titre !== '' && mb_stripos($message, $titre) !== false) {
+                    $extrait = (string) ($c['extrait'] ?? $c['resume'] ?? $c['lien'] ?? '');
+
+                    return [
+                        'reply' => $titre.($extrait !== '' ? ' · '.$extrait : ''),
+                        'citations' => [['label' => $titre, 'url' => $c['url'] ?? '/n/'.$node->slug]],
+                        'actions' => [['label' => $titre, 'href' => $c['url'] ?? '/n/'.$node->slug.'/personnages']],
+                    ];
+                }
+            }
             if (! $cards) {
                 return [
                     'reply' => 'Pas encore de fiche pack dans ce lieu. Les guides se posent ici.',

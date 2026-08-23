@@ -7,6 +7,7 @@ use App\Models\GpNode;
 use App\Models\Product;
 use App\Models\Thread;
 use App\Models\User;
+use App\Support\Acl;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -30,6 +31,7 @@ class ImageStudioController extends Controller
 
     public function save(Request $request): RedirectResponse
     {
+        Acl::mustUser();
         $data = $request->validate([
             'data' => 'required|string',
             'target' => 'required|string',
@@ -37,6 +39,10 @@ class ImageStudioController extends Controller
             'slug' => 'nullable|string',
             'src' => 'nullable|string',
         ]);
+        $slug = (string) ($data['slug'] ?? '');
+        if (in_array($data['target'], ['hero', 'product', 'thread', 'drive'], true)) {
+            Acl::guard(Acl::nodeOfSlug($slug !== '' ? $slug : 'lumen')->id, 'admin');
+        }
         $raw = $data['data'];
         if (! str_starts_with($raw, 'data:image')) {
             return back()->with('ok', 'Image invalide.');

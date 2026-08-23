@@ -92,7 +92,8 @@ class VeraProductTest extends TestCase
 
     public function test_studio_shows_visual_field_builder(): void
     {
-        $this->get('/n/lumen/studio')
+        $this->actingAsStaff()
+            ->get('/n/lumen/studio')
             ->assertOk()
             ->assertSee('Champs de la fiche', false)
             ->assertSee('Aperçu de la fiche', false)

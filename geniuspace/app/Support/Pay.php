@@ -17,13 +17,31 @@ class Pay
     public static function cents(array $row, ?Product $p = null): int
     {
         if (isset($row['held_cents']) && is_numeric($row['held_cents'])) {
-            return max(0, (int) $row['held_cents']);
+            $held = (int) $row['held_cents'];
+        } else {
+            $p = $p ?: Product::query()->find($row['product_id'] ?? null);
+            $list = $p ? (int) round((float) $p->priceAmount() * 100) : 0;
+            $extra = (int) ($row['extra_cents'] ?? 0);
+            $held = $list + $extra;
         }
         $p = $p ?: Product::query()->find($row['product_id'] ?? null);
-        $list = $p ? (int) round((float) $p->priceAmount() * 100) : 0;
-        $extra = (int) ($row['extra_cents'] ?? 0);
 
-        return max(0, $list + $extra);
+        return Invariants::heldCents($held, self::floorCents($p));
+    }
+
+    public static function floorCents(?Product $p): int
+    {
+        if (! $p) {
+            return 0;
+        }
+        $fields = Engine::fields((string) $p->id, null);
+        foreach (['prix', 'prix_plancher'] as $k) {
+            if (isset($fields[$k]) && $fields[$k]->min_val !== null && $fields[$k]->min_val !== '') {
+                return (int) round((float) $fields[$k]->min_val * 100);
+            }
+        }
+
+        return 0;
     }
 
     public static function secret(): string

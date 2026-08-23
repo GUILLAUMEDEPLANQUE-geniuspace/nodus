@@ -32,7 +32,7 @@ class GhostActionTest extends TestCase
     public function test_plan_does_not_write(): void
     {
         $before = DB::table('cck_fields')->where('node_id', 'lumen')->where('field_key', 'salaire')->count();
-        $res = $this->postJson('/n/lumen/ghost/plan', [
+        $res = $this->actingAs($this->user)->postJson('/n/lumen/ghost/plan', [
             'message' => 'Ajoute un champ salaire après contrat',
         ]);
         $res->assertOk();
@@ -44,7 +44,7 @@ class GhostActionTest extends TestCase
 
     public function test_apply_writes_then_undo_restores(): void
     {
-        $plan = $this->postJson('/n/lumen/ghost/plan', [
+        $plan = $this->actingAs($this->user)->postJson('/n/lumen/ghost/plan', [
             'message' => 'Ajoute un champ salaire après contrat',
         ])->json('action');
         $this->actingAs($this->user)
@@ -60,15 +60,16 @@ class GhostActionTest extends TestCase
 
     public function test_apply_requires_staff(): void
     {
-        $plan = $this->postJson('/n/lumen/ghost/plan', [
+        $plan = $this->actingAs($this->user)->postJson('/n/lumen/ghost/plan', [
             'message' => 'Ajoute un champ salaire après contrat',
         ])->json('action');
-        $this->postJson('/n/lumen/ghost/apply', ['id' => $plan['id']])->assertStatus(403);
+        $this->asGuest()->postJson('/n/lumen/ghost/apply', ['id' => $plan['id']])->assertStatus(403);
     }
 
     public function test_refund_is_blocked(): void
     {
-        $this->postJson('/n/lumen/ghost/plan', ['message' => 'Rembourse cette commande'])
+        $this->actingAs($this->user)
+            ->postJson('/n/lumen/ghost/plan', ['message' => 'Rembourse cette commande'])
             ->assertOk()
             ->assertJsonPath('action.status', 'blocked')
             ->assertJsonPath('action.autonomy', 'deny');
@@ -76,11 +77,12 @@ class GhostActionTest extends TestCase
 
     public function test_editor_manifest_is_french(): void
     {
-        $this->getJson('/n/lumen/ghost/editor')
+        $this->actingAs($this->user)
+            ->getJson('/n/lumen/ghost/editor')
             ->assertOk()
             ->assertJsonPath('editor.page', 'Lumen')
             ->assertJsonFragment(['field.add'])
-            ->assertSee('Prix / nombre', false);
+            ->assertJsonPath('editor.catalog.digits.label', 'Prix / nombre');
     }
 
     public function test_chat_counts_buyers(): void
@@ -93,7 +95,7 @@ class GhostActionTest extends TestCase
 
     public function test_campaign_is_prepare_not_send(): void
     {
-        $res = $this->postJson('/n/lumen/ghost/plan', [
+        $res = $this->actingAs($this->user)->postJson('/n/lumen/ghost/plan', [
             'message' => 'Lance une campagne pour les clients qui ont acheté le cel et n\'ont pas le print. Propose-leur le print avec 15 % de réduction.',
         ]);
         $res->assertOk();

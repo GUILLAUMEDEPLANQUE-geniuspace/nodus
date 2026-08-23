@@ -60,9 +60,12 @@ class GhostTest extends TestCase
         $this->assertStringNotContainsString('granted=true', $reply);
     }
 
-    public function test_context_endpoint_hides_engine_jargon(): void
+    public function test_context_endpoint_is_staff_and_hides_engine_jargon(): void
     {
-        $res = $this->getJson('/n/lumen/ghost/context');
+        $this->getJson('/n/lumen/ghost/context')->assertStatus(403);
+        $user = \App\Models\User::factory()->create();
+        \Illuminate\Support\Facades\DB::table('node_staff')->insert(['node_id' => 'lumen', 'user_id' => $user->id, 'role' => 'admin']);
+        $res = $this->actingAs($user)->getJson('/n/lumen/ghost/context');
         $res->assertOk();
         $json = json_encode($res->json());
         $this->assertStringNotContainsString('parent_of', $json);
@@ -86,3 +89,4 @@ class GhostTest extends TestCase
         $res->assertOk()->assertJsonPath('profile', 'marchand');
         $this->assertStringContainsString('hôte', mb_strtolower($res->json('reply')));
     }
+}

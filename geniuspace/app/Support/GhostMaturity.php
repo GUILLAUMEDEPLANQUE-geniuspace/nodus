@@ -60,7 +60,7 @@ class GhostMaturity
             'tools' => $runs ? min(100, 60 + (int) round(100 * $wins / $n) / 5) : 0,
             'grounding' => $grounding,
             'verification' => $grounding,
-            'autonomy' => 54,
+            'autonomy' => Invariants::AUTONOMY_CAP,
             'reliability' => $reliability,
             'skills' => $skills,
             'facts' => $facts,

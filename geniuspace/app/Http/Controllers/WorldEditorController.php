@@ -25,6 +25,7 @@ class WorldEditorController extends Controller
     public function show(Request $request, string $slug): View
     {
         $node = Acl::nodeOfSlug($slug);
+        Acl::guard($node->id, 'mod');
         Chrome::ensure($node->id);
         $mode = $request->query('mode', 'design');
         if (! in_array($mode, ['structure', 'design', 'action', 'motion'], true)) {

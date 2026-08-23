@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Article;
 use App\Models\Edge;
 use App\Models\GpNode;
+use App\Support\Acl;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -44,6 +45,7 @@ class MagazineController extends Controller
     public function store(Request $request, string $slug): RedirectResponse
     {
         $node = GpNode::query()->where('slug', $slug)->firstOrFail();
+        Acl::guard($node->id, 'admin');
         $data = $request->validate([
             'title' => 'required|string|max:180',
             'resume' => 'required|string|max:800',

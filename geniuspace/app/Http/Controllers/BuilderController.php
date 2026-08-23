@@ -19,6 +19,7 @@ class BuilderController extends Controller
     public function show(Request $request, string $slug = 'one-piece'): View
     {
         $node = GpNode::query()->where('slug', $slug)->firstOrFail();
+        Acl::guard($node->id);
         $count = DB::table('spatial_nodes')->where('universe_id', $node->id)->count();
         $fresh = $request->boolean('new') || $count <= 1;
         $catalog = CckCatalog::all();
@@ -29,14 +30,8 @@ class BuilderController extends Controller
     public function state(string $slug): JsonResponse
     {
         $uni = GpNode::query()->where('slug', $slug)->firstOrFail();
+        Acl::guard($uni->id);
         $spatial = DB::table('spatial_nodes')->where('universe_id', $uni->id)->get();
-        if ($spatial->isEmpty()) {
-            DB::table('spatial_nodes')->insert([
-                'universe_id' => $uni->id, 'node_id' => $uni->id, 'kind' => 'core',
-                'x' => 0, 'y' => 0, 'z' => 0, 'radius' => 0, 'angle' => 0, 'speed' => 0,
-            ]);
-            $spatial = DB::table('spatial_nodes')->where('universe_id', $uni->id)->get();
-        }
         $ids = $spatial->pluck('node_id');
         $nodes = GpNode::query()->whereIn('id', $ids)->get()->keyBy('id');
         $cck = DB::table('cck_fields')->whereIn('node_id', $ids)->get()->groupBy('node_id');
@@ -76,6 +71,8 @@ class BuilderController extends Controller
 
     public function propose(Request $request, string $slug): JsonResponse
     {
+        $uni = GpNode::query()->where('slug', $slug)->firstOrFail();
+        Acl::guard($uni->id);
         $prompt = $request->input('prompt', '');
         return response()->json(WorldCompiler::propose($slug, $prompt));
     }
@@ -147,6 +144,8 @@ class BuilderController extends Controller
 
     public function proposeCck(Request $request, string $slug): JsonResponse
     {
+        $uni = GpNode::query()->where('slug', $slug)->firstOrFail();
+        Acl::guard($uni->id);
         return response()->json(['fields' => CckCatalog::proposeFrom($request->input('prompt', ''))]);
     }
 
@@ -159,6 +158,7 @@ class BuilderController extends Controller
 
     public function tools(): JsonResponse
     {
+        abort_unless(\App\Support\Invariants::demoLoginAllowed(), 404);
         return response()->json(['tools' => Toolbelt::schema()]);
     }
 }
