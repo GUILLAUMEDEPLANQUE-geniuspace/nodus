@@ -26,23 +26,20 @@ class GhostConsistency
         if (mb_strlen(trim($text)) < 12) {
             return ['status' => self::NEW, 'related' => null, 'snippet' => null, 'confidence' => 1, 'overlap' => 0];
         }
-        $hits = GhostCortex::search($node, $text, 3);
+        $hits = GhostCortex::search($node, $text, 3, [GhostCortex::WORLD, GhostCortex::EVIDENCE]);
         if ($hits === [] || ($hits[0]['score'] ?? 0) < 0.4) {
             return ['status' => self::NEW, 'related' => null, 'snippet' => null, 'confidence' => 0.8, 'overlap' => 0];
         }
         $top = $hits[0];
         $overlap = self::jaccard($text, (string) $top['text']);
+        $shared = self::shared($text, (string) $top['text']);
         $flip = self::negation($text) !== self::negation((string) $top['text']);
-        if ($flip && $overlap >= 0.25) {
+        if ($flip && ($overlap >= 0.25 || $shared >= 2)) {
             $status = self::CONTRADICTION;
             $conf = 0.8;
-            GhostSynapse::reinforce((string) $node->id, 'mem:new', (string) $top['id'], 'CONTRADICTION', 0.2);
-            GhostBelief::observe($node, \Illuminate\Support\Str::limit($text, 180), 'contradict', $top['layer']);
         } elseif ($overlap >= 0.5 && ! $flip) {
             $status = self::SUPPORT;
             $conf = 0.9;
-            GhostSynapse::reinforce((string) $node->id, 'mem:new', (string) $top['id'], 'SUPPORT', 0.2);
-            GhostBelief::observe($node, \Illuminate\Support\Str::limit($text, 180), 'support', $top['layer']);
         } elseif ($overlap < 0.15) {
             $status = self::NEW;
             $conf = 0.75;
@@ -73,8 +70,16 @@ class GhostConsistency
         return $union ? $inter / $union : 0;
     }
 
+    public static function shared(string $a, string $b): int
+    {
+        $A = array_unique(GhostCortex::tokens($a));
+        $B = array_unique(GhostCortex::tokens($b));
+
+        return count(array_intersect($A, $B));
+    }
+
     public static function negation(string $text): bool
     {
-        return (bool) preg_match('/\b(pas|jamais|aucun|aucune|faux|contraire|sans|plus)\b/u', mb_strtolower($text));
+        return (bool) preg_match('/\b(pas|jamais|aucun|aucune|faux|contraire)\b/u', mb_strtolower($text));
     }
 }

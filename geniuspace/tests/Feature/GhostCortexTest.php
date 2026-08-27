@@ -107,7 +107,10 @@ class GhostCortexTest extends TestCase
         $this->assertContains($sup['status'], [GhostConsistency::SUPPORT, GhostConsistency::NEUTRAL]);
         $neg = GhostConsistency::check($node, 'Le print nocturne ne coûte jamais 180 €.');
         $this->assertSame(GhostConsistency::CONTRADICTION, $neg['status']);
-        $this->assertGreaterThanOrEqual(0.25, $neg['overlap']);
+        $this->assertGreaterThanOrEqual(2, GhostConsistency::shared(
+            'Le print nocturne ne coûte jamais 180 €.',
+            (string) $neg['snippet']
+        ));
         $this->assertTrue(GhostConsistency::negation('jamais 180'));
         $this->assertFalse(GhostConsistency::negation('print nocturne 180'));
     }
@@ -153,6 +156,16 @@ class GhostCortexTest extends TestCase
         $this->assertFalse(GhostTribunal::looksFactual('quel produit sombre autour de 200'));
         $this->assertFalse(GhostTribunal::looksFactual('où est le making-of'));
         $this->assertTrue(GhostTribunal::looksFactual('Combien coûte le print nocturne ?'));
+        $cristal = Ghost::reply($node, 'Quel est le prix du cristal ?');
+        $this->assertSame('tribunal', $cristal['mode']);
+        $this->assertMatchesRegularExpression('/2400/', $cristal['reply']);
+        $ventes = Ghost::reply($node, 'Combien de ventes ce mois ?');
+        $this->assertContains($ventes['mode'] ?? '', ['tribunal', 'tribunal-refuse', 'verified-block']);
+        $this->assertTrue(empty($ventes['lab']));
+        $hi = Ghost::reply($node, 'bonjour');
+        $this->assertFalse($hi['growth']['updated'] ?? true);
+        $this->assertNull($hi['growth']['error'] ?? null);
+        $this->assertSame(0, (int) ($hi['belief']['supporting'] ?? -1));
     }
 
     public function test_brain_page_is_staff_only(): void

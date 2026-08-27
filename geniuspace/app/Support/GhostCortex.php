@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 /**
- * Index lexical du lieu. BM25 + vecteur hashing-trick. Pas un embedding LLM.
+ * Index lexical du lieu. TF-IDF-like + vecteur hashing-trick. Pas BM25 (pas de k1/b), pas MiniLM.
  *
  * Chaque hit porte une couche : world | evidence | belief.
  * Le tribunal ne cite jamais belief comme preuve du monde.
@@ -46,16 +46,16 @@ class GhostCortex
             if ($text === '') {
                 continue;
             }
-            $out[] = self::doc('world:'.$i, self::WORLD, $text, (string) ($f['predicate'] ?? 'champ'), 'engine', time());
+            $out[] = self::doc('world:'.$i, self::WORLD, $text, (string) ($f['predicate'] ?? 'champ'), 'engine', self::stamp($f['updated_at'] ?? null));
         }
         foreach (Product::query()->where('node_id', $node->id)->limit(24)->get() as $p) {
-            $price = str_replace(' ', '', (string) $p->price);
-            $text = trim($p->title.' '.$price.' '.(string) $p->summary);
-            $out[] = self::doc('product:'.$p->id, self::WORLD, $text, (string) $p->title, 'product', time());
+            $price = GhostVerifier::foldMoney((string) $p->price);
+            $text = trim($p->title.' prix '.$price.' '.(string) $p->summary);
+            $out[] = self::doc('product:'.$p->id, self::WORLD, $text, (string) $p->title, 'product', self::stamp($p->updated_at ?? $p->created_at ?? null));
         }
         foreach (Media::query()->where('node_id', $node->id)->limit(16)->get() as $m) {
-            $text = trim($m->title.' '.(string) ($m->transcript ?? '').' '.(string) ($m->price ?? ''));
-            $out[] = self::doc('media:'.$m->id, self::WORLD, $text, (string) $m->title, 'media', time());
+            $text = trim($m->title.' prix '.GhostVerifier::foldMoney((string) ($m->price ?? '')).' '.(string) ($m->transcript ?? ''));
+            $out[] = self::doc('media:'.$m->id, self::WORLD, $text, (string) $m->title, 'media', self::stamp($m->updated_at ?? $m->created_at ?? null));
         }
         if (Schema::hasTable('ghost_chunks')) {
             foreach (DB::table('ghost_chunks')->where('node_id', $node->id)->orderByDesc('created_at')->limit(80)->get() as $c) {
@@ -67,7 +67,7 @@ class GhostCortex
             if ($text === '') {
                 continue;
             }
-            $out[] = self::doc('belief:'.$i, self::BELIEF, $text, (string) ($f['predicate'] ?? 'croyance'), 'visitor', time());
+            $out[] = self::doc('belief:'.$i, self::BELIEF, $text, (string) ($f['predicate'] ?? 'croyance'), 'visitor', self::stamp($f['updated_at'] ?? null));
         }
 
         return $out;
@@ -176,17 +176,22 @@ class GhostCortex
     public static function tokens(string $text): array
     {
         $norm = mb_strtolower($text);
+        $norm = GhostVerifier::foldMoney($norm);
         $norm = strtr($norm, [
             'à' => 'a', 'á' => 'a', 'â' => 'a', 'ä' => 'a',
             'è' => 'e', 'é' => 'e', 'ê' => 'e', 'ë' => 'e',
             'ì' => 'i', 'î' => 'i', 'ï' => 'i',
             'ò' => 'o', 'ô' => 'o', 'ö' => 'o',
             'ù' => 'u', 'û' => 'u', 'ü' => 'u', 'ç' => 'c',
+            'œ' => 'oe', 'æ' => 'ae',
         ]);
         $parts = preg_split('/[^\p{L}\p{N}]+/u', $norm) ?: [];
         $out = [];
         foreach ($parts as $p) {
-            if (mb_strlen($p) < 2 || in_array($p, self::STOP, true) || ctype_digit($p)) {
+            if (mb_strlen($p) < 2 || in_array($p, self::STOP, true)) {
+                continue;
+            }
+            if (ctype_digit($p) && (strlen($p) < 2 || strlen($p) > 6)) {
                 continue;
             }
             $out[] = $p;
@@ -293,5 +298,20 @@ class GhostCortex
             'source' => $source,
             'updated_at' => $at,
         ];
+    }
+
+    private static function stamp(mixed $at): int
+    {
+        if (is_numeric($at)) {
+            return (int) $at;
+        }
+        if (is_string($at) && $at !== '') {
+            return strtotime($at) ?: 0;
+        }
+        if ($at instanceof \DateTimeInterface) {
+            return $at->getTimestamp();
+        }
+
+        return 0;
     }
 }

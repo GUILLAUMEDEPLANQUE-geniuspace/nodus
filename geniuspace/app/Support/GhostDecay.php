@@ -38,13 +38,18 @@ class GhostDecay
             return 0;
         }
         $deleted = 0;
-        $rows = DB::table('ghost_synapses')->where('node_id', $nodeId)->orderBy('weight')->limit($max)->get();
+        $rows = DB::table('ghost_synapses')->where('node_id', $nodeId)->get();
+        $dead = [];
         foreach ($rows as $r) {
             $eff = self::effective((float) $r->weight, (string) $r->relation, $r->last_reinforced_at);
             if ($eff < self::MIN_WEIGHT) {
-                DB::table('ghost_synapses')->where('id', $r->id)->delete();
-                $deleted++;
+                $dead[] = ['id' => $r->id, 'eff' => $eff];
             }
+        }
+        usort($dead, fn ($a, $b) => $a['eff'] <=> $b['eff']);
+        foreach (array_slice($dead, 0, $max) as $d) {
+            DB::table('ghost_synapses')->where('id', $d['id'])->delete();
+            $deleted++;
         }
 
         return $deleted;

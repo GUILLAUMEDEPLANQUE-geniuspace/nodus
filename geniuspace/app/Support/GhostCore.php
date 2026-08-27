@@ -30,7 +30,6 @@ class GhostCore
     {
         $world = GhostWorldObserver::of((string) $node->id);
         $ctx = Ghost::context($node);
-        GhostCortex::ingestWorld($node);
         $sit = GhostSituation::parse($message, $ctx);
         if (isset($opts['situation']) && is_array($opts['situation'])) {
             $sit = GhostSituation::ingest($opts['situation'], $sit);
@@ -69,8 +68,6 @@ class GhostCore
         $polarity = 'unknown';
         if (is_array($trial) && ($trial['observed'] ?? null) !== null) {
             $polarity = ($out['verify']['valid'] ?? true) ? 'support' : 'contradict';
-        } elseif (($plan['skill'] ?? '') !== 'discover_strategy' && ($out['verify']['valid'] ?? true)) {
-            $polarity = 'support';
         }
         GhostBelief::observe(
             $node,
@@ -112,8 +109,8 @@ class GhostCore
         $out['tempo'] = self::tempo();
         $out['loop'] = implode('.', self::LOOP);
         $out['growth'] = GhostGrowth::after($node, [
-            'expected' => $reflection['expected'] ?? null,
-            'actual' => $reflection['actual'] ?? null,
+            'expected' => is_array($trial) ? ($trial['prediction'] ?? null) : null,
+            'actual' => is_array($trial) ? ($trial['observed'] ?? null) : null,
             'trial' => $trial,
             'reflection' => $reflection,
         ]);
@@ -153,7 +150,10 @@ class GhostCore
         if (($plan['skill'] ?? '') === 'recover_failed_campaign') {
             return self::recoverTurn($node, $message, $plan);
         }
-        if (GhostStrategy::looksLike($message) || ($plan['skill'] ?? '') === 'discover_strategy') {
+        $factual = GhostTribunal::looksFactual($message)
+            && ! GhostEdit::looksLike($message)
+            && ! GhostBiz::route($message);
+        if (! $factual && (GhostStrategy::looksLike($message) || ($plan['skill'] ?? '') === 'discover_strategy')) {
             return Ghost::strategyTurn($node, $message);
         }
         $editorCtx = $opts['editor_context'] ?? [];
@@ -185,10 +185,17 @@ class GhostCore
                 $mode = 'llm+grounded';
             }
         }
+        $exec['citations'] = array_values(array_merge($exec['citations'] ?? [], $grounded['citations'] ?? []));
         $check = GhostVerifier::check($grounded['reply'], $exec, $ctx);
-        if (! $check['valid']) {
-            $grounded['reply'] = $check['safe_reply'];
-            $mode = 'verified-block';
+        if (! $check['valid'] && $mode !== 'tribunal-refuse') {
+            $jargon = array_filter(
+                $check['unsupported_claims'] ?? [],
+                fn ($c) => str_starts_with((string) $c, 'jargon:') || str_starts_with((string) $c, 'act_')
+            );
+            if ($mode !== 'tribunal' || $jargon !== []) {
+                $grounded['reply'] = $check['safe_reply'];
+                $mode = 'verified-block';
+            }
         }
         GhostMemory::rememberTurn($node, $plan, $exec, $check);
         GhostLearn::afterTurn($node, $message, $plan, $exec, $check, $mode);

@@ -80,6 +80,8 @@ class InvariantTest extends TestCase
         $this->post('/n/lumen/ghost/gym')->assertStatus(403);
         $this->post('/n/lumen/ghost/lab', ['objective' => 'x'])->assertStatus(403);
         $this->post('/n/lumen/ghost/cerveau')->assertStatus(403);
+        $this->post('/n/lumen/ghost/cerveau/ask', ['q' => 'prix'])->assertStatus(403);
+        $this->postJson('/n/lumen/ghost/cerveau/ingest', ['text' => 'note'])->assertStatus(403);
         $this->post('/n/lumen/t/x/reply', ['body' => 'hello'])->assertStatus(403);
         $this->post('/n/lumen/t/x/fire')->assertStatus(403);
     }

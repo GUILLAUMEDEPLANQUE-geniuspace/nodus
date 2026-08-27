@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
@@ -46,14 +47,31 @@ class GhostSynapse
             ]);
         } else {
             $weight = round($alpha, 4);
-            DB::table('ghost_synapses')->insert([
-                'node_id' => $nodeId,
-                'source' => $a,
-                'target' => $b,
-                'relation' => $relation,
-                'weight' => $weight,
-                'last_reinforced_at' => now(),
-            ]);
+            try {
+                DB::table('ghost_synapses')->insert([
+                    'node_id' => $nodeId,
+                    'source' => $a,
+                    'target' => $b,
+                    'relation' => $relation,
+                    'weight' => $weight,
+                    'last_reinforced_at' => now(),
+                ]);
+            } catch (QueryException $e) {
+                $row = DB::table('ghost_synapses')
+                    ->where('node_id', $nodeId)
+                    ->where('source', $a)
+                    ->where('target', $b)
+                    ->where('relation', $relation)
+                    ->first();
+                if ($row) {
+                    $weight = max(0.0, min(1.0, (float) $row->weight + $alpha * (1 - (float) $row->weight)));
+                    $weight = round($weight, 4);
+                    DB::table('ghost_synapses')->where('id', $row->id)->update([
+                        'weight' => $weight,
+                        'last_reinforced_at' => now(),
+                    ]);
+                }
+            }
         }
 
         return ['source' => $a, 'target' => $b, 'relation' => $relation, 'weight' => $weight];

@@ -18,46 +18,107 @@ class GhostVerifier
 
     /**
      * Extraire des claims structurés. Pas d’invention.
+     * « 2 400 € » = 2400, pas 400.
      *
      * @return list<array{type:string, value:string, claim:string}>
      */
     public static function claims(string $text): array
     {
         $out = [];
-        if (preg_match_all('/(\d{2,5})\s*€/u', $text, $hits)) {
-            foreach ($hits[1] as $n) {
-                $out[] = ['type' => 'price', 'value' => (string) $n, 'claim' => $n.' €'];
-            }
+        foreach (self::moneyValues($text) as $n) {
+            $out[] = ['type' => 'price', 'value' => $n, 'claim' => $n.' €'];
         }
 
         return $out;
     }
 
     /**
-     * Ensemble de preuves observées (état, pas prose).
+     * « 2 400 € » → « 2400 € ». Espaces entre chiffres seulement.
+     */
+    public static function foldMoney(string $text): string
+    {
+        return (string) preg_replace('/(?<=\d)[\s\x{00A0}](?=\d)/u', '', $text);
+    }
+
+    /**
+     * @return list<string>
+     */
+    public static function moneyValues(string $text): array
+    {
+        $out = [];
+        if (preg_match_all('/(\d{2,6})\s*€/u', self::foldMoney($text), $hits)) {
+            foreach ($hits[1] as $n) {
+                $out[] = (string) (int) $n;
+            }
+        }
+
+        return array_values(array_unique($out));
+    }
+
+    /**
+     * Preuves = champs prix / texte avec €. Pas les scores JSON.
      *
      * @param  array<string, mixed>|list<mixed>  $observed
      * @return array{prices: list<string>, titles: list<string>, raw: string}
      */
     public static function evidenceFrom(array $observed): array
     {
-        $raw = mb_strtolower((string) json_encode($observed, JSON_UNESCAPED_UNICODE));
         $prices = [];
-        if (preg_match_all('/(\d{2,5})/u', $raw, $hits)) {
-            $prices = array_values(array_unique($hits[1]));
-        }
         $titles = [];
-        foreach ($observed as $row) {
-            if (is_array($row)) {
-                foreach (['titre', 'title', 'label', 'name'] as $k) {
-                    if (! empty($row[$k])) {
-                        $titles[] = mb_strtolower((string) $row[$k]);
+        $raw = [];
+        $walk = function ($row) use (&$prices, &$titles, &$raw, &$walk): void {
+            if (! is_array($row)) {
+                if (is_string($row) && str_contains($row, '€')) {
+                    foreach (self::moneyValues($row) as $n) {
+                        $prices[] = $n;
+                    }
+                    $raw[] = $row;
+                }
+
+                return;
+            }
+            foreach (['prix', 'price', 'amount', 'floor', 'ceil', 'list', 'min', 'max', 'offer', 'held'] as $k) {
+                if (! isset($row[$k]) || is_array($row[$k])) {
+                    continue;
+                }
+                $v = (string) $row[$k];
+                $raw[] = $v;
+                if (is_numeric($row[$k])) {
+                    $prices[] = (string) (int) $row[$k];
+                } else {
+                    foreach (self::moneyValues($v) as $n) {
+                        $prices[] = $n;
+                    }
+                    if ($v !== '' && ! str_contains($v, '€') && preg_match('/^\d{2,6}$/', self::foldMoney($v))) {
+                        $prices[] = (string) (int) self::foldMoney($v);
                     }
                 }
             }
-        }
+            foreach (['titre', 'title', 'label', 'name', 'text'] as $k) {
+                if (empty($row[$k]) || ! is_string($row[$k])) {
+                    continue;
+                }
+                $raw[] = $row[$k];
+                if (in_array($k, ['titre', 'title', 'label', 'name'], true)) {
+                    $titles[] = mb_strtolower($row[$k]);
+                }
+                foreach (self::moneyValues($row[$k]) as $n) {
+                    $prices[] = $n;
+                }
+            }
+            foreach ($row as $v) {
+                if (is_array($v)) {
+                    $walk($v);
+                }
+            }
+        };
+        $walk($observed);
 
-        return ['prices' => $prices, 'titles' => $titles, 'raw' => $raw];
+        return [
+            'prices' => array_values(array_unique($prices)),
+            'titles' => $titles,
+            'raw' => mb_strtolower(implode(' ', $raw)),
+        ];
     }
 
     /**
@@ -144,6 +205,9 @@ class GhostVerifier
             $exec['data']['produits'] ?? [],
             $ctx['produits'] ?? [],
             $ctx['details'] ?? [],
+            $exec['citations'] ?? [],
+            $ctx['media'] ?? [],
+            $ctx['medias'] ?? [],
             isset($exec['constraints']) ? [$exec['constraints']] : [],
             isset($ctx['fourchette']) ? [$ctx['fourchette']] : [],
         );

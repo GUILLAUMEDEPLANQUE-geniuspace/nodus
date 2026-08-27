@@ -79,6 +79,12 @@ class GhostContractTest extends TestCase
         $this->assertSame(GhostVerifier::FAIL, $fail['result']);
         $unk = GhostVerifier::verifyText('Cette offre coûte 180 €', []);
         $this->assertSame(GhostVerifier::UNKNOWN, $unk['result']);
+        $spaced = GhostVerifier::verifyText('Cette pièce coûte 2 400 €', [['prix' => '2 400 €', 'titre' => 'Cristal']]);
+        $this->assertSame(GhostVerifier::PASS, $spaced['result']);
+        $this->assertSame('2400', $spaced['claims'][0]['claim']['value']);
+        $hay = GhostVerifier::evidenceFrom([['score' => 0.1800, 'lexical' => 0.42]]);
+        $this->assertNotContains('1800', $hay['prices']);
+        $this->assertSame([], $hay['prices']);
     }
 
     public function test_manifest_never_lists_deny_in_propose(): void

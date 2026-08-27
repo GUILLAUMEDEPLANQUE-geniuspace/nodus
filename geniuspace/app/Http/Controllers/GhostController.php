@@ -227,7 +227,6 @@ class GhostController extends Controller
     {
         $node = GpNode::query()->where('slug', $slug)->firstOrFail();
         Acl::guard($node->id, 'admin');
-        GhostCortex::ingestWorld($node);
 
         return view('ghost-brain', [
             'node' => $node,

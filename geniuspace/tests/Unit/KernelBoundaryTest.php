@@ -22,7 +22,7 @@ class KernelBoundaryTest extends TestCase
     public function test_chrome_does_not_call_ghost_or_grantor(): void
     {
         $src = file_get_contents(app_path('Support/Chrome.php'));
-        foreach (['Ghost::', 'Grantor::', 'GhostAction::'] as $ban) {
+        foreach (['Ghost::', 'Grantor::', 'GhostAction::', 'GhostCortex', 'GhostDream', 'GhostTribunal', 'GhostSynapse', 'GhostGrowth'] as $ban) {
             $this->assertStringNotContainsString($ban, $src, $ban);
         }
         $this->assertStringContainsString('Engine::', $src);

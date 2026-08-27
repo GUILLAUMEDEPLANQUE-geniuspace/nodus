@@ -12,7 +12,7 @@ Nodus maintient un monde structuré et vérifiable. Ghost est une couche cogniti
 Nodus reste le noyau d’exécution. V8 absorbe les **algorithmes** d’un cerveau personnel (index, liens, oubli, refus sans preuve) sans absorber IndexedDB, un LLM local, ni un vector DB.
 
 ```
-WORLD (Engine) ──► CORTEX (BM25 + hashing-trick)
+WORLD (Engine) ──► CORTEX (TF-IDF-like + hashing-trick, pas BM25, pas MiniLM)
                       │
          chunks (preuves)   beliefs (visiteur)   ← couches séparées
                       │

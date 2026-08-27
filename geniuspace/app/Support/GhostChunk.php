@@ -56,17 +56,20 @@ class GhostChunk
             return $chunks;
         }
         foreach ($chunks as $c) {
-            DB::table('ghost_chunks')->updateOrInsert(
-                ['id' => $c['id']],
-                [
-                    'node_id' => $node->id,
-                    'asset_id' => $assetId,
-                    'text' => $c['text'],
-                    'source_kind' => $kind,
-                    'importance' => 0.5,
-                    'created_at' => now(),
-                ]
-            );
+            $id = 'chk_'.substr(sha1($node->id.'|'.$c['id']), 0, 16);
+            $payload = [
+                'node_id' => $node->id,
+                'asset_id' => $assetId,
+                'text' => $c['text'],
+                'source_kind' => $kind,
+                'importance' => 0.5,
+            ];
+            $exists = DB::table('ghost_chunks')->where('id', $id)->exists();
+            if ($exists) {
+                DB::table('ghost_chunks')->where('id', $id)->update($payload);
+            } else {
+                DB::table('ghost_chunks')->insert($payload + ['id' => $id, 'created_at' => now()]);
+            }
         }
 
         return $chunks;

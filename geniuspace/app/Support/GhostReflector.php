@@ -21,15 +21,15 @@ class GhostReflector
      */
     public static function turn(GpNode $node, array $plan, array $exec, array $check, ?array $trial = null): array
     {
-        $expected = $trial['prediction'] ?? (($check['valid'] ?? true) ? 1.0 : 0.0);
-        $actual = $trial['observed'] ?? (($check['valid'] ?? true) ? 1.0 : 0.0);
+        $expected = is_array($trial) ? ($trial['prediction'] ?? null) : null;
+        $actual = is_array($trial) && array_key_exists('observed', $trial) ? $trial['observed'] : null;
         $gap = is_numeric($actual) && is_numeric($expected) ? abs((float) $actual - (float) $expected) : null;
-        $why = 'Tour ancré.';
+        $why = 'Pas d’observation du monde. Rien à généraliser.';
         $rule = null;
         if (! ($check['valid'] ?? true)) {
             $why = 'Prédiction verbale réfutée par le vérifieur.';
             $rule = 'Ne pas citer hors coffre.';
-        } elseif ($trial && $trial['observed'] === null) {
+        } elseif ($actual === null) {
             $why = 'Pas d’observation du monde. Rien à généraliser.';
         } elseif ($trial && ($trial['hypothesis']['status'] ?? '') === GhostHypothesis::REFUTED) {
             $why = 'L’hypothèse est fausse dans ce contexte.';
