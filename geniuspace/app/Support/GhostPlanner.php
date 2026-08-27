@@ -18,8 +18,21 @@ class GhostPlanner
      */
     public static function plan(GpNode $node, string $message, array $ctx, array $working): array
     {
+        $sit = GhostSituation::parse($message, $ctx);
         $goal = self::goal($message, $ctx, $working);
-        $constraints = array_merge($working['constraints'] ?? [], $goal['constraints']);
+        $sitSkill = (string) ($sit['skill'] ?? '');
+        if ($sitSkill === 'discover_strategy' || $sitSkill === 'recover_failed_campaign') {
+            $goal['name'] = $sit['goal'];
+            $goal['skill'] = $sitSkill;
+            $goal['intent'] = $sit['intent'];
+            $goal['confidence'] = max($goal['confidence'] ?? 0, $sit['confidence']);
+        } elseif ($sitSkill === 'find_product' && in_array($goal['skill'] ?? '', ['investigate_place', 'find_product'], true)) {
+            $goal['name'] = 'find_product';
+            $goal['skill'] = 'find_product';
+            $goal['intent'] = 'price';
+            $goal['confidence'] = max($goal['confidence'] ?? 0, $sit['confidence']);
+        }
+        $constraints = array_merge($working['constraints'] ?? [], $goal['constraints'], GhostSituation::constraints($sit));
         $style = GhostMemory::fact($node, 'prefers_style');
         $budget = GhostMemory::fact($node, 'budget_max');
         if ($style && ! isset($constraints['style'])) {
@@ -33,13 +46,14 @@ class GhostPlanner
         $steps = $skill['procedure'] ?? [];
 
         return [
-            'goal' => $goal['name'],
+            'goal' => $goal['name'] === 'find_best_product' ? 'find_product' : $goal['name'],
             'intent' => $goal['intent'],
             'skill' => $skill['name'],
             'constraints' => $constraints,
             'steps' => $steps,
             'uncertainty' => ($goal['confidence'] ?? 1) < 0.55 ? GhostMemory::UNCERTAIN : GhostMemory::KNOWN,
             'ceiling' => $skill['level'] ?? GhostSkills::OBSERVE,
+            'situation' => $sit,
         ];
     }
 
@@ -79,8 +93,12 @@ class GhostPlanner
             return ['name' => 'find_product', 'skill' => 'find_product', 'intent' => 'price', 'constraints' => $constraints, 'confidence' => 0.86];
         }
 
-        if (\App\Support\GhostStrategy::looksLike($message)) {
+        if (GhostStrategy::looksLike($message)) {
             return ['name' => 'discover_strategy', 'skill' => 'discover_strategy', 'intent' => 'strategy', 'constraints' => $constraints, 'confidence' => 0.92];
+        }
+
+        if (preg_match('/campagne.*(échou|rat[eé]|failed)|r[eé]cup[eé]r.*campagne/u', $m)) {
+            return ['name' => 'recover_failed_campaign', 'skill' => 'recover_failed_campaign', 'intent' => 'campaign', 'constraints' => [], 'confidence' => 0.9];
         }
 
         if (preg_match('/certificat|rwa|authent|d[eé]bloqu|unlock|paywall|making/u', $m)) {
@@ -89,11 +107,11 @@ class GhostPlanner
             return ['name' => 'verify_claim', 'skill' => 'verify_claim', 'intent' => $intent, 'constraints' => [], 'confidence' => 0.88];
         }
 
-        if (\App\Support\GhostEdit::looksLike($message) && ! preg_match('/rembourse/u', $m)) {
+        if (GhostEdit::looksLike($message) && ! preg_match('/rembourse/u', $m)) {
             return ['name' => 'edit_page', 'skill' => 'edit_page', 'intent' => 'studio', 'constraints' => $constraints, 'confidence' => 0.9];
         }
 
-        $biz = \App\Support\GhostBiz::route($message);
+        $biz = GhostBiz::route($message);
         if ($biz === 'tracking') {
             return ['name' => 'send_tracking', 'skill' => 'send_tracking', 'intent' => 'tracking', 'constraints' => [], 'confidence' => 0.92];
         }
@@ -140,5 +158,24 @@ class GhostPlanner
             'constraints' => $constraints,
             'confidence' => 0.5,
         ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $plan
+     * @param  array<string, mixed>  $attack
+     * @return array<string, mixed>
+     */
+    public static function replan(array $plan, array $attack): array
+    {
+        foreach ($attack['require'] ?? [] as $req) {
+            $plan['constraints']['require_'.$req] = true;
+        }
+        if (in_array('authority', $attack['require'] ?? [], true)) {
+            $plan['ceiling'] = GhostSkills::PREPARE;
+        }
+        $plan['critic'] = $attack['problems'] ?? [];
+        $plan['replanned'] = true;
+
+        return $plan;
     }
 }

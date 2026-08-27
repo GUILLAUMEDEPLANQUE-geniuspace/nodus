@@ -6,6 +6,44 @@
 
 Nodus maintient un monde structuré et vérifiable. Ghost est une couche cognitive capable de **proposer des transitions** de ce monde, contraintes par un moteur déterministe d’autorité, de capacités et de vérification.
 
+## V7 — Boucle cognitive
+
+```
+WORLD (Engine)
+   → OBSERVE
+   → SITUATION (hard / soft / trade-off)
+   → MEMORY (semantic · episodic · procedural · social · working)
+   → HYPOTHESIS + contre + rivales
+   → PLAN
+   → CRITIC → REPLAN
+   → SIMULATE (A/B/C, observed = null)
+   → DECIDE
+   → CONTRACT → AUTHORIZE
+   → EXECUTE  (jamais seul)
+   → VERIFY
+   → REFLECT (expected vs actual)
+   → LEARN (généraliser, versionner la skill)
+   → SELF MODEL
+```
+
+| Pièce | Fichier | Contrat |
+| --- | --- | --- |
+| Core | `GhostCore.php` | Orchestrateur. Pas un god object métier. |
+| Situation | `GhostSituation.php` | JSON validé. Le LLM propose, Nodus recale. |
+| Working memory | `GhostWorkingMemory.php` | But, sous-buts, connus, inconnus, risques. |
+| Critic | `GhostCritic.php` | Attaque le raisonnement. Pas l’arbitre de vérité. |
+| Simulator | `GhostSimulator.php` | « Si je fais X ? » Jamais une observation. |
+| Reflector | `GhostReflector.php` | Écart prédiction / monde → règle. |
+| Belief | `GhostBelief.php` | P + preuves + decay. Pas `knowledge = 87`. |
+| Self | `GhostSelfModel.php` | Matrice de capacités. Autonomie ≠ booléen. |
+| Skill | `recover_failed_campaign` | Préconditions. Envoi = ACT. |
+
+Quatre temporalités : fast / episode / learning / strategic.
+
+Signature inchangée : **autonome sur la stratégie, jamais sur l’autorité.**
+
+Pas dans V7 : fine-tune, auto-ACT, vector DB, critic comme juge de vérité.
+
 ## V4 — Contrat, provenance, deux réalités
 
 ```
@@ -306,8 +344,16 @@ Le LLM reçoit le system prompt + JSON contexte + la réponse grounded à respec
 
 | Fichier | Rôle |
 | --- | --- |
-| `app/Support/Ghost.php` | Orchestrateur |
-| `app/Support/GhostMemory.php` | Faits + working memory · world ≠ belief |
+| `app/Support/Ghost.php` | Orchestrateur (délègue au Core) |
+| `app/Support/GhostCore.php` | Boucle cognitive v7 |
+| `app/Support/GhostSituation.php` | Situation structurée |
+| `app/Support/GhostWorkingMemory.php` | Mémoire de travail |
+| `app/Support/GhostCritic.php` | Attaque le raisonnement |
+| `app/Support/GhostSimulator.php` | Contrefactuels. Pas le monde. |
+| `app/Support/GhostReflector.php` | Expected vs actual |
+| `app/Support/GhostBelief.php` | P + preuves + decay |
+| `app/Support/GhostSelfModel.php` | Métacognition |
+| `app/Support/GhostMemory.php` | Faits + 5 couches · world ≠ belief |
 | `app/Support/GhostActionContract.php` | Transition d’état vérifiable |
 | `app/Support/GhostProvenance.php` | produced_by / verified_by |
 | `app/Support/GhostPlanner.php` | But + skill + étapes |

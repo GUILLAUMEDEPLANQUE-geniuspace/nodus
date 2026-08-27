@@ -331,6 +331,48 @@ class GhostMemory
         }
     }
 
+    /**
+     * Épisodes réellement tenus. Pas une similarité cosmétique.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public static function similarEpisodes(GpNode $node, string $goal): array
+    {
+        if (! Schema::hasTable('ghost_experiences') || $goal === '') {
+            return [];
+        }
+        $rows = DB::table('ghost_experiences')->where('node_id', $node->id)->orderByDesc('id')->limit(40)->get();
+        $out = [];
+        foreach ($rows as $r) {
+            $payload = json_decode((string) $r->payload, true) ?: [];
+            if (($payload['goal'] ?? '') === $goal || ($payload['skill'] ?? '') === $goal) {
+                $out[] = ['kind' => $r->kind, 'payload' => $payload, 'at' => $r->created_at];
+            }
+        }
+
+        return array_slice($out, 0, 8);
+    }
+
+    /**
+     * Cinq couches. Semantic = faits. Episodic = tours. Procedural = skills.
+     * Social = préférences visiteur. Working = tâche en cours.
+     *
+     * @return array{semantic:list<array>, episodic:list<array>, procedural:list<string>, social:list<array>, working:array}
+     */
+    public static function layers(GpNode $node): array
+    {
+        $facts = self::factsForVisitor($node);
+        $social = array_values(array_filter($facts, fn ($f) => in_array($f['predicate'] ?? '', ['prefers_style', 'dislikes', 'budget_max'], true)));
+
+        return [
+            'semantic' => $facts,
+            'episodic' => self::similarEpisodes($node, (string) (self::load($node)['goal'] ?? '')),
+            'procedural' => array_keys(GhostSkills::all()),
+            'social' => $social,
+            'working' => self::load($node),
+        ];
+    }
+
     private static function touchTool(string $tool, bool $ok): void
     {
         if (! Schema::hasTable('ghost_tool_stats') || $tool === '') {

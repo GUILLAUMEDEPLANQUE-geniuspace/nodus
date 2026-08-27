@@ -2,13 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Models\GpNode;
 use App\Support\Ghost;
 use App\Support\GhostExperiment;
 use App\Support\GhostHypothesis;
 use App\Support\GhostLearn;
 use App\Support\GhostStrategy;
 use App\Support\GhostWorldObserver;
-use App\Models\GpNode;
 use Database\Seeders\DualWorldsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -190,10 +190,10 @@ class GhostDiscoveryTest extends TestCase
     public function test_kernel_keeps_discovery_inside_ghost(): void
     {
         $engine = file_get_contents(app_path('Support/Engine.php'));
-        foreach (['GhostHypothesis', 'GhostExperiment', 'GhostWorldObserver', 'GhostStrategy'] as $ban) {
+        foreach (['GhostHypothesis', 'GhostExperiment', 'GhostWorldObserver', 'GhostStrategy', 'GhostCore', 'GhostSituation', 'GhostCritic', 'GhostSimulator', 'GhostReflector', 'GhostBelief', 'GhostSelfModel'] as $ban) {
             $this->assertStringNotContainsString($ban, $engine, $ban);
         }
-        foreach (['GhostHypothesis.php', 'GhostExperiment.php', 'GhostWorldObserver.php'] as $f) {
+        foreach (['GhostHypothesis.php', 'GhostExperiment.php', 'GhostWorldObserver.php', 'GhostCore.php', 'GhostCritic.php', 'GhostSimulator.php', 'GhostReflector.php'] as $f) {
             $src = file_get_contents(app_path('Support/'.$f));
             $this->assertStringNotContainsString('Grantor::give', $src);
             $this->assertStringNotContainsString("DB::table('cck_fields')->insert", $src);

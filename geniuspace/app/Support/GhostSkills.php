@@ -2,6 +2,9 @@
 
 namespace App\Support;
 
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+
 /**
  * Catalogue de compétences. Ghost n’improvise pas une action :
  * il choisit une skill versionnée, avec outils et plafond d’autorisation.
@@ -151,11 +154,28 @@ class GhostSkills
                 'name' => 'discover_strategy',
                 'description' => 'Inventer, muter, simuler. Déployer = ACT, confirmation humaine.',
                 'level' => self::PREPARE,
+                'version' => 1,
                 'required_tools' => ['strategy.explore', 'strategy.simulate'],
+                'preconditions' => [],
                 'procedure' => [
                     ['tool' => 'strategy.explore', 'level' => self::OBSERVE],
                     ['tool' => 'strategy.simulate', 'level' => self::OBSERVE],
                     ['tool' => 'strategy.promote', 'level' => self::PREPARE],
+                ],
+            ],
+            'recover_failed_campaign' => [
+                'name' => 'recover_failed_campaign',
+                'description' => 'Reprendre une campagne en échec. Envoi = ACT.',
+                'level' => self::PREPARE,
+                'version' => 1,
+                'preconditions' => ['campaign exists', 'campaign status = failed'],
+                'success' => 'delivery_rate > 98%',
+                'failure' => 'delivery_rate < 95%',
+                'required_tools' => ['customers.segment', 'campaign.preview'],
+                'procedure' => [
+                    ['tool' => 'customers.segment', 'level' => self::OBSERVE],
+                    ['tool' => 'campaign.preview', 'level' => self::PREPARE],
+                    ['tool' => 'campaign.launch', 'level' => self::ACT],
                 ],
             ],
         ];
@@ -164,8 +184,42 @@ class GhostSkills
     public static function get(string $name): array
     {
         $all = self::all();
+        $s = $all[$name] ?? $all['investigate_place'];
+        $s['version'] = self::version($s['name']);
 
-        return $all[$name] ?? $all['investigate_place'];
+        return $s;
+    }
+
+    public static function version(string $name): int
+    {
+        if ($name === '' || ! Schema::hasTable('ghost_skill_stats')) {
+            return 1;
+        }
+        try {
+            $v = DB::table('ghost_skill_stats')->where('name', $name)->value('version');
+
+            return max(1, (int) ($v ?? 1));
+        } catch (\Throwable $e) {
+            return 1;
+        }
+    }
+
+    /**
+     * @param  array<string, mixed>  $ctx
+     */
+    public static function ready(string $name, array $ctx = []): bool
+    {
+        $s = self::get($name);
+        foreach ($s['preconditions'] ?? [] as $p) {
+            if ($p === 'campaign exists' && empty($ctx['campaign']) && empty($ctx['failed_campaign'])) {
+                return false;
+            }
+            if ($p === 'campaign status = failed' && empty($ctx['failed_campaign'])) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public static function toolLevel(string $tool): string

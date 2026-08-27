@@ -5,9 +5,17 @@ namespace App\Http\Controllers;
 use App\Models\GpNode;
 use App\Support\Acl;
 use App\Support\Ghost;
+use App\Support\GhostAction;
+use App\Support\GhostActionContract;
+use App\Support\GhostBiz;
+use App\Support\GhostCore;
+use App\Support\GhostEdit;
 use App\Support\GhostGym;
 use App\Support\GhostLearn;
+use App\Support\GhostManifest;
 use App\Support\GhostMaturity;
+use App\Support\GhostSelfModel;
+use App\Support\GhostStrategy;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -90,7 +98,12 @@ class GhostController extends Controller
     {
         $node = GpNode::query()->where('slug', $slug)->firstOrFail();
 
-        return response()->json(GhostMaturity::of($node));
+        return response()->json(GhostMaturity::of($node) + [
+            'matrix' => GhostMaturity::matrix($node),
+            'self' => GhostSelfModel::of($node),
+            'loop' => GhostCore::LOOP,
+            'tempo' => GhostCore::tempo(),
+        ]);
     }
 
     public function approveSkill(Request $request, string $slug): JsonResponse
@@ -106,9 +119,9 @@ class GhostController extends Controller
     {
         $node = GpNode::query()->where('slug', $slug)->firstOrFail();
         Acl::guard($node->id, 'admin');
-        $blocks = \App\Support\GhostEdit::read($node);
+        $blocks = GhostEdit::read($node);
 
-        return response()->json(\App\Support\GhostManifest::of($node, $blocks) + ['blocks' => $blocks]);
+        return response()->json(GhostManifest::of($node, $blocks) + ['blocks' => $blocks]);
     }
 
     public function plan(Request $request, string $slug): JsonResponse
@@ -123,16 +136,16 @@ class GhostController extends Controller
             'editor_context.cursor.position' => 'nullable|in:before,after',
         ]);
         $ctx = $data['editor_context'] ?? [];
-        $biz = \App\Support\GhostBiz::route($data['message']);
+        $biz = GhostBiz::route($data['message']);
         $action = $biz
-            ? \App\Support\GhostBiz::plan($data['message'])
-            : \App\Support\GhostEdit::parse($data['message'], \App\Support\GhostEdit::read($node), $ctx);
-        $action = \App\Support\GhostActionContract::authorize($action, \App\Support\GhostManifest::of($node));
-        \App\Support\GhostEdit::store($node, $action);
+            ? GhostBiz::plan($data['message'])
+            : GhostEdit::parse($data['message'], GhostEdit::read($node), $ctx);
+        $action = GhostActionContract::authorize($action, GhostManifest::of($node));
+        GhostEdit::store($node, $action);
 
         return response()->json([
             'action' => $action,
-            'manifest' => \App\Support\GhostManifest::of($node),
+            'manifest' => GhostManifest::of($node),
         ]);
     }
 
@@ -141,14 +154,14 @@ class GhostController extends Controller
         $node = GpNode::query()->where('slug', $slug)->firstOrFail();
         Acl::guard($node->id, 'admin');
         $id = $request->validate(['id' => 'required|string'])['id'];
-        $action = \App\Support\GhostEdit::load($id);
+        $action = GhostEdit::load($id);
         abort_unless($action, 404);
         abort_unless(($action['status'] ?? '') === 'preview', 422, 'Ce plan n’est plus applicable.');
         $op = $action['action'] ?? '';
-        abort_unless(\App\Support\GhostAction::may($op) || \App\Support\GhostAction::may($action['ops'][0]['op'] ?? $op), 403, 'Refusé.');
-        $done = \App\Support\GhostEdit::commit($node, $action);
+        abort_unless(GhostAction::may($op) || GhostAction::may($action['ops'][0]['op'] ?? $op), 403, 'Refusé.');
+        $done = GhostEdit::commit($node, $action);
 
-        return response()->json(['action' => $done, 'blocks' => \App\Support\GhostEdit::read($node)]);
+        return response()->json(['action' => $done, 'blocks' => GhostEdit::read($node)]);
     }
 
     public function undo(Request $request, string $slug): JsonResponse
@@ -156,11 +169,11 @@ class GhostController extends Controller
         $node = GpNode::query()->where('slug', $slug)->firstOrFail();
         Acl::guard($node->id, 'admin');
         $id = $request->validate(['id' => 'required|string'])['id'];
-        $action = \App\Support\GhostEdit::load($id);
+        $action = GhostEdit::load($id);
         abort_unless($action, 404);
-        $done = \App\Support\GhostEdit::revert($node, $action);
+        $done = GhostEdit::revert($node, $action);
 
-        return response()->json(['action' => $done, 'blocks' => \App\Support\GhostEdit::read($node)]);
+        return response()->json(['action' => $done, 'blocks' => GhostEdit::read($node)]);
     }
 
     public function lab(string $slug): View
@@ -182,7 +195,7 @@ class GhostController extends Controller
         $objective = $request->validate([
             'objective' => 'required|string|max:240',
         ])['objective'];
-        $board = \App\Support\GhostStrategy::lab($objective, (string) $node->id, true);
+        $board = GhostStrategy::lab($objective, (string) $node->id, true);
 
         return view('ghost-lab', compact('node', 'board', 'objective'));
     }
@@ -192,13 +205,13 @@ class GhostController extends Controller
         $node = GpNode::query()->where('slug', $slug)->firstOrFail();
         Acl::guard($node->id, 'admin');
         $code = $request->validate(['code' => 'required|string|max:24'])['code'];
-        $memory = \App\Support\GhostStrategy::memory((string) $node->id);
+        $memory = GhostStrategy::memory((string) $node->id);
         $hit = collect($memory)->firstWhere('code', $code) ?? ['code' => $code];
-        $action = \App\Support\GhostActionContract::authorize(
-            \App\Support\GhostStrategy::deploy($hit),
-            \App\Support\GhostManifest::of($node)
+        $action = GhostActionContract::authorize(
+            GhostStrategy::deploy($hit),
+            GhostManifest::of($node)
         );
-        \App\Support\GhostEdit::store($node, $action);
+        GhostEdit::store($node, $action);
         abort_unless(($action['status'] ?? '') === 'preview', 422, 'Le déploiement reste une preview.');
 
         return response()->json(['action' => $action, 'applied' => false]);

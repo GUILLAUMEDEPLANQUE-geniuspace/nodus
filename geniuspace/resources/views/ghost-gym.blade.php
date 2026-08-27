@@ -8,6 +8,12 @@
   <h1 class="font-display" style="font-size:clamp(2rem,6vw,3.2rem);line-height:.95">Ghost ne lit pas plus. Il s’entraîne.</h1>
   <p class="lede">Chaque tour laisse un fait, une observation, parfois une erreur. Une hallucination n’entre pas en mémoire. Acheter, embaucher, ouvrir : confirmation humaine.</p>
   <p class="muted" style="margin:.8rem 0 0;display:flex;flex-wrap:wrap;gap:.35rem">
+    @foreach(['Observer','Situation','Mémoire','Hypothèse','Plan','Critic','Simuler','Décider','Autoriser','Vérifier','Réfléchir','Apprendre'] as $i => $s)
+      @if($i)<span>→</span>@endif
+      <span class="chip">{{ $s }}</span>
+    @endforeach
+  </p>
+  <p class="muted" style="margin:.4rem 0 0;display:flex;flex-wrap:wrap;gap:.35rem">
     @foreach(['Intention','Plan','Contrat','Autoriser','Preview','Appliquer','Observer','Vérifier','État tenu'] as $i => $s)
       @if($i)<span>→</span>@endif
       <span class="chip">{{ $s }}</span>

@@ -2,18 +2,20 @@
 
 namespace App\Support;
 
+use App\Models\DriveFile;
 use App\Models\GpNode;
 use App\Models\Media;
 use App\Models\Product;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 /**
  * Ghost du lieu : agent cognitif ancré, pas un chat généraliste.
- * Orchestrateur = mémoire + planner + executor + vérificateur.
- * Le LLM raisonne ; le graphe décide de ce qui est vrai.
+ * Orchestrateur = Core (situation, critic, simulate, reflect) + contrat d’autorité.
+ * Le LLM propose. Le graphe décide de ce qui est vrai. Ghost n’agit jamais seul.
  */
 class Ghost
 {
@@ -53,12 +55,12 @@ class Ghost
     {
         $profile = self::profile($node);
         $base = "Tu es le Ghost du lieu « {$node->title} ». "
-            ."Tu ne parles QUE de ce lieu et de son coffre (fiches, produits, vidéos, preuves). "
+            .'Tu ne parles QUE de ce lieu et de son coffre (fiches, produits, vidéos, preuves). '
             ."Tu ne cites que le contexte fourni. Si l'info n'y est pas : « Je n'ai pas cette preuve dans le coffre. » "
             ."Tu n'inventes ni prix, ni salaire, ni spoil, ni promesse d'embauche. "
             ."Tu ne débloques jamais un fichier toi-même : tu orientes vers l'action (achat, épreuve, unlock). "
             ."Les fiches viennent du coffre du lieu, jamais d'un crawl web. "
-            ."Réponds en français, court, utile. Aucun jargon technique (pas Node, CCK, edge, grant).";
+            .'Réponds en français, court, utile. Aucun jargon technique (pas Node, CCK, edge, grant).';
 
         return $base.' '.match ($profile) {
             'marchand' => 'Profil marchand : tu aides sur les œuvres, certificats, options de commande et making-of. Négociation seulement dans les fourchettes indiquées.',
@@ -104,21 +106,21 @@ class Ghost
         $products = Product::query()->where('node_id', $node->id)->limit(12)->get()
             ->filter(fn ($p) => Spoiler::ok((int) ($p->appear_order ?? 0), $node->id))
             ->map(function ($p) use ($node) {
-            $opts = Order::fields($p->id);
+                $opts = Order::fields($p->id);
 
-            return [
-                'id' => $p->id,
-                'titre' => $p->title,
-                'prix' => $p->price,
-                'url' => '/n/'.$node->slug.'/p/'.$p->id,
-                'options' => array_map(fn ($o) => [
-                    'key' => $o->field_key ?: Str::slug($o->name),
-                    'label' => $o->name,
-                    'type' => $o->type,
-                    'choices' => Order::choices($o),
-                ], $opts),
-            ];
-        })->values()->all();
+                return [
+                    'id' => $p->id,
+                    'titre' => $p->title,
+                    'prix' => $p->price,
+                    'url' => '/n/'.$node->slug.'/p/'.$p->id,
+                    'options' => array_map(fn ($o) => [
+                        'key' => $o->field_key ?: Str::slug($o->name),
+                        'label' => $o->name,
+                        'type' => $o->type,
+                        'choices' => Order::choices($o),
+                    ], $opts),
+                ];
+            })->values()->all();
 
         $medias = Media::query()->where('node_id', $node->id)->limit(8)->get()->map(fn ($m) => [
             'id' => $m->id,
@@ -131,17 +133,17 @@ class Ghost
         ])->values()->all();
 
         $files = [];
-        if (\Illuminate\Support\Facades\Schema::hasTable('drive_files')) {
+        if (Schema::hasTable('drive_files')) {
             $files = DB::table('drive_files')->where('node_id', $node->id)->limit(12)->get()->map(fn ($f) => [
                 'id' => $f->id,
                 'titre' => $f->title,
                 'locke' => (bool) ($f->locked ?? false),
-                'ouvert' => Grantor::canSeeFile(\App\Models\DriveFile::query()->find($f->id)),
+                'ouvert' => Grantor::canSeeFile(DriveFile::query()->find($f->id)),
             ])->values()->all();
         }
 
         $tabs = DB::table('node_tabs')->where('node_id', $node->id)
-            ->when(\Illuminate\Support\Facades\Schema::hasColumn('node_tabs', 'enabled'), fn ($q) => $q->where('enabled', 1))
+            ->when(Schema::hasColumn('node_tabs', 'enabled'), fn ($q) => $q->where('enabled', 1))
             ->orderBy('sort')->get(['key', 'label'])->map(fn ($t) => [
                 'key' => $t->key,
                 'label' => $t->label,
@@ -212,118 +214,82 @@ class Ghost
             return $blocked;
         }
 
-        if (GhostStrategy::looksLike($message)) {
-            $board = GhostStrategy::lab($message, (string) $node->id, false);
-            $action = GhostActionContract::authorize(
-                GhostStrategy::promote($board['best'] ?? []),
-                GhostManifest::of($node)
-            );
-            $best = $board['best'] ?? [];
-            $pred = number_format((float) (($best['expected_gain'] ?? 0) * 100), 1, ',', ' ');
-            $obs = $best['observed_gain'] ?? null;
-            $obsTxt = $obs === null
-                ? 'aucune observation du monde encore'
-                : number_format((float) $obs * 100, 1, ',', ' ').' % tenus';
-            $h = $board['hypotheses'][0]['hypothesis'] ?? 'hypothèse en cours';
-            $base = number_format((float) (($board['world']['participation'] ?? $board['world']['completion'] ?? 0) * 100), 1, ',', ' ');
-            $out = [
-                'reply' => 'Objectif lu. Le monde montre une baseline de '.$base.' %. Hypothèse : '.$h.' Prédiction : +'.$pred.' %. Observation : '.$obsTxt.'. '.$board['experiments_observed'].' expérience(s) tenue(s) sur '.$board['experiments'].'. Rien n’est déployé — confirmation humaine.',
-                'citations' => [['label' => 'Laboratoire', 'url' => '/n/'.$node->slug.'/ghost/lab']],
-                'tools' => ['strategy.explore', 'strategy.simulate', 'strategy.observe'],
-                'actions' => [
-                    ['label' => 'Ouvrir le laboratoire', 'href' => '/n/'.$node->slug.'/ghost/lab'],
-                    ['label' => 'Préparer le déploiement', 'href' => '/n/'.$node->slug.'/ghost/lab'],
-                ],
-                'profile' => self::profile($node),
-                'mode' => 'grounded',
-                'goal' => 'discover_strategy',
-                'skill' => 'discover_strategy',
-                'plan' => [['tool' => 'strategy.explore'], ['tool' => 'strategy.simulate']],
-                'verify' => ['valid' => true, 'status' => 'known'],
-                'memory' => GhostMemory::publicFacts($node),
-                'permission' => GhostSkills::PREPARE,
-                'maturity' => GhostMaturity::of($node),
-                'lab' => $board,
-                'action' => $action,
-            ];
-            GhostLearn::afterTurn($node, $message, ['skill' => 'discover_strategy'], ['tools' => $out['tools']], ['valid' => true], 'grounded');
+        return GhostCore::think($node, $message, $history, $opts);
+    }
 
-            return $out;
-        }
-
-        $editorCtx = $opts['editor_context'] ?? [];
-        if (GhostBiz::route($message) || GhostEdit::looksLike($message)) {
-            $action = GhostBiz::route($message)
-                ? GhostBiz::plan($message)
-                : GhostEdit::parse($message, GhostEdit::read($node), is_array($editorCtx) ? $editorCtx : []);
-            if (GhostEdit::looksLike($message) && empty($editorCtx) && ! empty($action['ops'])) {
-                $action['preview'][] = 'Rien n’est écrit. Ouvrez le Studio pour Appliquer.';
-            }
-            $action = GhostActionContract::authorize($action, GhostManifest::of($node));
-            GhostEdit::store($node, $action);
-            $out = self::fromAction($node, $action);
-            GhostLearn::afterTurn($node, $message, ['skill' => $out['skill']], ['tools' => $out['tools']], ['valid' => true], 'grounded');
-
-            return $out;
-        }
-
-        $plan = GhostPlanner::plan($node, $message, $ctx, $working);
-        $exec = GhostExecutor::run($node, $plan, $message, $ctx, $working);
-        $ctx = GhostExecutor::merge($ctx, $exec);
-
-        $intent = $plan['intent'] ?? self::intent($message, $ctx);
-        $toolResult = $exec['primary'] ?? null;
-        $grounded = self::groundedReply($node, $message, $intent, $ctx, $toolResult);
-        $grounded = self::withPick($grounded, $exec['pick'] ?? null, $working, $plan);
-
-        $mode = 'grounded';
-        $llm = self::maybeLlm($node, $message, $history, $ctx, $grounded);
-        if ($llm !== null) {
-            $grounded['reply'] = $llm;
-            $mode = 'llm+grounded';
-        }
-
-        $check = GhostVerifier::check($grounded['reply'], $exec, $ctx);
-        if (! $check['valid']) {
-            $grounded['reply'] = $check['safe_reply'];
-            $mode = 'verified-block';
-        }
-
-        GhostMemory::rememberTurn($node, $plan, $exec, $check);
-        GhostLearn::afterTurn($node, $message, $plan, $exec, $check, $mode);
-        self::logTurn($node, $message, $grounded['reply'], $exec['tools'] ?? [], $mode);
-
-        $citations = array_values(array_unique(array_merge($exec['citations'] ?? [], $grounded['citations'] ?? []), SORT_REGULAR));
-        $actions = $grounded['actions'] ?? [];
-        if ($actions === []) {
-            $actions = $exec['actions'] ?? [];
-        }
-        if ($exec['pending'] ?? []) {
-            $actions[] = ['label' => 'Confirmer l’action', 'href' => $ctx['lieu']['url'] ?? '/'];
-        }
-
-        return [
-            'reply' => $grounded['reply'],
-            'citations' => $citations,
-            'tools' => $exec['tools'] ?? [],
-            'actions' => $actions,
+    /**
+     * @return array<string, mixed>
+     */
+    public static function strategyTurn(GpNode $node, string $message): array
+    {
+        $board = GhostStrategy::lab($message, (string) $node->id, false);
+        $action = GhostActionContract::authorize(
+            GhostStrategy::promote($board['best'] ?? []),
+            GhostManifest::of($node)
+        );
+        $best = $board['best'] ?? [];
+        $pred = number_format((float) (($best['expected_gain'] ?? 0) * 100), 1, ',', ' ');
+        $obs = $best['observed_gain'] ?? null;
+        $obsTxt = $obs === null
+            ? 'aucune observation du monde encore'
+            : number_format((float) $obs * 100, 1, ',', ' ').' % tenus';
+        $h = $board['hypotheses'][0]['hypothesis'] ?? 'hypothèse en cours';
+        $base = number_format((float) (($board['world']['participation'] ?? $board['world']['completion'] ?? 0) * 100), 1, ',', ' ');
+        $out = [
+            'reply' => 'Objectif lu. Le monde montre une baseline de '.$base.' %. Hypothèse : '.$h.' Prédiction : +'.$pred.' %. Observation : '.$obsTxt.'. '.$board['experiments_observed'].' expérience(s) tenue(s) sur '.$board['experiments'].'. Rien n’est déployé — confirmation humaine.',
+            'citations' => [['label' => 'Laboratoire', 'url' => '/n/'.$node->slug.'/ghost/lab']],
+            'tools' => ['strategy.explore', 'strategy.simulate', 'strategy.observe'],
+            'actions' => [
+                ['label' => 'Ouvrir le laboratoire', 'href' => '/n/'.$node->slug.'/ghost/lab'],
+                ['label' => 'Préparer le déploiement', 'href' => '/n/'.$node->slug.'/ghost/lab'],
+            ],
             'profile' => self::profile($node),
-            'mode' => $mode,
-            'goal' => $plan['goal'] ?? null,
-            'skill' => $plan['skill'] ?? null,
-            'plan' => $plan['steps'] ?? [],
-            'verify' => ['valid' => $check['valid'], 'status' => $check['status']],
+            'mode' => 'grounded',
+            'goal' => 'discover_strategy',
+            'skill' => 'discover_strategy',
+            'plan' => [['tool' => 'strategy.explore'], ['tool' => 'strategy.simulate']],
+            'verify' => ['valid' => true, 'status' => 'known'],
             'memory' => GhostMemory::publicFacts($node),
-            'permission' => $exec['ceiling'] ?? GhostSkills::OBSERVE,
+            'permission' => GhostSkills::PREPARE,
             'maturity' => GhostMaturity::of($node),
+            'lab' => $board,
+            'action' => $action,
         ];
+        GhostLearn::afterTurn($node, $message, ['skill' => 'discover_strategy'], ['tools' => $out['tools']], ['valid' => true], 'grounded');
+        GhostMemory::rememberTurn($node, [
+            'goal' => 'discover_strategy',
+            'skill' => 'discover_strategy',
+            'steps' => $out['plan'],
+        ], ['tools' => $out['tools']], ['valid' => true]);
+
+        return $out;
+    }
+
+    /**
+     * @param  array<string, mixed>  $editorCtx
+     * @return array<string, mixed>
+     */
+    public static function editorTurn(GpNode $node, string $message, array $editorCtx = []): array
+    {
+        $action = GhostBiz::route($message)
+            ? GhostBiz::plan($message)
+            : GhostEdit::parse($message, GhostEdit::read($node), $editorCtx);
+        if (GhostEdit::looksLike($message) && $editorCtx === [] && ! empty($action['ops'])) {
+            $action['preview'][] = 'Rien n’est écrit. Ouvrez le Studio pour Appliquer.';
+        }
+        $action = GhostActionContract::authorize($action, GhostManifest::of($node));
+        GhostEdit::store($node, $action);
+        $out = self::fromAction($node, $action);
+        GhostLearn::afterTurn($node, $message, ['skill' => $out['skill']], ['tools' => $out['tools']], ['valid' => true], 'grounded');
+
+        return $out;
     }
 
     /**
      * @param  array<string, mixed>  $action
      * @return array<string, mixed>
      */
-    private static function fromAction(GpNode $node, array $action): array
+    public static function fromAction(GpNode $node, array $action): array
     {
         $skill = match ($action['action'] ?? '') {
             'campaign.create', 'campaign.launch' => 'run_campaign',
@@ -361,7 +327,7 @@ class Ghost
      * @param  array<string, mixed>  $plan
      * @return array{reply:string, citations:list<array>, actions:list<array>}
      */
-    private static function withPick(array $grounded, ?array $pick, array $working, array $plan): array
+    public static function withPick(array $grounded, ?array $pick, array $working, array $plan): array
     {
         if (! $pick) {
             return $grounded;
@@ -383,6 +349,14 @@ class Ghost
             $grounded['reply'] = $prefix."Parmi ce qui est dans le coffre{$note} : « {$title} »".($prix ? " — {$prix}" : '').'. '.$grounded['reply'];
             if (! empty($pick['url'])) {
                 array_unshift($grounded['actions'], ['label' => $title, 'href' => $pick['url']]);
+            }
+            $alt = $pick['_alt'] ?? null;
+            if (is_array($alt)) {
+                $altTitle = $alt['titre'] ?? $alt['title'] ?? null;
+                $allow = $plan['constraints']['allow_price'] ?? null;
+                if ($altTitle) {
+                    $grounded['reply'] .= ' Alternative au trade-off'.($allow ? " (jusqu’à {$allow} €)" : '')." : « {$altTitle} ».";
+                }
             }
         }
         if (($plan['goal'] ?? '') === 'match_job' && isset($pick['score'])) {
@@ -432,7 +406,7 @@ class Ghost
      * @param  array<string, mixed>|null  $toolResult
      * @return array{reply: string, citations: list<array>, actions: list<array>}
      */
-    private static function groundedReply(GpNode $node, string $message, string $intent, array $ctx, ?array $toolResult): array
+    public static function groundedReply(GpNode $node, string $message, string $intent, array $ctx, ?array $toolResult): array
     {
         $citations = $toolResult['citations'] ?? [];
         $actions = $toolResult['actions'] ?? [];
@@ -452,7 +426,7 @@ class Ghost
         if ($intent === 'hello') {
             $cta = $ctx['actions'][0]['label'] ?? 'Explorer';
             $name = self::hostName($node);
-            $wake = Flagships::of($node)['ghost']['wake'] ?? "Je réponds uniquement avec ce qui est dans ce lieu.";
+            $wake = Flagships::of($node)['ghost']['wake'] ?? 'Je réponds uniquement avec ce qui est dans ce lieu.';
 
             return [
                 'reply' => "{$name} · {$node->title}. {$wake} Essayez « prix », « certificat », « épreuve » ou « {$cta} ».",
@@ -768,7 +742,7 @@ class Ghost
         ];
     }
 
-    private static function maybeLlm(GpNode $node, string $message, array $history, array $ctx, array $grounded): ?string
+    public static function maybeLlm(GpNode $node, string $message, array $history, array $ctx, array $grounded): ?string
     {
         $url = config('services.ghost.url', env('GHOST_LLM_URL', ''));
         if ($url === '' && env('OLLAMA_BASE_URL')) {
@@ -804,9 +778,9 @@ class Ghost
         }
     }
 
-    private static function logTurn(GpNode $node, string $message, string $reply, array $tools, string $mode): void
+    public static function logTurn(GpNode $node, string $message, string $reply, array $tools, string $mode): void
     {
-        if (! \Illuminate\Support\Facades\Schema::hasTable('ghost_logs')) {
+        if (! Schema::hasTable('ghost_logs')) {
             return;
         }
         try {

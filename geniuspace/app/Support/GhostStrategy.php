@@ -4,7 +4,6 @@ namespace App\Support;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Str;
 
 /**
  * Discovery de stratégies. Ghost invente, mute, recombine, estime, observe.
@@ -53,7 +52,7 @@ class GhostStrategy
         $m = mb_strtolower($message);
 
         return (bool) preg_match(
-            '/strat[eé]g|participation|compl[eé]tion|taux d.activation|d[eé]couverte de strat|laboratoire de strat/u',
+            '/strat[eé]g|participation|compl[eé]tion|taux d.activation|d[eé]couverte de strat|laboratoire de strat|ventes|conversion|sans augmenter le budget|chiffre d.affaires/u',
             $m
         );
     }

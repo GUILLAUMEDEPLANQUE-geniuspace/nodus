@@ -14,7 +14,7 @@ class KernelBoundaryTest extends TestCase
     public function test_engine_does_not_call_actors(): void
     {
         $src = file_get_contents(app_path('Support/Engine.php'));
-        foreach (['Grantor', 'Ghost::', 'Chrome::', 'GhostAction::', 'GhostEdit::', 'GhostBiz::', 'GhostStrategy', 'GhostHypothesis', 'GhostExperiment', 'GhostWorldObserver'] as $ban) {
+        foreach (['Grantor', 'Ghost::', 'Chrome::', 'GhostAction::', 'GhostEdit::', 'GhostBiz::', 'GhostStrategy', 'GhostHypothesis', 'GhostExperiment', 'GhostWorldObserver', 'GhostCore', 'GhostSituation', 'GhostCritic', 'GhostSimulator', 'GhostReflector', 'GhostBelief', 'GhostSelfModel', 'GhostWorkingMemory'] as $ban) {
             $this->assertStringNotContainsString($ban, $src, $ban);
         }
     }

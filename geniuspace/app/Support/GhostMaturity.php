@@ -69,4 +69,37 @@ class GhostMaturity
             'strategies' => $approved,
         ];
     }
+
+    /**
+     * L’autonomie n’est pas un booléen. Capacités mesurées, plafond d’exécution inchangé.
+     * `of()['autonomy']` reste AUTONOMY_CAP. Ici : ce que Ghost sait faire, pas ce qu’il a le droit d’engager.
+     *
+     * @return array<string, int>
+     */
+    public static function matrix(?GpNode $node = null): array
+    {
+        $m = self::of($node);
+        $reflections = 0;
+        if (Schema::hasTable('ghost_reflections')) {
+            $q = DB::table('ghost_reflections');
+            if ($node) {
+                $q->where('node_id', $node->id);
+            }
+            $reflections = $q->count();
+        }
+
+        return [
+            'observation' => min(97, 55 + min(40, (int) $m['facts'] * 3)),
+            'recherche' => min(94, max(30, (int) $m['tools'])),
+            'raisonnement' => min(82, max(20, (int) $m['reasoning'])),
+            'planification' => min(88, max(20, (int) $m['planning'])),
+            'simulation' => min(61, 22 + (int) $m['strategies'] * 8),
+            'apprentissage' => min(57, 18 + min(37, (int) $m['fails'] * 3)),
+            'creation_skills' => min(43, 10 + (int) $m['strategies'] * 10),
+            'execution' => min(72, max(18, (int) $m['tools'])),
+            'fiabilite' => min(91, max(0, (int) $m['reliability'])),
+            'metacognition' => min(38, 12 + min(26, $reflections * 2 + (int) $m['fails'])),
+            'decouverte' => min(44, 8 + (int) $m['strategies'] * 8),
+        ];
+    }
 }

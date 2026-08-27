@@ -2,6 +2,18 @@
 
 Format : ce qui est **dans le code**, pas la vision PDF.
 
+## 2026-08-27 — Boucle cognitive v7
+
+- **GhostCore.** OBSERVE → situation → mémoire → hypothèse → plan → critic → simuler → décider → autoriser → vérifier → réfléchir → apprendre.
+- **Situation.** Contrainte dure, préférence souple, trade-off (200 € / 230 €). Le LLM propose un JSON, Nodus recale.
+- **Cinq mémoires.** Sémantique, épisodique, procédurale, sociale, de travail.
+- **Critic.** Attaque le plan. Replan. Pas un juge de vérité.
+- **Simulateur.** A / B / C. `observed` reste null. Ce n’est pas le monde.
+- **Croyance.** P + preuves + decay. Pas un score « knowledge = 87 ».
+- **Self.** Matrice de capacités. Autonomie d’exécution plafonnée à 54.
+- **Skill** `recover_failed_campaign`. Préconditions. Envoi = confirmation.
+- **Learn.generalize.** Trois échecs du même type → règle, testée sur l’histoire.
+
 ## 2026-08-27 — Découverte : hypothèse, monde, réfutation
 
 - **estimate ≠ observe.** Une formule n’écrit plus `observed_gain`.

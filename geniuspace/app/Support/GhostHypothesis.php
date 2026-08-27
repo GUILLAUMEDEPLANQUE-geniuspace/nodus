@@ -103,6 +103,23 @@ class GhostHypothesis
                 ],
             ];
         }
+        if (preg_match('/ventes|conversion|chiffre/u', $m)) {
+            return [
+                'objective' => $objective,
+                'key' => 'increase_sales',
+                'metric' => 'conversion',
+                'baseline' => (float) ($world['conversion'] ?? $world['completion'] ?? 0),
+                'levers' => ['friction', 'motivation', 'content', 'timing', 'reward'],
+                'target' => $target,
+                'why' => [
+                    'friction' => 'Un parcours lent coupe la conversion.',
+                    'motivation' => 'Le prix perçu n’est pas le prix affiché.',
+                    'content' => 'Le message ne parle pas au bon segment.',
+                    'timing' => 'Trop tôt après le dernier contact.',
+                    'reward' => 'Une réduction n’est pas une cause.',
+                ],
+            ];
+        }
 
         return [
             'objective' => $objective,
@@ -284,6 +301,41 @@ class GhostHypothesis
             'surprise' => null,
             'world_node' => $world['node_id'] ?? null,
         ];
+    }
+
+    /**
+     * Pour une croyance, produire les causes rivales. Distinguer. Chercher à réfuter.
+     *
+     * @return list<array{id:string, cause:string, hypothesis:string, distinguish:string, falsify:string}>
+     */
+    public static function rivals(string $claim): array
+    {
+        $causes = [
+            'prix' => 'La baisse vient du prix.',
+            'ux' => 'Le parcours a ralenti le checkout.',
+            'trafic' => 'La qualité du trafic a chuté.',
+            'saisonnalité' => 'Un effet de saison, pas un levier interne.',
+            'concurrence' => 'Un concurrent a bougé.',
+            'stock' => 'Une rupture ou un délai d’expédition.',
+            'tracking' => 'Le tracking sous-estime la conversion réelle.',
+        ];
+        $keys = array_keys($causes);
+        $out = [];
+        $i = 0;
+        foreach ($causes as $cause => $hyp) {
+            $next = $keys[($i + 1) % count($keys)];
+            $out[] = [
+                'id' => 'H'.($i + 1),
+                'cause' => $cause,
+                'hypothesis' => $hyp,
+                'claim' => $claim,
+                'distinguish' => 'Quelle évidence distinguerait '.$cause.' de '.$next.' ? Isoler '.$cause.', tenir le reste constant.',
+                'falsify' => 'Quelle observation réfuterait « '.$hyp.' » ? Un delta nul quand on agit uniquement sur '.$cause.'.',
+            ];
+            $i++;
+        }
+
+        return $out;
     }
 
     private static function pct(float $n): string

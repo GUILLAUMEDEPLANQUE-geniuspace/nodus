@@ -87,6 +87,66 @@ class GhostLearn
     }
 
     /**
+     * FAILURE → CLASSIFY → GENERALIZE → RULE CANDIDATE → TEST AGAINST HISTORY → VALIDATE.
+     *
+     * @return list<array{when:string, then:string, from:int, validated:bool}>
+     */
+    public static function generalize(?GpNode $node = null): array
+    {
+        if (! Schema::hasTable('ghost_failures')) {
+            return [];
+        }
+        $q = DB::table('ghost_failures');
+        if ($node) {
+            $q->where('node_id', $node->id);
+        }
+        $rows = $q->select('error_type', 'correction', DB::raw('count(*) as n'))
+            ->groupBy('error_type', 'correction')
+            ->havingRaw('count(*) >= 3')
+            ->get();
+        $out = [];
+        foreach ($rows as $row) {
+            $when = (string) $row->error_type;
+            $then = (string) $row->correction;
+            $validated = self::holdsAgainstHistory($when, $node);
+            if ($validated) {
+                self::rule($when, $then);
+            }
+            $out[] = [
+                'when' => $when,
+                'then' => $then,
+                'from' => (int) $row->n,
+                'validated' => $validated,
+            ];
+        }
+
+        return $out;
+    }
+
+    private static function holdsAgainstHistory(string $when, ?GpNode $node): bool
+    {
+        if (! Schema::hasTable('ghost_experiences')) {
+            return true;
+        }
+        $q = DB::table('ghost_experiences')->orderByDesc('id')->limit(40);
+        if ($node) {
+            $q->where('node_id', $node->id);
+        }
+        $ok = 0;
+        $ko = 0;
+        foreach ($q->get() as $r) {
+            $payload = json_decode((string) $r->payload, true) ?: [];
+            $valid = (bool) ($payload['valid'] ?? true);
+            $valid ? $ok++ : $ko++;
+        }
+        if ($ok + $ko === 0) {
+            return true;
+        }
+
+        return $ko >= $ok || $when === 'strategy_refuted' || $when === 'act' || $when === 'crawl';
+    }
+
+    /**
      * strategy → outcome → leçon → prochaine génération.
      *
      * @param  array<string, mixed>  $trial
@@ -95,11 +155,11 @@ class GhostLearn
     {
         $h = $trial['hypothesis'] ?? [];
         $status = $h['status'] ?? '';
-        $node = \App\Models\GpNode::query()->find($nodeId);
+        $node = GpNode::query()->find($nodeId);
         if (! $node) {
             return;
         }
-        if ($status === \App\Support\GhostHypothesis::REFUTED) {
+        if ($status === GhostHypothesis::REFUTED) {
             $cause = $h['levers'][0] ?? 'unknown';
             self::fail(
                 $node,
@@ -188,12 +248,23 @@ class GhostLearn
         }
         try {
             $row = DB::table('ghost_skill_stats')->where('name', $name)->first();
+            $runs = (int) ($row->runs ?? 0) + 1;
+            $version = (int) ($row->version ?? 1);
+            if ($runs >= 50) {
+                $version = max($version, 2);
+            }
+            if ($runs >= 200) {
+                $version = max($version, 3);
+            }
+            if ($runs >= 500) {
+                $version = max($version, 4);
+            }
             DB::table('ghost_skill_stats')->updateOrInsert(
                 ['name' => $name],
                 [
-                    'runs' => (int) ($row->runs ?? 0) + 1,
+                    'runs' => $runs,
                     'wins' => (int) ($row->wins ?? 0) + ($ok ? 1 : 0),
-                    'version' => (int) ($row->version ?? 1),
+                    'version' => $version,
                     'updated_at' => now(),
                 ]
             );

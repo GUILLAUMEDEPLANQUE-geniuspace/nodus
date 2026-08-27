@@ -36,6 +36,7 @@ class GhostExecutor
             $need = GhostSkills::toolLevel($tool);
             if ($need === GhostSkills::ACT || ! GhostSkills::may($tool, $ceiling === GhostSkills::ACT ? GhostSkills::PREPARE : $ceiling)) {
                 $pending[] = ['tool' => $tool, 'level' => $need, 'reason' => 'confirmation'];
+
                 continue;
             }
             $result = GhostTools::call($tool, $node, $ctx, [
@@ -102,12 +103,44 @@ class GhostExecutor
         if (! is_array($ranked) || $ranked === []) {
             return null;
         }
-        $first = $ranked[0];
+        $max = (int) ($constraints['max_price'] ?? $working['constraints']['max_price'] ?? 0);
+        $allow = (int) ($constraints['allow_price'] ?? $max);
+        $under = null;
+        $flex = null;
+        foreach ($ranked as $row) {
+            if (! is_array($row)) {
+                continue;
+            }
+            $price = self::euros($row);
+            if ($max <= 0 || $price <= $max) {
+                $under ??= $row;
+            } elseif ($allow > $max && $price <= $allow) {
+                $flex ??= $row + ['_tradeoff' => true];
+            }
+        }
+        $first = $under ?? ($ranked[0] ?? null);
         if (! is_array($first)) {
             return null;
         }
+        $why = $constraints['style'] ?? ($working['constraints']['style'] ?? null);
 
-        return $first + ['_why' => $constraints['style'] ?? ($working['constraints']['style'] ?? null)];
+        return $first + ['_why' => $why, '_alt' => $flex];
+    }
+
+    /**
+     * @param  array<string, mixed>  $row
+     */
+    private static function euros(array $row): int
+    {
+        $raw = (string) ($row['price'] ?? $row['prix'] ?? $row['cents'] ?? '');
+        if (isset($row['cents']) && is_numeric($row['cents'])) {
+            return (int) round(((int) $row['cents']) / 100);
+        }
+        if (preg_match('/(\d+)/', $raw, $h)) {
+            return (int) $h[1];
+        }
+
+        return 0;
     }
 
     /**
