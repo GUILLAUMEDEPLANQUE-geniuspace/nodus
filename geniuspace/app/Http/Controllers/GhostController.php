@@ -162,4 +162,45 @@ class GhostController extends Controller
 
         return response()->json(['action' => $done, 'blocks' => \App\Support\GhostEdit::read($node)]);
     }
+
+    public function lab(string $slug): View
+    {
+        $node = GpNode::query()->where('slug', $slug)->firstOrFail();
+        Acl::guard($node->id, 'admin');
+
+        return view('ghost-lab', [
+            'node' => $node,
+            'board' => null,
+            'objective' => 'Augmenter la participation de 20 %.',
+        ]);
+    }
+
+    public function labRun(Request $request, string $slug): View
+    {
+        $node = GpNode::query()->where('slug', $slug)->firstOrFail();
+        Acl::guard($node->id, 'admin');
+        $objective = $request->validate([
+            'objective' => 'required|string|max:240',
+        ])['objective'];
+        $board = \App\Support\GhostStrategy::lab($objective, (string) $node->id, true);
+
+        return view('ghost-lab', compact('node', 'board', 'objective'));
+    }
+
+    public function labDeploy(Request $request, string $slug): JsonResponse
+    {
+        $node = GpNode::query()->where('slug', $slug)->firstOrFail();
+        Acl::guard($node->id, 'admin');
+        $code = $request->validate(['code' => 'required|string|max:24'])['code'];
+        $memory = \App\Support\GhostStrategy::memory((string) $node->id);
+        $hit = collect($memory)->firstWhere('code', $code) ?? ['code' => $code];
+        $action = \App\Support\GhostActionContract::authorize(
+            \App\Support\GhostStrategy::deploy($hit),
+            \App\Support\GhostManifest::of($node)
+        );
+        \App\Support\GhostEdit::store($node, $action);
+        abort_unless(($action['status'] ?? '') === 'preview', 422, 'Le déploiement reste une preview.');
+
+        return response()->json(['action' => $action, 'applied' => false]);
+    }
 }

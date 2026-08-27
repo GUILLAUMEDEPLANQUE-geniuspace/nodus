@@ -79,6 +79,10 @@ class GhostPlanner
             return ['name' => 'find_product', 'skill' => 'find_product', 'intent' => 'price', 'constraints' => $constraints, 'confidence' => 0.86];
         }
 
+        if (\App\Support\GhostStrategy::looksLike($message)) {
+            return ['name' => 'discover_strategy', 'skill' => 'discover_strategy', 'intent' => 'strategy', 'constraints' => $constraints, 'confidence' => 0.92];
+        }
+
         if (preg_match('/certificat|rwa|authent|d[eé]bloqu|unlock|paywall|making/u', $m)) {
             $intent = preg_match('/certificat|rwa|authent/u', $m) ? 'certificate' : 'unlock';
 

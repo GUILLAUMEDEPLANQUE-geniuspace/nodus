@@ -51,6 +51,34 @@ PREPARE (produit) = PROPOSE (noyau).
 
 Pas dans V4 (volontaire) : vector DB, auto-ACT hors volume/remise, mélange world/belief, apply sans contrat.
 
+## V5 — Strategy Discovery
+
+Ghost n’exécute pas une stratégie. Il **cherche** dans l’espace des leviers, mute, recombine, simule, attaque, mémorise. Le déploiement reste ACT + confirmation.
+
+```
+OBJECTIF → leviers → génération combinatoire
+        → mutation / recombinaison
+        → simulation
+        → analyse causale
+        → plateau ? exploration : exploitation
+        → challenger (ATTACK-n)
+        → mémoire (tenues / ratées / partielles / dangereuses)
+        → PREPARE
+        → ACT (humain)
+```
+
+| Pièce | Contrat |
+| --- | --- |
+| Génome | leviers + séquence + cible + mutations. Comparaison structurelle, pas textuelle. |
+| Fitness | performance + novelty − cost − risk |
+| Mutations | REMOVE ADD REVERSE COMBINE SEQUENCE CONDITION AMPLIFY MINIMIZE PERSONALIZE DELAY ACCELERATE |
+| Deux cerveaux | exploitation 70 % / exploration 30 %. Plateau → rupture. |
+| Autorité | `strategy.explore` OBSERVE. `strategy.promote` PREPARE. `strategy.deploy` ACT + CONFIRM. |
+
+Signature : **autonome sur la stratégie, jamais sur l’autorité.**
+
+Pas dans V5 : auto-déploiement, LLM « donne-moi trois idées », vector DB comme coffre.
+
 ## V3 livrée — GhostAction (éditeur + business)
 
 ```
@@ -96,6 +124,7 @@ API V3 :
 | `GET` | `/n/{slug}/ghost/context` | Staff admin. Pack de vérité |
 | `POST` | `/n/{slug}/ghost/skills` | Staff admin. Valide un candidat |
 | `GET`/`POST` | `/n/{slug}/ghost/gym` | Staff admin. Salle d’épreuve |
+| `GET`/`POST` | `/n/{slug}/ghost/lab` | Staff admin. Laboratoire de stratégies. Deploy = preview |
 | `GET` | `/n/{slug}/ghost/maturity` | Public. Jauges, autonomie = 54 |
 | `GET`/`POST` | `/n/{slug}/ghost` | Public. Chat. N’écrit pas la fiche |
 

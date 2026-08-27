@@ -30,7 +30,7 @@ Quatre classes. Une flèche = une dépendance. **Pas de cycle.**
 
 `Acl` n’écrit plus `node_staff`. Le owner naît à la **création** du lieu (`CreateController`) ou par un owner (`WorldEditorController::staff`).
 
-GhostActionContract, GhostProvenance, GhostVerifier vivent **dans** Ghost. Pas un cinquième god object. Engine ne les connaît pas.
+GhostActionContract, GhostProvenance, GhostVerifier, GhostStrategy vivent **dans** Ghost. Pas un cinquième god object. Engine ne les connaît pas.
 
 ```
 INTENT → PLAN → CONTRACT → AUTHORIZE → PREVIEW → APPLY → OBSERVE → VERIFY → STATE'

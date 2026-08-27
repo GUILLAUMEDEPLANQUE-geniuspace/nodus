@@ -212,6 +212,40 @@ class Ghost
             return $blocked;
         }
 
+        if (GhostStrategy::looksLike($message)) {
+            $board = GhostStrategy::lab($message, (string) $node->id, false);
+            $action = GhostActionContract::authorize(
+                GhostStrategy::promote($board['best'] ?? []),
+                GhostManifest::of($node)
+            );
+            $best = $board['best'] ?? [];
+            $gain = number_format((float) (($best['observed_gain'] ?? 0) * 100), 1, ',', ' ');
+            $nov = number_format((float) (($best['novelty'] ?? 0) * 100), 0, ',', ' ');
+            $out = [
+                'reply' => 'Objectif lu. '.$board['explored'].' stratégies explorées, '.$board['experiments'].' expériences, '.$board['rejected'].' rejetées. Meilleure : '.($best['code'] ?? '—').' (gain observé '.$gain.' %, nouveauté '.$nov.' %). Rien n’est déployé — confirmation humaine.',
+                'citations' => [['label' => 'Laboratoire', 'url' => '/n/'.$node->slug.'/ghost/lab']],
+                'tools' => ['strategy.explore', 'strategy.simulate'],
+                'actions' => [
+                    ['label' => 'Ouvrir le laboratoire', 'href' => '/n/'.$node->slug.'/ghost/lab'],
+                    ['label' => 'Préparer le déploiement', 'href' => '/n/'.$node->slug.'/ghost/lab'],
+                ],
+                'profile' => self::profile($node),
+                'mode' => 'grounded',
+                'goal' => 'discover_strategy',
+                'skill' => 'discover_strategy',
+                'plan' => [['tool' => 'strategy.explore'], ['tool' => 'strategy.simulate']],
+                'verify' => ['valid' => true, 'status' => 'known'],
+                'memory' => GhostMemory::publicFacts($node),
+                'permission' => GhostSkills::PREPARE,
+                'maturity' => GhostMaturity::of($node),
+                'lab' => $board,
+                'action' => $action,
+            ];
+            GhostLearn::afterTurn($node, $message, ['skill' => 'discover_strategy'], ['tools' => $out['tools']], ['valid' => true], 'grounded');
+
+            return $out;
+        }
+
         $editorCtx = $opts['editor_context'] ?? [];
         if (GhostBiz::route($message) || GhostEdit::looksLike($message)) {
             $action = GhostBiz::route($message)

@@ -78,6 +78,7 @@ class InvariantTest extends TestCase
             'field' => 'Épisode', 'value' => '13',
         ])->assertStatus(403);
         $this->post('/n/lumen/ghost/gym')->assertStatus(403);
+        $this->post('/n/lumen/ghost/lab', ['objective' => 'x'])->assertStatus(403);
         $this->post('/n/lumen/t/x/reply', ['body' => 'hello'])->assertStatus(403);
         $this->post('/n/lumen/t/x/fire')->assertStatus(403);
     }
@@ -90,6 +91,7 @@ class InvariantTest extends TestCase
             '/builder/lumen',
             '/builder/lumen/state',
             '/n/lumen/ghost/gym',
+            '/n/lumen/ghost/lab',
             '/n/lumen/ghost/editor',
             '/n/lumen/radar',
         ] as $url) {

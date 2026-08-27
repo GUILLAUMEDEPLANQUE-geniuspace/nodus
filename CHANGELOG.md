@@ -2,6 +2,14 @@
 
 Format : ce qui est **dans le code**, pas la vision PDF.
 
+## 2026-08-27 — Strategy Lab
+
+- **GhostStrategy.** Leviers × mutations × recombinaison. Pas trois paraphrases.
+- **Fitness.** performance + novelty − cost − risk. Plateau → exploration.
+- **Challenger.** ATTACK-n, puis durcissement. Mémoire tenues / ratées / dangereuses.
+- **Autorité.** Explorer = lire. Promouvoir = préparer. Déployer = ACT + confirmation.
+- **Lab.** Staff. Rien n’est écrit dans le monde sans humain.
+
 ## 2026-08-27 — Coffre : seeder, profil, unlock, drop
 
 - **Seeder.** Accolade en trop dans `DatabaseSeeder` : `php artisan db:seed` reparsait.

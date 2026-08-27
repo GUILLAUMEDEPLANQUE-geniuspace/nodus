@@ -14,7 +14,7 @@ class KernelBoundaryTest extends TestCase
     public function test_engine_does_not_call_actors(): void
     {
         $src = file_get_contents(app_path('Support/Engine.php'));
-        foreach (['Grantor', 'Ghost::', 'Chrome::', 'GhostAction::', 'GhostEdit::', 'GhostBiz::'] as $ban) {
+        foreach (['Grantor', 'Ghost::', 'Chrome::', 'GhostAction::', 'GhostEdit::', 'GhostBiz::', 'GhostStrategy'] as $ban) {
             $this->assertStringNotContainsString($ban, $src, $ban);
         }
     }
@@ -79,5 +79,15 @@ class KernelBoundaryTest extends TestCase
         $this->assertStringNotContainsString('GhostProvenance', $engine);
         $chrome = file_get_contents(app_path('Support/Chrome.php'));
         $this->assertStringNotContainsString('GhostActionContract', $chrome);
+    }
+
+    public function test_strategy_does_not_write_grants(): void
+    {
+        $src = file_get_contents(app_path('Support/GhostStrategy.php'));
+        foreach (['Grantor::', "DB::table('cck_fields')", "DB::table('grants')->insert"] as $ban) {
+            $this->assertStringNotContainsString($ban, $src, $ban);
+        }
+        $engine = file_get_contents(app_path('Support/Engine.php'));
+        $this->assertStringNotContainsString('GhostStrategy', $engine);
     }
 }

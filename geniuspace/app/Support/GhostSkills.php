@@ -3,8 +3,9 @@
 namespace App\Support;
 
 /**
- * Catalogue de compétences. Ghost n'improvise pas une stratégie :
- * il choisit une skill versionnée, avec outils et plafond d'autorisation.
+ * Catalogue de compétences. Ghost n’improvise pas une action :
+ * il choisit une skill versionnée, avec outils et plafond d’autorisation.
+ * Les stratégies, elles, s’inventent dans GhostStrategy — pas ici.
  *
  * OBSERVE  — lire le monde
  * SUGGEST  — proposer
@@ -144,6 +145,17 @@ class GhostSkills
                 'required_tools' => ['orders.filter'],
                 'procedure' => [
                     ['tool' => 'orders.filter', 'level' => self::OBSERVE],
+                ],
+            ],
+            'discover_strategy' => [
+                'name' => 'discover_strategy',
+                'description' => 'Inventer, muter, simuler. Déployer = ACT, confirmation humaine.',
+                'level' => self::PREPARE,
+                'required_tools' => ['strategy.explore', 'strategy.simulate'],
+                'procedure' => [
+                    ['tool' => 'strategy.explore', 'level' => self::OBSERVE],
+                    ['tool' => 'strategy.simulate', 'level' => self::OBSERVE],
+                    ['tool' => 'strategy.promote', 'level' => self::PREPARE],
                 ],
             ],
         ];

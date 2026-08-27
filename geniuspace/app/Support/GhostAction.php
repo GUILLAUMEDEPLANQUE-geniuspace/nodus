@@ -61,6 +61,11 @@ class GhostAction
         'read_editor' => ['level' => self::OBSERVE, 'autonomy' => self::AUTO],
         'customers.segment' => ['level' => self::OBSERVE, 'autonomy' => self::AUTO],
         'orders.filter' => ['level' => self::OBSERVE, 'autonomy' => self::AUTO],
+        'strategy.explore' => ['level' => self::OBSERVE, 'autonomy' => self::AUTO],
+        'strategy.mutate' => ['level' => self::PREPARE, 'autonomy' => self::AUTO],
+        'strategy.simulate' => ['level' => self::OBSERVE, 'autonomy' => self::AUTO],
+        'strategy.promote' => ['level' => self::PREPARE, 'autonomy' => self::AUTO],
+        'strategy.deploy' => ['level' => self::ACT, 'autonomy' => self::CONFIRM],
     ];
 
     /**
