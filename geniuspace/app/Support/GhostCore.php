@@ -30,6 +30,7 @@ class GhostCore
     {
         $world = GhostWorldObserver::of((string) $node->id);
         $ctx = Ghost::context($node);
+        GhostCortex::ingestWorld($node);
         $sit = GhostSituation::parse($message, $ctx);
         if (isset($opts['situation']) && is_array($opts['situation'])) {
             $sit = GhostSituation::ingest($opts['situation'], $sit);
@@ -110,6 +111,12 @@ class GhostCore
         $out['rules_learned'] = $rules;
         $out['tempo'] = self::tempo();
         $out['loop'] = implode('.', self::LOOP);
+        $out['growth'] = GhostGrowth::after($node, [
+            'expected' => $reflection['expected'] ?? null,
+            'actual' => $reflection['actual'] ?? null,
+            'trial' => $trial,
+            'reflection' => $reflection,
+        ]);
         if (! str_contains((string) $out['reply'], 'fiabilité') && in_array($sit['goal'] ?? '', ['discover_strategy', 'recover_failed_campaign'], true)) {
             $out['reply'] = rtrim((string) $out['reply']).' '.$advise;
         }
@@ -159,10 +166,24 @@ class GhostCore
         $grounded = Ghost::groundedReply($node, $message, $intent, $ctx, $exec['primary'] ?? null);
         $grounded = Ghost::withPick($grounded, $exec['pick'] ?? null, $working, $plan);
         $mode = 'grounded';
-        $llm = Ghost::maybeLlm($node, $message, $history, $ctx, $grounded);
-        if ($llm !== null) {
-            $grounded['reply'] = $llm;
-            $mode = 'llm+grounded';
+        $tribunal = null;
+        if (GhostTribunal::looksFactual($message)) {
+            $tribunal = GhostTribunal::answer($node, $message);
+            if (! $tribunal['ok']) {
+                $grounded['reply'] = $tribunal['refusal'];
+                $grounded['citations'] = $tribunal['evidence'];
+                $mode = 'tribunal-refuse';
+            } else {
+                $grounded['reply'] = $tribunal['answer'];
+                $grounded['citations'] = $tribunal['evidence'];
+                $mode = 'tribunal';
+            }
+        } else {
+            $llm = Ghost::maybeLlm($node, $message, $history, $ctx, $grounded);
+            if ($llm !== null) {
+                $grounded['reply'] = $llm;
+                $mode = 'llm+grounded';
+            }
         }
         $check = GhostVerifier::check($grounded['reply'], $exec, $ctx);
         if (! $check['valid']) {
@@ -195,6 +216,7 @@ class GhostCore
             'memory' => GhostMemory::publicFacts($node),
             'permission' => $exec['ceiling'] ?? GhostSkills::OBSERVE,
             'maturity' => GhostMaturity::of($node),
+            'tribunal' => $tribunal,
         ];
     }
 

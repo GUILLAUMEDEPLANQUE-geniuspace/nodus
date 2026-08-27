@@ -30,13 +30,13 @@ Quatre classes. Une flèche = une dépendance. **Pas de cycle.**
 
 `Acl` n’écrit plus `node_staff`. Le owner naît à la **création** du lieu (`CreateController`) ou par un owner (`WorldEditorController::staff`).
 
-GhostActionContract, GhostProvenance, GhostVerifier, GhostStrategy, GhostHypothesis, GhostExperiment, GhostWorldObserver, GhostCore, GhostSituation, GhostCritic, GhostSimulator, GhostReflector, GhostBelief, GhostSelfModel, GhostWorkingMemory vivent **dans** Ghost. Pas un cinquième god object. Engine ne les connaît pas.
+GhostActionContract, GhostProvenance, GhostVerifier, GhostStrategy, GhostHypothesis, GhostExperiment, GhostWorldObserver, GhostCore, GhostSituation, GhostCritic, GhostSimulator, GhostReflector, GhostBelief, GhostSelfModel, GhostWorkingMemory, GhostCortex, GhostSynapse, GhostDecay, GhostDream, GhostTribunal, GhostConsistency, GhostChunk, GhostGrowth vivent **dans** Ghost. Pas un cinquième god object. Engine ne les connaît pas. Cortex lit Engine (vérité) et les chunks (preuves). Il ne mélange pas la croyance.
 
 ```
 INTENT → PLAN → CONTRACT → AUTHORIZE → PREVIEW → APPLY → OBSERVE → VERIFY → STATE'
 ```
 
-Les pages de sculpture (`/studio`, `/monde`, `/builder`, `/ghost/editor`, `/ghost/plan`, `/ghost/gym`) exigent un rôle. Le chat public (`POST /n/{slug}/ghost`) ne sculpte pas.
+Les pages de sculpture (`/studio`, `/monde`, `/builder`, `/ghost/editor`, `/ghost/plan`, `/ghost/gym`, `/ghost/lab`, `/ghost/cerveau`) exigent un rôle. Le chat public (`POST /n/{slug}/ghost`) ne sculpte pas. Une question factuelle passe par le tribunal : preuve ou refus. La consolidation (rêve) n’écrit pas le monde.
 
 
 Test : `tests/Unit/KernelBoundaryTest.php` lit le source. Un `Grantor` dans `Engine.php` fait échouer la suite.

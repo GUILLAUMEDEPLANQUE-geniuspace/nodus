@@ -14,7 +14,7 @@ class KernelBoundaryTest extends TestCase
     public function test_engine_does_not_call_actors(): void
     {
         $src = file_get_contents(app_path('Support/Engine.php'));
-        foreach (['Grantor', 'Ghost::', 'Chrome::', 'GhostAction::', 'GhostEdit::', 'GhostBiz::', 'GhostStrategy', 'GhostHypothesis', 'GhostExperiment', 'GhostWorldObserver', 'GhostCore', 'GhostSituation', 'GhostCritic', 'GhostSimulator', 'GhostReflector', 'GhostBelief', 'GhostSelfModel', 'GhostWorkingMemory'] as $ban) {
+        foreach (['Grantor', 'Ghost::', 'Chrome::', 'GhostAction::', 'GhostEdit::', 'GhostBiz::', 'GhostStrategy', 'GhostHypothesis', 'GhostExperiment', 'GhostWorldObserver', 'GhostCore', 'GhostSituation', 'GhostCritic', 'GhostSimulator', 'GhostReflector', 'GhostBelief', 'GhostSelfModel', 'GhostWorkingMemory', 'GhostCortex', 'GhostSynapse', 'GhostDecay', 'GhostDream', 'GhostTribunal', 'GhostConsistency', 'GhostChunk', 'GhostGrowth'] as $ban) {
             $this->assertStringNotContainsString($ban, $src, $ban);
         }
     }
@@ -89,5 +89,26 @@ class KernelBoundaryTest extends TestCase
         }
         $engine = file_get_contents(app_path('Support/Engine.php'));
         $this->assertStringNotContainsString('GhostStrategy', $engine);
+    }
+
+    public function test_cortex_family_does_not_write_grants_or_act(): void
+    {
+        $engine = file_get_contents(app_path('Support/Engine.php'));
+        foreach (['GhostCortex', 'GhostSynapse', 'GhostDecay', 'GhostDream', 'GhostTribunal', 'GhostConsistency', 'GhostChunk', 'GhostGrowth'] as $cls) {
+            $this->assertStringNotContainsString($cls, $engine, $cls);
+            $src = file_get_contents(app_path('Support/'.$cls.'.php'));
+            foreach (['Grantor::give', 'Grantor::unlock', "DB::table('cck_fields')", "DB::table('grants')->insert"] as $ban) {
+                $this->assertStringNotContainsString($ban, $src, $cls.' '.$ban);
+            }
+        }
+        $dream = file_get_contents(app_path('Support/GhostDream.php'));
+        $this->assertStringNotContainsString("'applied' => true", $dream);
+        $this->assertStringContainsString("'applied' => false", $dream);
+        $growth = file_get_contents(app_path('Support/GhostGrowth.php'));
+        $this->assertStringContainsString('Pas d’observation du monde', $growth);
+        $tri = file_get_contents(app_path('Support/GhostTribunal.php'));
+        $this->assertStringContainsString('GhostCortex::WORLD', $tri);
+        $this->assertStringContainsString('GhostCortex::EVIDENCE', $tri);
+        $this->assertStringContainsString('BELIEF', $tri);
     }
 }

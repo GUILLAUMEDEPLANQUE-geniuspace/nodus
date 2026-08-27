@@ -8,7 +8,11 @@ use App\Support\Ghost;
 use App\Support\GhostAction;
 use App\Support\GhostActionContract;
 use App\Support\GhostBiz;
+use App\Support\GhostChunk;
+use App\Support\GhostConsistency;
 use App\Support\GhostCore;
+use App\Support\GhostCortex;
+use App\Support\GhostDream;
 use App\Support\GhostEdit;
 use App\Support\GhostGym;
 use App\Support\GhostLearn;
@@ -16,6 +20,8 @@ use App\Support\GhostManifest;
 use App\Support\GhostMaturity;
 use App\Support\GhostSelfModel;
 use App\Support\GhostStrategy;
+use App\Support\GhostSynapse;
+use App\Support\GhostTribunal;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -215,5 +221,63 @@ class GhostController extends Controller
         abort_unless(($action['status'] ?? '') === 'preview', 422, 'Le déploiement reste une preview.');
 
         return response()->json(['action' => $action, 'applied' => false]);
+    }
+
+    public function brain(string $slug): View
+    {
+        $node = GpNode::query()->where('slug', $slug)->firstOrFail();
+        Acl::guard($node->id, 'admin');
+        GhostCortex::ingestWorld($node);
+
+        return view('ghost-brain', [
+            'node' => $node,
+            'synapses' => GhostSynapse::snapshot((string) $node->id),
+            'journal' => GhostDream::journal($node),
+            'cycle' => null,
+            'ask' => null,
+        ]);
+    }
+
+    public function brainRun(string $slug): View
+    {
+        $node = GpNode::query()->where('slug', $slug)->firstOrFail();
+        Acl::guard($node->id, 'admin');
+        $cycle = GhostDream::cycle($node);
+
+        return view('ghost-brain', [
+            'node' => $node,
+            'synapses' => GhostSynapse::snapshot((string) $node->id),
+            'journal' => GhostDream::journal($node),
+            'cycle' => $cycle,
+            'ask' => null,
+        ]);
+    }
+
+    public function brainAsk(Request $request, string $slug): View
+    {
+        $node = GpNode::query()->where('slug', $slug)->firstOrFail();
+        Acl::guard($node->id, 'admin');
+        $q = $request->validate(['q' => 'required|string|max:400'])['q'];
+        $tri = GhostTribunal::answer($node, $q);
+        $cons = GhostConsistency::check($node, $q);
+
+        return view('ghost-brain', [
+            'node' => $node,
+            'synapses' => GhostSynapse::snapshot((string) $node->id),
+            'journal' => GhostDream::journal($node),
+            'cycle' => null,
+            'ask' => ['q' => $q, 'tribunal' => $tri, 'consistency' => $cons],
+        ]);
+    }
+
+    public function brainIngest(Request $request, string $slug): JsonResponse
+    {
+        $node = GpNode::query()->where('slug', $slug)->firstOrFail();
+        Acl::guard($node->id, 'admin');
+        $text = $request->validate(['text' => 'required|string|max:8000'])['text'];
+        $chunks = GhostChunk::ingest($node, $text, 'note-'.now()->timestamp, 'note');
+        $cons = GhostConsistency::check($node, $text);
+
+        return response()->json(['chunks' => count($chunks), 'consistency' => $cons, 'applied' => false]);
     }
 }

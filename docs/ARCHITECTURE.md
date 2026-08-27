@@ -83,4 +83,4 @@ Il n’y a plus d’app TanStack / React dans ce dépôt.
 
 ## Auth
 
-Lectures publiques (SEO). Écritures (forum, Drive, studio, magazine, builder, create, lore) : utilisateur connecté **et** `node_staff` pour sculpter. GET `/studio`, `/monde`, `/builder`, `/ghost/gym`, `/ghost/editor`, `/ghost/plan` : staff. `Acl` n’auto-promouvoit plus. `/login/demo` : local seulement. Créer un lieu pose le compte comme owner.
+Lectures publiques (SEO). Écritures (forum, Drive, studio, magazine, builder, create, lore) : utilisateur connecté **et** `node_staff` pour sculpter. GET `/studio`, `/monde`, `/builder`, `/ghost/gym`, `/ghost/lab`, `/ghost/cerveau`, `/ghost/editor`, `/ghost/plan` : staff. `Acl` n’auto-promouvoit plus. `/login/demo` : local seulement. Créer un lieu pose le compte comme owner.

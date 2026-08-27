@@ -3,8 +3,43 @@
 > Ghost **ne possède pas la vérité.** Il observe, raisonne et agit sur un monde vérifiable.
 > Le LLM (optionnel) comprend, planifie, explique. Le graphe Nodus décide de ce qui est vrai.
 > **Le LLM propose. Le moteur Nodus décide et exécute.**
+> **Autonome sur la stratégie, jamais sur l’autorité.**
 
 Nodus maintient un monde structuré et vérifiable. Ghost est une couche cognitive capable de **proposer des transitions** de ce monde, contraintes par un moteur déterministe d’autorité, de capacités et de vérification.
+
+## V8 — Mémoire, preuves, consolidation
+
+Nodus reste le noyau d’exécution. V8 absorbe les **algorithmes** d’un cerveau personnel (index, liens, oubli, refus sans preuve) sans absorber IndexedDB, un LLM local, ni un vector DB.
+
+```
+WORLD (Engine) ──► CORTEX (BM25 + hashing-trick)
+                      │
+         chunks (preuves)   beliefs (visiteur)   ← couches séparées
+                      │
+                 TRIBUNAL
+            preuve  /  refus
+                      │
+                 SYNAPSE  w' = w + α(1−w)
+                      │
+                  DECAY   w × 2^(−Δt/hl)
+                      │
+                  DREAM   prune → liaisons distantes → candidats
+                      │
+                 GROWTH   prediction error. Sans observation : rien.
+```
+
+| Pièce | Fichier | Contrat |
+| --- | --- | --- |
+| Cortex | `GhostCortex.php` | Hit = `{layer, score}`. `world` ≠ `belief`. |
+| Chunk | `GhostChunk.php` | 600 / 150. ID `sha1` stable. |
+| Synapse | `GhostSynapse.php` | Hebbian. Pas une arête métier. |
+| Decay | `GhostDecay.php` | Demi-vie par relation. SERENDIPITY = 14 j. |
+| Tribunal | `GhostTribunal.php` | Réponse extraite + citations, ou refus. Jamais belief. |
+| Consistency | `GhostConsistency.php` | SUPPORT / CONTRADICTION / NEUTRAL / NEW. Jaccard + négation. Pas un T5. |
+| Dream | `GhostDream.php` | Consolidation. `applied = false`. |
+| Growth | `GhostGrowth.php` | Sans `observed`, pas de mise à jour. |
+
+Pas dans V8 : transformers.js, OCR, PDF, auto-ACT, mélange world/belief, observed simulé.
 
 ## V7 — Boucle cognitive
 
@@ -176,6 +211,7 @@ API V3 :
 | `POST` | `/n/{slug}/ghost/skills` | Staff admin. Valide un candidat |
 | `GET`/`POST` | `/n/{slug}/ghost/gym` | Staff admin. Salle d’épreuve |
 | `GET`/`POST` | `/n/{slug}/ghost/lab` | Staff admin. Laboratoire de stratégies. Deploy = preview |
+| `GET`/`POST` | `/n/{slug}/ghost/cerveau` | Staff admin. Index, preuves, consolidation. `applied = false` |
 | `GET` | `/n/{slug}/ghost/maturity` | Public. Jauges, autonomie = 54 |
 | `GET`/`POST` | `/n/{slug}/ghost` | Public. Chat. N’écrit pas la fiche |
 

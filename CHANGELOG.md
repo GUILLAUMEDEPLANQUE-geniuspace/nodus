@@ -2,6 +2,18 @@
 
 Format : ce qui est **dans le code**, pas la vision PDF.
 
+## 2026-08-27 — Cerveau V8 (index, liens, oubli, refus)
+
+- **GhostCortex.** BM25 + vecteur hashing-trick. Chaque hit a une couche `world` / `evidence` / `belief`.
+- **GhostTribunal.** Réponse extraite avec citations, ou refus. La croyance n’est pas une preuve.
+- **GhostSynapse.** Hebbian `w' = w + α(1−w)`.
+- **GhostDecay.** Demi-vie. SERENDIPITY 14 j. Seuil 0.03.
+- **GhostChunk.** 600 / 150, ID stable. Pas d’OCR.
+- **GhostConsistency.** SUPPORT / CONTRADICTION / NEUTRAL / NEW. Jaccard + négation. Pas un LLM.
+- **GhostDream.** Consolidation hors interaction. `applied = false`.
+- **GhostGrowth.** Sans observation du monde, rien n’est mis à jour.
+- **Staff.** `/n/{slug}/ghost/cerveau`. Question factuelle du chat public : tribunal, pas LLM.
+
 ## 2026-08-27 — Boucle cognitive v7
 
 - **GhostCore.** OBSERVE → situation → mémoire → hypothèse → plan → critic → simuler → décider → autoriser → vérifier → réfléchir → apprendre.

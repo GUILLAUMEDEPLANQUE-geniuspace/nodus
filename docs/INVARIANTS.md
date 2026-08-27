@@ -5,7 +5,7 @@ Le moteur ne grandit plus par ajout de mots. Il se durcit. Chaque règle a un te
 | Id | Règle | Où ça casse |
 | --- | --- | --- |
 | I-READ | Lectures publiques. Écritures authentifiées. | Forum, Drive, Studio, Magazine, Create, Image, lore |
-| I-STAFF | Sculpter = `node_staff`. **Pas** d’auto-owner. GET studio / monde / builder / gym / editor = staff. | `Acl::canWrite` |
+| I-STAFF | Sculpter = `node_staff`. **Pas** d’auto-owner. GET studio / monde / builder / gym / lab / cerveau / editor = staff. | `Acl::canWrite` |
 | I-NO-DEMO | `/login/demo` local / tests seulement. | `routes/web.php` |
 | I-GRANT | Média gated : ligne `grants`, sinon 403. Unlock = preuve/achat, pas un POST nu. | `Grantor::mayUnlock` |
 | I-PATH | `/play` refuse `..` | `Invariants::safeRel`, `SignedMedia::fullPath` |
@@ -31,6 +31,6 @@ Pas un seizième concept produit. Elles rendent le contrat in-cassable (`Invaria
 | I-TRUTH | World truth (Engine) ≠ agent belief (visitor). Jamais mélangés. | `GhostMemory::mixed` |
 | I-CONTRACT | Mutation = contrat autorisé. PLAN ≠ APPLY. | `GhostActionContract::authorize` |
 | I-PROVENANCE | STATE' ← produced_by ACTION ← verified_by VERIFICATION | `ghost_transitions` |
-| I-CLAIM | Claim → evidence → PASS/FAIL/UNKNOWN | `GhostVerifier::rule` |
+| I-CLAIM | Claim → evidence → PASS/FAIL/UNKNOWN. Tribunal : world+evidence, jamais belief. | `GhostVerifier::rule`, `GhostTribunal` |
 | I-CAPABILITY | DENY n’apparaît pas dans propose | `GhostManifest::gates` |
 
