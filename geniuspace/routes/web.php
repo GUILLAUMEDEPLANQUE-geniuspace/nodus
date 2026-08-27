@@ -48,7 +48,8 @@ Route::get('/login/demo', function () {
     Auth::login($u);
     return redirect('/')->with('ok', 'Connecté en créateur.');
 });
-Route::get('/profil/{id?}', [ProfileController::class, 'show']);
+Route::get('/profil', [ProfileController::class, 'me']);
+Route::get('/profil/{id}', [ProfileController::class, 'show'])->whereNumber('id');
 Route::post('/profil', [ProfileController::class, 'save']);
 Route::post('/profil/playlist', [ProfileController::class, 'playlist']);
 Route::post('/profil/pl-add', [ProfileController::class, 'addToPlaylist']);
@@ -137,6 +138,7 @@ Route::get('/studio/{slug}/jsonld', [JsonLdController::class, 'studio']);
 Route::get('/n/{slug}/schema.json', [JsonLdController::class, 'document']);
 Route::get('/n/{slug}/{salle}/schema.json', [JsonLdController::class, 'room'])->where('salle', RoomCatalog::keys());
 Route::post('/n/{slug}/blog', [MagazineController::class, 'store']);
+Route::get('/n/{slug}/blog/{aid}', [MagazineController::class, 'show']);
 Route::get('/n/{slug}/blog', [MagazineController::class, 'index']);
 Route::get('/n/{slug}/guide/{wid}', [UniverseController::class, 'guide']);
 Route::get('/n/{slug}/f/{fiche}', [UniverseController::class, 'fiche']);

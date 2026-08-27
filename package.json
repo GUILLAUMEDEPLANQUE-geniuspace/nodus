@@ -1,5 +1,5 @@
 {
   "name": "geniuspace",
   "private": true,
-  "description": "Source of truth: geniuspace/ (Laravel 11 + Blade). This is not a Node/TanStack app."
+  "description": "Source of truth: geniuspace/ (Laravel 13 + Blade). This is not a Node/TanStack app."
 }

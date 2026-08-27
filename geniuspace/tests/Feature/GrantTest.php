@@ -45,10 +45,22 @@ class GrantTest extends TestCase
             ->assertDontSee('graphe');
     }
 
-    public function test_unlock_is_a_server_grant_not_js(): void
+    public function test_unlock_without_proof_or_purchase_is_forbidden(): void
     {
         $media = Media::query()->where('node_id', 'vera')->first();
         $this->assertNotNull($media);
+        $this->assertFalse(Grantor::canSeeMedia($media));
+        $this->postGrant('/n/vera/v/'.$media->id.'/unlock')->assertForbidden();
+        $this->assertFalse(Grantor::canSeeMedia($media));
+        $this->assertFalse(Grantor::has('proof', 'vera'));
+    }
+
+    public function test_unlock_after_verified_proof_is_a_server_grant(): void
+    {
+        $media = Media::query()->where('node_id', 'vera')->first();
+        $this->assertNotNull($media);
+        $this->get('/');
+        Grantor::recordVerifiedProof('vera', 'Épreuve consignation', 'quest');
         $this->assertFalse(Grantor::canSeeMedia($media));
 
         $res = $this->postGrant('/n/vera/v/'.$media->id.'/unlock');
@@ -56,6 +68,16 @@ class GrantTest extends TestCase
         $this->assertTrue(Grantor::canSeeMedia($media));
         $this->assertStringContainsString('/play?', $res->json('src'));
         $this->assertStringContainsString('preuve', json_encode($res->json()));
+    }
+
+    public function test_shop_unlock_requires_purchase(): void
+    {
+        $media = Media::query()->where('node_id', 'lumen')->first();
+        $this->postGrant('/n/lumen/v/'.$media->id.'/unlock')->assertForbidden();
+        $pid = (string) \App\Models\Product::query()->where('node_id', 'lumen')->value('id');
+        Grantor::grantProduct($pid, 'lumen', 'Cristal');
+        $this->postGrant('/n/lumen/v/'.$media->id.'/unlock')->assertOk()->assertJsonPath('granted', true);
+        $this->assertTrue(Grantor::canSeeMedia($media));
     }
 
     public function test_full_signed_url_requires_grant(): void
@@ -71,6 +93,9 @@ class GrantTest extends TestCase
             ->assertOk()
             ->assertSee('/media/teaser.mp4', false);
 
+        $this->postGrant('/n/lumen/v/'.$media->id.'/unlock')->assertForbidden();
+        $pid = (string) \App\Models\Product::query()->where('node_id', 'lumen')->value('id');
+        Grantor::grantProduct($pid, 'lumen', 'Cristal');
         $this->postGrant('/n/lumen/v/'.$media->id.'/unlock')->assertOk();
         $this->get($full)->assertOk();
     }
@@ -82,8 +107,14 @@ class GrantTest extends TestCase
         $this->assertNotNull($brief);
         $this->assertFalse(Grantor::canSeeFile($brief));
 
-        $this->postGrant('/n/vera/v/'.$media->id.'/unlock')->assertOk();
+        $this->postGrant('/n/vera/v/'.$media->id.'/unlock')->assertForbidden();
+        $this->assertFalse(Grantor::canSeeFile($brief));
+
+        $this->get('/');
+        Grantor::recordVerifiedProof('vera', 'Épreuve consignation', 'quest');
         $this->assertTrue(Grantor::canSeeFile($brief));
+        $this->postGrant('/n/vera/v/'.$media->id.'/unlock')->assertOk();
+        $this->assertTrue(Grantor::canSeeMedia($media));
 
         $this->get('/n/vera/carnet')
             ->assertOk()
@@ -94,6 +125,10 @@ class GrantTest extends TestCase
     public function test_drop_puts_relic_in_carnet(): void
     {
         $media = Media::query()->where('node_id', 'lumen')->first();
+        $this->postGrant('/n/lumen/v/'.$media->id.'/drop', ['at' => 4])->assertForbidden();
+        $pid = (string) \App\Models\Product::query()->where('node_id', 'lumen')->value('id');
+        Grantor::grantProduct($pid, 'lumen', 'Cristal');
+        $this->postGrant('/n/lumen/v/'.$media->id.'/unlock')->assertOk();
         $this->postGrant('/n/lumen/v/'.$media->id.'/drop', ['at' => 4])
             ->assertOk()
             ->assertJsonPath('label', 'Éclat de cristal');
@@ -101,6 +136,30 @@ class GrantTest extends TestCase
             ->assertOk()
             ->assertSee('Éclat de cristal', false)
             ->assertDontSee('CCK');
+    }
+
+    public function test_drop_without_door_is_forbidden(): void
+    {
+        $media = Media::query()->where('node_id', 'lumen')->first();
+        $pid = (string) \App\Models\Product::query()->where('node_id', 'lumen')->value('id');
+        Grantor::grantProduct($pid, 'lumen', 'Cristal');
+        $this->postGrant('/n/lumen/v/'.$media->id.'/unlock')->assertOk();
+        $this->postGrant('/n/lumen/v/'.$media->id.'/drop', ['at' => 999])->assertForbidden();
+        $this->assertFalse(Grantor::has('relic', 'drop-'.$media->id.'-999'));
+    }
+
+    public function test_omni_is_a_claim_not_a_verified_proof(): void
+    {
+        $media = Media::query()->where('node_id', 'lumen')->first();
+        $this->postGrant('/n/lumen/v/'.$media->id.'/omni', ['kind' => 'labo', 'label' => 'Cadre tenu'])->assertForbidden();
+        $pid = (string) \App\Models\Product::query()->where('node_id', 'lumen')->value('id');
+        Grantor::grantProduct($pid, 'lumen', 'Cristal');
+        $this->postGrant('/n/lumen/v/'.$media->id.'/unlock')->assertOk();
+        $this->postGrant('/n/lumen/v/'.$media->id.'/omni', ['kind' => 'labo', 'label' => 'Cadre tenu'])
+            ->assertOk()
+            ->assertJsonPath('status', 'claim');
+        $this->assertTrue(Grantor::has('claim', 'omni-'.$media->id.'-labo'));
+        $this->assertFalse(Grantor::has('proof', 'omni-'.$media->id.'-labo'));
     }
 
     public function test_embed_is_a_place_not_a_player(): void

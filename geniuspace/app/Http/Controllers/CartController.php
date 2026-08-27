@@ -103,7 +103,8 @@ class CartController extends Controller
     private function settle(Request $request, array $cart): RedirectResponse
     {
         $buyer = Auth::id();
-        foreach ($cart as $row) {
+        DB::transaction(function () use ($request, $cart, $buyer) {
+            foreach ($cart as $row) {
             $pid = $row['product_id'] ?? null;
             if (! $pid) {
                 continue;
@@ -157,6 +158,7 @@ class CartController extends Controller
                 ]);
             }
         }
+        });
         $request->session()->forget(['cart', 'koc', 'koc_product', 'pay_cart', 'pay_sid']);
 
         return redirect('/panier')->with('ok', 'Payé au prix tenu. Les fichiers mérités s’ouvrent.');

@@ -19,34 +19,19 @@ class GrantController extends Controller
     public function unlock(Request $request, string $slug, string $vid): JsonResponse
     {
         $media = $this->media($slug, $vid);
-        $payload = Grantor::unlockMedia($media, Grantor::reasonFor($media));
+        abort_unless(Grantor::mayUnlock($media), 403, 'Preuve ou achat requis.');
+        $reason = Grantor::isShop($media) ? 'purchase' : Grantor::reasonFor($media);
 
-        return response()->json($payload);
+        return response()->json(Grantor::unlockMedia($media, $reason));
     }
 
     public function drop(Request $request, string $slug, string $vid): JsonResponse
     {
         $media = $this->media($slug, $vid);
-        if (Grantor::isGated($media) && ! Grantor::canSeeMedia($media)) {
-            Grantor::unlockMedia($media, Grantor::reasonFor($media));
-        }
+        abort_unless(Grantor::canSeeMedia($media), 403, 'Il faut ouvrir la vidéo avant.');
         $at = (int) $request->input('at', 0);
-        $doors = Grantor::doors($media);
-        $door = null;
-        foreach ($doors as $d) {
-            if (($d['kind'] ?? '') === 'drop' && abs(((int) $d['at']) - $at) <= 3) {
-                $door = (object) $d;
-                break;
-            }
-        }
-        if (! $door) {
-            foreach ($doors as $d) {
-                if (($d['kind'] ?? '') === 'drop') {
-                    $door = (object) $d;
-                    break;
-                }
-            }
-        }
+        $door = Grantor::doorAt($media, $at, 'drop');
+        abort_unless($door, 403, 'Cette relique n’est pas disponible.');
 
         return response()->json(Grantor::drop($media, $door));
     }
@@ -54,18 +39,11 @@ class GrantController extends Controller
     public function omni(Request $request, string $slug, string $vid): JsonResponse
     {
         $media = $this->media($slug, $vid);
+        abort_unless(Grantor::canSeeMedia($media) || ! Grantor::isGated($media), 403, 'Cadre hors vidéo ouverte.');
         $kind = (string) $request->input('kind', 'labo');
         $label = (string) $request->input('label', 'Cadre tenu');
-        Grantor::give('proof', 'omni-'.$media->id.'-'.$kind, 'omni', (string) $media->node_id, $label, [
-            'kind' => $kind,
-            'at' => (int) $request->input('at', 0),
-        ]);
 
-        return response()->json([
-            'ok' => true,
-            'quoi' => $label.' · tenu',
-            'kind' => $kind,
-        ]);
+        return response()->json(Grantor::claimOmni($media, $kind, $label, (int) $request->input('at', 0)));
     }
 
     public function visit(Request $request, string $slug): JsonResponse

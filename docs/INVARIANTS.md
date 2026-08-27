@@ -7,7 +7,7 @@ Le moteur ne grandit plus par ajout de mots. Il se durcit. Chaque règle a un te
 | I-READ | Lectures publiques. Écritures authentifiées. | Forum, Drive, Studio, Magazine, Create, Image, lore |
 | I-STAFF | Sculpter = `node_staff`. **Pas** d’auto-owner. GET studio / monde / builder / gym / editor = staff. | `Acl::canWrite` |
 | I-NO-DEMO | `/login/demo` local / tests seulement. | `routes/web.php` |
-| I-GRANT | Média gated : ligne `grants`, sinon 403. | `Grantor`, `MediaController` |
+| I-GRANT | Média gated : ligne `grants`, sinon 403. Unlock = preuve/achat, pas un POST nu. | `Grantor::mayUnlock` |
 | I-PATH | `/play` refuse `..` | `Invariants::safeRel`, `SignedMedia::fullPath` |
 | I-PREVIEW | `preview=1` ne sert jamais `private/` | `MediaController::play` |
 | I-JARGON | Copy sans CCK / parent_of / GpNode | `Vocab::banned` |

@@ -9,14 +9,16 @@
     <div>
       <h1 class="font-display" style="font-size:2.4rem;margin:0">{{ $user->name }}</h1>
       <p>{{ $user->bio }}</p>
+      @if(!empty($mine))
       <a class="btn-line" href="/studio/image?src={{ urlencode($user->avatar) }}&target=avatar">Éditer avatar</a>
       <a class="btn-line" href="/studio/image?src={{ urlencode($user->banner) }}&target=banner">Éditer bannière</a>
+      @endif
     </div>
   </div>
 </section>
 <main class="wrap" style="padding:1.5rem 1.25rem 5rem">
   @auth
-    @if(auth()->id()===$user->id)
+    @if(!empty($mine))
       <form method="post" action="/profil">
         @csrf
         <input name="name" value="{{ $user->name }}">

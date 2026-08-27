@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Playlist;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -12,15 +11,35 @@ use Illuminate\View\View;
 
 class ProfileController extends Controller
 {
-    public function show(?int $id = null): View
+    /** Coffre privé : notifications, DM, inventaire. Jamais /profil/{id}. */
+    public function me(): View|RedirectResponse
     {
-        $user = $id ? User::query()->findOrFail($id) : Auth::user();
-        abort_unless($user, 404);
+        if (! Auth::check()) {
+            return redirect('/login');
+        }
+        $user = Auth::user();
         $playlists = DB::table('playlists')->where('user_id', $user->id)->get();
         $notifs = DB::table('notifications')->where('user_id', $user->id)->orderByDesc('id')->limit(20)->get();
-        $dms = DB::table('dm_messages')->where('to_id', $user->id)->orWhere('from_id', $user->id)->orderByDesc('id')->limit(20)->get();
+        $dms = DB::table('dm_messages')->where(function ($q) use ($user) {
+            $q->where('to_id', $user->id)->orWhere('from_id', $user->id);
+        })->orderByDesc('id')->limit(20)->get();
         $pack = DB::table('inventory')->where('user_id', $user->id)->orderByDesc('id')->get();
-        return view('profile', compact('user', 'playlists', 'notifs', 'dms', 'pack'));
+        $mine = true;
+
+        return view('profile', compact('user', 'playlists', 'notifs', 'dms', 'pack', 'mine'));
+    }
+
+    /** Carte publique. Pas de DM, pas de notifications, pas d’inventaire. */
+    public function show(int $id): View
+    {
+        $user = User::query()->findOrFail($id);
+        $playlists = DB::table('playlists')->where('user_id', $user->id)->get();
+        $notifs = collect();
+        $dms = collect();
+        $pack = collect();
+        $mine = false;
+
+        return view('profile', compact('user', 'playlists', 'notifs', 'dms', 'pack', 'mine'));
     }
 
     public function save(Request $request): RedirectResponse
@@ -28,6 +47,7 @@ class ProfileController extends Controller
         $user = Auth::user();
         abort_unless($user, 401);
         $user->update($request->validate(['name' => 'required|string', 'bio' => 'nullable|string']));
+
         return back()->with('ok', 'Profil enregistré.');
     }
 
@@ -38,6 +58,7 @@ class ProfileController extends Controller
         $title = $request->validate(['title' => 'required|string'])['title'];
         $slug = 'pl-'.substr(md5($title.microtime()), 0, 8);
         DB::table('playlists')->insert(['user_id' => $user->id, 'title' => $title, 'share_slug' => $slug]);
+
         return back()->with('ok', 'Playlist créée — /pl/'.$slug);
     }
 
@@ -54,6 +75,7 @@ class ProfileController extends Controller
             'playlist_id' => $pl->id,
             'media_id' => $data['media_id'],
         ]);
+
         return back()->with('ok', 'Ajouté à la playlist.');
     }
 
@@ -61,6 +83,7 @@ class ProfileController extends Controller
     {
         $pl = DB::table('playlists')->where('share_slug', $share)->firstOrFail();
         $items = DB::table('playlist_items')->where('playlist_id', $pl->id)->get();
+
         return view('playlist', compact('pl', 'items'));
     }
 
@@ -72,6 +95,7 @@ class ProfileController extends Controller
             'to_id' => $request->integer('to_id'),
             'body' => $request->validate(['body' => 'required|string'])['body'],
         ]);
+
         return back()->with('ok', 'Message envoyé.');
     }
 }

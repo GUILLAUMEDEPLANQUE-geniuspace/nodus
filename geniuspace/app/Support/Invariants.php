@@ -36,7 +36,7 @@ final class Invariants
             'I-READ' => 'Lectures publiques. Écritures (studio, drive, forum, magazine, builder) authentifiées.',
             'I-STAFF' => 'Sculpter un lieu exige node_staff. Jamais d’auto-promotion owner.',
             'I-NO-DEMO' => '/login/demo n’existe qu’en local / tests.',
-            'I-GRANT' => 'Média gated : ligne grants, sinon 403. Teaser public distinct.',
+            'I-GRANT' => 'Média gated : ligne grants, sinon 403. Unlock exige preuve ou achat. Teaser public distinct.',
             'I-PATH' => '/play ne sort pas du coffre (pas de ..).',
             'I-PREVIEW' => 'preview=1 ne sert jamais un fichier private/.',
             'I-JARGON' => 'Copy produit sans CCK, parent_of, GpNode, node_tabs.',

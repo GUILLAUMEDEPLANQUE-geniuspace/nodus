@@ -77,6 +77,73 @@ class Grantor
         return $media && ($media->access ?? 'free') !== 'free';
     }
 
+    /**
+     * Preuve ou achat AVANT le grant. Un POST nu n’ouvre rien.
+     */
+    public static function mayUnlock(Media $media): bool
+    {
+        if (! self::isGated($media)) {
+            return true;
+        }
+        if (self::canSeeMedia($media)) {
+            return true;
+        }
+        if (Acl::atLeast($media->node_id, 'mod')) {
+            return true;
+        }
+        if (self::isQuest($media)) {
+            return self::has('proof', $media->node_id);
+        }
+        if (self::isShop($media)) {
+            return self::boughtOnNode($media->node_id);
+        }
+
+        return false;
+    }
+
+    public static function isQuest(Media $media): bool
+    {
+        return in_array($media->mode, ['interview', 'quest'], true)
+            || in_array(self::reasonFor($media), ['quest', 'ats'], true);
+    }
+
+    public static function isShop(Media $media): bool
+    {
+        return $media->mode === 'shop' || ($media->access ?? '') === 'paid';
+    }
+
+    public static function boughtOnNode(string $nodeId): bool
+    {
+        $ids = \App\Models\Product::query()->where('node_id', $nodeId)->pluck('id');
+        foreach ($ids as $id) {
+            if (self::has('product', (string) $id)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /** Épreuve tenue ailleurs (ATS, lore validée). Pas un POST /unlock. */
+    public static function recordVerifiedProof(string $nodeId, string $label, string $reason = 'quest', array $meta = []): void
+    {
+        self::give('proof', $nodeId, $reason, $nodeId, $label, $meta);
+    }
+
+    /**
+     * Porte drop à cet instant. Pas de repli « n’importe quel drop ».
+     */
+    public static function doorAt(Media $media, int $at, string $kind = 'drop'): ?object
+    {
+        foreach (self::doors($media) as $d) {
+            if (($d['kind'] ?? '') === $kind && abs(((int) $d['at']) - $at) <= 3) {
+                return (object) $d;
+            }
+        }
+
+        return null;
+    }
+
     public static function canSeeMedia(?Media $media): bool
     {
         if (! $media) {
@@ -120,8 +187,11 @@ class Grantor
 
     public static function unlockMedia(Media $media, string $reason = 'teaser'): array
     {
+        abort_unless(self::mayUnlock($media), 403, 'Preuve ou achat requis.');
         $reason = $reason ?: self::reasonFor($media);
-        self::give('media', (string) $media->id, $reason, $media->node_id, $media->title, ['mode' => $media->mode]);
+        if (! self::has('media', (string) $media->id)) {
+            self::give('media', (string) $media->id, $reason, $media->node_id, $media->title, ['mode' => $media->mode]);
+        }
 
         $node = GpNode::query()->find($media->node_id);
         $plain = match ($reason) {
@@ -131,12 +201,11 @@ class Grantor
             default => 'Suite ouverte. Le lieu se souvient.',
         };
 
-        if (in_array($reason, ['quest', 'ats', 'teaser'], true) && in_array($media->mode, ['interview', 'quest'], true)) {
-            self::give('proof', $media->node_id, 'quest', $media->node_id, $media->title, ['media_id' => $media->id]);
+        if (self::isQuest($media) && self::has('proof', $media->node_id)) {
             self::unlockFiles($media->node_id, ['quest', 'ats']);
             self::validateFromDoors($media);
         }
-        if ($reason === 'purchase') {
+        if ($reason === 'purchase' || (self::isShop($media) && self::boughtOnNode($media->node_id))) {
             self::unlockFiles($media->node_id, ['purchase']);
         }
 
@@ -155,10 +224,12 @@ class Grantor
 
     public static function drop(Media $media, ?object $door = null): array
     {
+        abort_unless($door, 403, 'Cette relique n’est pas disponible.');
+        abort_unless(self::canSeeMedia($media), 403, 'Il faut ouvrir la vidéo avant.');
         $label = $door->label ?? $door->relic_title ?? ('Relique · '.$media->title);
         $path = $door->relic_path ?? '';
         $nodeId = $media->node_id;
-        $relicId = 'drop-'.$media->id.'-'.(int) ($door->at_sec ?? 0);
+        $relicId = 'drop-'.$media->id.'-'.(int) ($door->at ?? $door->at_sec ?? 0);
         self::give('relic', $relicId, 'drop', $nodeId, $label, [
             'media_id' => $media->id,
             'at' => $door->at_sec ?? 0,
@@ -294,6 +365,7 @@ class Grantor
                 'relic' => 'Relique',
                 'product' => 'Œuvre acquise',
                 'proof' => 'Étape tenue',
+                'claim' => 'Cadre déclaré',
                 'visit' => 'A visité',
                 default => 'Preuve',
             };
@@ -323,6 +395,30 @@ class Grantor
             'version' => '2026.2',
             'issued' => now()->toDateString(),
             'preuves' => self::mine($nodeId),
+        ];
+    }
+
+    /**
+     * Déclaration Omni : un claim, pas une preuve vérifiée.
+     */
+    public static function claimOmni(Media $media, string $kind, string $label, int $at = 0): array
+    {
+        $kind = preg_replace('/[^a-z\-]/', '', mb_strtolower($kind)) ?: 'labo';
+        $allowed = ['labo', 'mixer', 'tactique', 'route', 'cel', 'rush', 'sim'];
+        if (! in_array($kind, $allowed, true)) {
+            $kind = 'labo';
+        }
+        $label = \Illuminate\Support\Str::limit($label !== '' ? $label : 'Cadre tenu', 80);
+        self::give('claim', 'omni-'.$media->id.'-'.$kind, 'omni', (string) $media->node_id, $label, [
+            'kind' => $kind,
+            'at' => $at,
+        ]);
+
+        return [
+            'ok' => true,
+            'status' => 'claim',
+            'quoi' => $label.' · déclaré',
+            'kind' => $kind,
         ];
     }
 

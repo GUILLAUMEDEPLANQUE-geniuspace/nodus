@@ -45,9 +45,17 @@ class MoatController extends Controller
     public function claim(string $slug, int $id): RedirectResponse
     {
         abort_unless(Auth::id(), 401);
-        $b = DB::table('bounties')->where('id', $id)->firstOrFail();
-        abort_unless($b->status === 'open', 403);
-        DB::table('bounties')->where('id', $id)->update(['status' => 'claimed', 'claimer_id' => Auth::id()]);
+        $node = GpNode::query()->where('slug', $slug)->firstOrFail();
+        $n = DB::table('bounties')
+            ->where('id', $id)
+            ->where('node_id', $node->id)
+            ->where('status', 'open')
+            ->update([
+                'status' => 'claimed',
+                'claimer_id' => Auth::id(),
+            ]);
+        abort_unless($n === 1, 403);
+
         return back()->with('ok', 'Quête prise. Écris le guide (≥400 car., mot-clé, structure).');
     }
 

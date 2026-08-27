@@ -1,6 +1,6 @@
 # Architecture Geniuspace
 
-> Une stack : **Laravel 11 + Blade + Alpine**, dans `geniuspace/`.
+> Une stack : **Laravel 13 + Blade + Alpine**, dans `geniuspace/`.
 > Un **univers** = un lieu indexable (club, jobboard, galerie). Les **liens** relient parent → enfant.
 
 ## Moteur secret
@@ -29,7 +29,7 @@ Le player, le Drive et l’éditeur d’images ne sont pas trois outils. Un chap
 
 | Visible | Derrière |
 | --- | --- |
-| « Continuer l’épreuve » | `POST /n/{slug}/v/{id}/unlock` → `grants` |
+| « Continuer l’épreuve » | preuve tenue **ou** achat → `grants`. Un POST `/unlock` nu est 403 |
 | « Kit consignation » à 0:04 | `media_doors` kind `drop` → relique + carnet |
 | Brief locké | `drive_files.lock_kind=quest` + coffre `private/` |
 | Widget carrière | `/embed/{slug}` teaser + délai + CTA |

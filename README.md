@@ -1,6 +1,6 @@
 # Geniuspace
 
-**Une seule stack : Laravel 11 + Blade.** Le dossier [`geniuspace/`](./geniuspace/) est l’application. Le prototype React / TanStack a été retiré.
+**Une seule stack : Laravel 13 + Blade.** Le dossier [`geniuspace/`](./geniuspace/) est l’application. Le prototype React / TanStack a été retiré.
 
 Repo : [GUILLAUMEDEPLANQUE-geniuspace/nodus](https://github.com/GUILLAUMEDEPLANQUE-geniuspace/nodus)
 

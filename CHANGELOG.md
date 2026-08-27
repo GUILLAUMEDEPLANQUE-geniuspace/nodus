@@ -2,6 +2,18 @@
 
 Format : ce qui est **dans le code**, pas la vision PDF.
 
+## 2026-08-27 — Coffre : seeder, profil, unlock, drop
+
+- **Seeder.** Accolade en trop dans `DatabaseSeeder` : `php artisan db:seed` reparsait.
+- **Profil.** `/profil` = coffre privé (auth). `/profil/{id}` = carte publique. DM / notifications / inventaire ne fuient plus.
+- **I-GRANT.** `POST /unlock` n’écrit un grant que si preuve (quest) ou achat (shop). Plus d’unlock magique.
+- **Drop.** Pas de porte à cet instant → 403. Plus de relique fabriquée. Plus d’auto-unlock via drop.
+- **Omni.** Claim déclaré, pas une preuve tenue.
+- **Magazine.** `GET /n/{slug}/blog/{aid}` (plus de 404 après création).
+- **Bounties.** Claim atomique `WHERE status=open`. Forum : thread appartient au lieu.
+- **Paiement.** `settle()` dans une transaction.
+- **Docs.** Laravel 13 (plus 11).
+
 ## 2026-08-27 — Contrat Ghost (transitions vérifiables)
 
 - **GhostActionContract.** INTENT → PLAN → CONTRACT → AUTHORIZE → PREVIEW → APPLY → OBSERVE → VERIFY. Produit : OBSERVE / PREPARE / ACT. Technique : OBSERVE / PROPOSE / AUTHORIZE / EXECUTE / VERIFY.
