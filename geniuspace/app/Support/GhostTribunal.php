@@ -32,7 +32,7 @@ class GhostTribunal
         }
         $answer = implode("\n", $lines);
         $check = GhostVerifier::verifyText($answer, $hits);
-        if ($check['result'] === GhostVerifier::FAIL) {
+        if (in_array($check['result'], [GhostVerifier::FAIL, GhostVerifier::UNKNOWN], true) && ($check['claims'] ?? []) !== []) {
             return self::refuse($question, $hits, "Je refuse d’affirmer un chiffre qui n’est pas dans le coffre.");
         }
         $conf = array_sum(array_column($hits, 'score')) / max(1, count($hits));
@@ -51,8 +51,11 @@ class GhostTribunal
     public static function looksFactual(string $message): bool
     {
         $m = mb_strtolower($message);
+        if (preg_match('/combien|prix|co[uû]te|salaire/u', $m)) {
+            return true;
+        }
 
-        return (bool) preg_match('/combien|prix|co[uû]te|titre|salaire|où|quel|quelle|preuve|coffre|document/u', $m);
+        return (bool) preg_match('/\b(?:quel|quelle)s?\s+est\b.{0,48}(prix|co[uû]t|salaire|titre|nom|preuve)/u', $m);
     }
 
     /**

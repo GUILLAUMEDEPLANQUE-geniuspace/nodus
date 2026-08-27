@@ -47,16 +47,20 @@ class GhostDream
             ];
             GhostSynapse::reinforce((string) $node->id, $p['a'], $p['b'], 'SERENDIPITY', 0.08);
             if (Schema::hasTable('ghost_dreams')) {
-                DB::table('ghost_dreams')->insert([
-                    'node_id' => $node->id,
-                    'code' => $code,
-                    'from_id' => $p['a'],
-                    'to_id' => $p['b'],
-                    'insight' => $insight,
-                    'status' => 'candidate',
-                    'applied' => false,
-                    'created_at' => now(),
-                ]);
+                DB::table('ghost_dreams')->updateOrInsert(
+                    [
+                        'node_id' => $node->id,
+                        'from_id' => $p['a'],
+                        'to_id' => $p['b'],
+                    ],
+                    [
+                        'code' => $code,
+                        'insight' => $insight,
+                        'status' => 'candidate',
+                        'applied' => false,
+                        'created_at' => now(),
+                    ]
+                );
             }
         }
 

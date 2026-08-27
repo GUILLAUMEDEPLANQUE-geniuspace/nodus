@@ -104,13 +104,10 @@ class GhostCortexTest extends TestCase
         $node = GpNode::query()->where('slug', 'lumen')->firstOrFail();
         GhostCortex::ingestWorld($node);
         $sup = GhostConsistency::check($node, 'Le print nocturne 40×60 coûte 180 €, tirage 25.');
-        $this->assertContains($sup['status'], [GhostConsistency::SUPPORT, GhostConsistency::NEUTRAL, GhostConsistency::NEW]);
+        $this->assertContains($sup['status'], [GhostConsistency::SUPPORT, GhostConsistency::NEUTRAL]);
         $neg = GhostConsistency::check($node, 'Le print nocturne ne coûte jamais 180 €.');
-        if ($neg['overlap'] >= 0.25) {
-            $this->assertSame(GhostConsistency::CONTRADICTION, $neg['status']);
-        } else {
-            $this->assertContains($neg['status'], [GhostConsistency::CONTRADICTION, GhostConsistency::NEUTRAL, GhostConsistency::NEW]);
-        }
+        $this->assertSame(GhostConsistency::CONTRADICTION, $neg['status']);
+        $this->assertGreaterThanOrEqual(0.25, $neg['overlap']);
         $this->assertTrue(GhostConsistency::negation('jamais 180'));
         $this->assertFalse(GhostConsistency::negation('print nocturne 180'));
     }
@@ -148,13 +145,14 @@ class GhostCortexTest extends TestCase
     {
         $node = GpNode::query()->where('slug', 'lumen')->firstOrFail();
         $out = Ghost::reply($node, 'Combien coûte le print nocturne ?');
-        $this->assertContains($out['mode'] ?? '', ['tribunal', 'tribunal-refuse', 'verified-block']);
-        if (($out['mode'] ?? '') === 'tribunal') {
-            $this->assertMatchesRegularExpression('/180/', $out['reply']);
-        }
+        $this->assertSame('tribunal', $out['mode']);
+        $this->assertMatchesRegularExpression('/180/', $out['reply']);
         $out2 = Ghost::reply($node, 'Quel est le salaire secret de Guillaume ?');
         $this->assertSame('tribunal-refuse', $out2['mode']);
         $this->assertStringContainsString('preuve', mb_strtolower($out2['reply']));
+        $this->assertFalse(GhostTribunal::looksFactual('quel produit sombre autour de 200'));
+        $this->assertFalse(GhostTribunal::looksFactual('où est le making-of'));
+        $this->assertTrue(GhostTribunal::looksFactual('Combien coûte le print nocturne ?'));
     }
 
     public function test_brain_page_is_staff_only(): void
