@@ -220,6 +220,7 @@ class Ghost
             if (GhostEdit::looksLike($message) && empty($editorCtx) && ! empty($action['ops'])) {
                 $action['preview'][] = 'Rien n’est écrit. Ouvrez le Studio pour Appliquer.';
             }
+            $action = GhostActionContract::authorize($action, GhostManifest::of($node));
             GhostEdit::store($node, $action);
             $out = self::fromAction($node, $action);
             GhostLearn::afterTurn($node, $message, ['skill' => $out['skill']], ['tools' => $out['tools']], ['valid' => true], 'grounded');

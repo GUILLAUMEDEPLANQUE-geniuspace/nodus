@@ -2,7 +2,18 @@
 
 Format : ce qui est **dans le code**, pas la vision PDF.
 
+## 2026-08-27 — Contrat Ghost (transitions vérifiables)
+
+- **GhostActionContract.** INTENT → PLAN → CONTRACT → AUTHORIZE → PREVIEW → APPLY → OBSERVE → VERIFY. Produit : OBSERVE / PREPARE / ACT. Technique : OBSERVE / PROPOSE / AUTHORIZE / EXECUTE / VERIFY.
+- **Deux réalités.** World truth = Engine. Agent belief = visitor. Une hallucination n’entre pas. `GhostMemory::mixed()` reste false.
+- **Provenance.** `ghost_transitions` : STATE' ← produced_by ACTION ← verified_by VERIFICATION. PLAN n’écrit pas de transition.
+- **Claims.** `GhostVerifier::rule` : 180 € + prix 180 → PASS. 999 € → FAIL. Aucune preuve → UNKNOWN.
+- **Manifeste.** READ / PREPARE(=PROPOSE) / ACT / DENY. Ghost ne reçoit pas les ops DENY.
+- **Tests.** `GhostContractTest`, `GhostProvenanceTest`. 15 invariants de sécu inchangés + 5 d’architecture.
+- **Docs.** GHOST V4, KERNEL, INVARIANTS architecture, FOR_AI #43.
+
 ## 2026-08-23 — Invariants (stop concepts)
+
 
 - **ACL.** `Acl::canWrite` n’écrit plus `node_staff`. Pas d’auto-owner. Forum, Drive, Magazine, Image, Create, weave, lore : authentifié. GET studio / monde / builder / gym / editor / plan : staff.
 - **Routes dev.** `/login/demo` et `/llm/tools` : local / tests. Plus de bouton Créateur en prod.

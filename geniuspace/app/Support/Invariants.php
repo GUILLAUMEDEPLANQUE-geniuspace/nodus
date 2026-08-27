@@ -51,6 +51,23 @@ final class Invariants
         ];
     }
 
+    /**
+     * Cinq règles d’architecture. Pas un seizième concept produit :
+     * elles rendent le pipeline INTENT→…→COMMIT in-cassable.
+     *
+     * @return array<string, string>
+     */
+    public static function architecture(): array
+    {
+        return [
+            'I-TRUTH' => 'World truth (Engine) et agent belief (GhostMemory) ne se mélangent pas.',
+            'I-CONTRACT' => 'Toute mutation passe par un contrat autorisé. PLAN ≠ APPLY.',
+            'I-PROVENANCE' => 'Chaque transition appliquée a produced_by + verified_by.',
+            'I-CLAIM' => 'Claim → evidence → PASS/FAIL/UNKNOWN. Pas un haystack aveugle.',
+            'I-CAPABILITY' => 'Ghost ne reçoit pas les opérations DENY du manifeste.',
+        ];
+    }
+
     public static function contained(string $full, string $root): ?string
     {
         if (! is_file($full)) {

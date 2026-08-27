@@ -381,6 +381,8 @@ class GhostEdit
         $action['status'] = 'applied';
         $action['after'] = array_column($next, 'id');
         $action['result'] = 'Appliqué.';
+        $action = GhostActionContract::observe($action, $next);
+        $action = GhostActionContract::verifyTransition($action, $blocks, $next);
 
         return ['blocks' => $next, 'action' => $action];
     }
@@ -589,6 +591,12 @@ class GhostEdit
      */
     public static function commit(GpNode $node, array $action): array
     {
+        $action = GhostActionContract::authorize($action, GhostManifest::of($node));
+        if (($action['status'] ?? '') === 'blocked') {
+            self::store($node, $action);
+
+            return $action;
+        }
         $blocks = self::read($node);
         $snapshot = $blocks;
         if (in_array($action['action'] ?? '', ['campaign.create', 'campaign.launch', 'message.send', 'customers.segment', 'orders.filter'], true)) {
@@ -596,7 +604,10 @@ class GhostEdit
             $action['result'] = $action['action'] === 'campaign.launch' || ($action['action'] ?? '') === 'message.send'
                 ? 'Envoyé (ledger).'
                 : 'Préparé.';
+            $action = GhostActionContract::observe($action, []);
+            $action = GhostActionContract::verifyTransition($action, [], []);
             self::store($node, $action);
+            GhostProvenance::record($node, $action, 'applied');
 
             return $action;
         }
@@ -609,6 +620,7 @@ class GhostEdit
                 'snapshot' => json_encode($snapshot, JSON_UNESCAPED_UNICODE),
             ]);
         }
+        GhostProvenance::record($node, $out['action'], 'applied');
 
         return $out['action'];
     }
@@ -629,7 +641,9 @@ class GhostEdit
         self::writeBlocks($node, $snap);
         $action['status'] = 'undone';
         $action['result'] = 'Annulé.';
+        $action['stage'] = GhostAction::OBSERVE;
         self::store($node, $action);
+        GhostProvenance::record($node, $action, 'undone');
 
         return $action;
     }

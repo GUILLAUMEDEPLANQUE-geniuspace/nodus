@@ -27,7 +27,7 @@
       <template x-for="line in (pending.preview || [])" :key="line">
         <p x-text="line"></p>
       </template>
-      <p class="muted" x-text="(pending.level||'')+' · '+(pending.autonomy==='confirm' ? 'confirmation exigée' : (pending.autonomy||''))"></p>
+      <p class="muted" x-text="(pending.level||'')+' · '+(pending.autonomy==='confirm' ? 'confirmation exigée' : (pending.autonomy||''))+(pending.stage ? ' · '+pending.stage : '')"></p>
       <div class="rel" style="margin-top:.6rem">
         <button class="btn-line" type="button" @click="cancel()">Annuler</button>
         <button class="btn" type="button" @click="apply()">Appliquer</button>

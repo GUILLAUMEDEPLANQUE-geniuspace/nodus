@@ -59,4 +59,25 @@ class KernelBoundaryTest extends TestCase
             $this->assertMatchesRegularExpression('/^I-[A-Z-]+$/', $id);
         }
     }
+
+    public function test_architecture_invariants_are_five(): void
+    {
+        $this->assertCount(5, array_keys(Invariants::architecture()));
+        foreach (array_keys(Invariants::architecture()) as $id) {
+            $this->assertMatchesRegularExpression('/^I-[A-Z-]+$/', $id);
+        }
+    }
+
+    public function test_contract_does_not_write_grants(): void
+    {
+        $src = file_get_contents(app_path('Support/GhostActionContract.php'));
+        foreach (['Grantor::give', 'Grantor::unlock', "DB::table('cck_fields')->insert"] as $ban) {
+            $this->assertStringNotContainsString($ban, $src, $ban);
+        }
+        $engine = file_get_contents(app_path('Support/Engine.php'));
+        $this->assertStringNotContainsString('GhostActionContract', $engine);
+        $this->assertStringNotContainsString('GhostProvenance', $engine);
+        $chrome = file_get_contents(app_path('Support/Chrome.php'));
+        $this->assertStringNotContainsString('GhostActionContract', $chrome);
+    }
 }

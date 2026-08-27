@@ -127,6 +127,7 @@ class GhostController extends Controller
         $action = $biz
             ? \App\Support\GhostBiz::plan($data['message'])
             : \App\Support\GhostEdit::parse($data['message'], \App\Support\GhostEdit::read($node), $ctx);
+        $action = \App\Support\GhostActionContract::authorize($action, \App\Support\GhostManifest::of($node));
         \App\Support\GhostEdit::store($node, $action);
 
         return response()->json([

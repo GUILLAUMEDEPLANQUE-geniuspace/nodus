@@ -25,6 +25,11 @@ class GhostMemory
 
     public const UNKNOWN = 'unknown';
 
+    /** World truth = Engine. Agent belief = visitor facts. Jamais mélangés. */
+    public const WORLD = 'world';
+
+    public const BELIEF = 'belief';
+
     /**
      * @return array{goal:?string, constraints:array, observations:list<array>, hypotheses:list<array>, plan:list<array>}
      */
@@ -99,6 +104,9 @@ class GhostMemory
         string $status
     ): void {
         if ($source === 'hallucination' || $status === self::UNKNOWN) {
+            return;
+        }
+        if ($subject !== 'visitor') {
             return;
         }
         $row = [
@@ -204,6 +212,71 @@ class GhostMemory
         }
 
         return $out;
+    }
+
+    /**
+     * Vérité du monde : Engine seulement. Jamais ghost_facts.
+     *
+     * @return list<array{realm:string, subject:string, predicate:string, object:string, confidence:float, source:string, status:string}>
+     */
+    public static function worldTruth(GpNode $node): array
+    {
+        $out = [];
+        foreach (Engine::fields($node->id) as $key => $f) {
+            $val = Engine::surface($f, 'fiche');
+            if ($val === '') {
+                continue;
+            }
+            $out[] = [
+                'realm' => self::WORLD,
+                'subject' => 'world',
+                'predicate' => (string) $key,
+                'object' => $val,
+                'confidence' => 1.0,
+                'source' => 'engine',
+                'status' => self::KNOWN,
+            ];
+        }
+
+        return $out;
+    }
+
+    /**
+     * Croyance de l’agent : visitor seulement.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public static function agentBelief(GpNode $node): array
+    {
+        $out = [];
+        foreach (self::factsForVisitor($node) as $f) {
+            if (($f['subject'] ?? 'visitor') !== 'visitor') {
+                continue;
+            }
+            $f['realm'] = self::BELIEF;
+            $out[] = $f;
+        }
+
+        return $out;
+    }
+
+    /**
+     * true si les deux réalités fuient l’une dans l’autre.
+     */
+    public static function mixed(GpNode $node): bool
+    {
+        foreach (self::agentBelief($node) as $f) {
+            if (($f['source'] ?? '') === 'engine' || ($f['subject'] ?? '') !== 'visitor') {
+                return true;
+            }
+        }
+        foreach (self::worldTruth($node) as $f) {
+            if (($f['subject'] ?? '') === 'visitor' || ($f['source'] ?? '') !== 'engine') {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public static function fact(GpNode $node, string $predicate): ?string

@@ -4,6 +4,53 @@
 > Le LLM (optionnel) comprend, planifie, explique. Le graphe Nodus décide de ce qui est vrai.
 > **Le LLM propose. Le moteur Nodus décide et exécute.**
 
+Nodus maintient un monde structuré et vérifiable. Ghost est une couche cognitive capable de **proposer des transitions** de ce monde, contraintes par un moteur déterministe d’autorité, de capacités et de vérification.
+
+## V4 — Contrat, provenance, deux réalités
+
+```
+MONDE NODUS (nodes / edges / fields)
+        │
+     CONTEXT
+        │
+   GHOST MEMORY     ← croyance visiteur. Jamais la vérité du monde.
+        │
+    UNDERSTAND
+        │
+      PLAN
+        │
+   GhostActionContract
+     intent · authority · ops · preview
+     allowed / forbidden
+     expected_state · evidence
+        │
+     NODUS ENGINE
+        │
+   DENY / CONFIRM / APPLY
+        │
+     OBSERVE  (état vu ≠ état déclaré)
+        │
+      VERIFY  Claim → Evidence → PASS / FAIL / UNKNOWN
+        │
+    FAIL → LEARN          PASS → STATE' + provenance
+```
+
+| Pièce | Fichier | Contrat |
+| --- | --- | --- |
+| GhostActionContract | `GhostActionContract.php` | INTENT → PLAN → CONTRACT → AUTHORIZE → PREVIEW → APPLY → OBSERVE → VERIFY |
+| Provenance | `GhostProvenance.php` + `ghost_transitions` | STATE' ← produced_by ACTION ← verified_by VERIFICATION |
+| Claims | `GhostVerifier` | prix cité = prix observé, sinon FAIL / UNKNOWN |
+| Manifeste | `GhostManifest::gates` | READ / PREPARE(=PROPOSE) / ACT / DENY. Ghost ne reçoit pas DENY. |
+| Deux réalités | `GhostMemory` | world = Engine. belief = visitor. `mixed()` doit rester false. |
+
+Produit (inchangé) : OBSERVE / PREPARE / ACT.
+
+Technique : OBSERVE (lecture) · PROPOSE (transition candidate) · AUTHORIZE (permission + confirm) · EXECUTE (mutation) · VERIFY (état observé).
+
+PREPARE (produit) = PROPOSE (noyau).
+
+Pas dans V4 (volontaire) : vector DB, auto-ACT hors volume/remise, mélange world/belief, apply sans contrat.
+
 ## V3 livrée — GhostAction (éditeur + business)
 
 ```
@@ -144,20 +191,28 @@ Réponse chat :
 }
 ```
 
-## Mémoire
+## Mémoire — deux réalités
 
-Pas un transcript. Des **faits** :
+Pas un transcript. Deux coffres distincts :
+
+**World truth** — ce que Nodus sait du monde (`Engine::fields`, graphe, produits). Source `engine`. Confiance 1.
+
+**Agent belief** — ce que Ghost croit du visiteur (`ghost_facts`, subject = `visitor`). Source `explicit` / `inferred`.
 
 ```
 (visitor, prefers_style, sombre)  confidence 0.91  source explicit  status known
 (visitor, budget_max, 200)        confidence 0.90  source explicit  status known
 ```
 
+Une hallucination n’entre pas. Un fait visiteur n’écrase pas un champ Engine. `GhostMemory::mixed()` est l’invariant.
+
 Statuts : `known` · `inferred` · `uncertain` · `contradicted` · `unknown`.
 
-Une hallucination n’entre pas en mémoire. Une inférence ne devient pas un fait.
+Cycle de vie (stratégies, pas les faits) : unknown → observed → inferred → supported → verified → trusted · contradicted → stale → revoked.
 
-Tables : `ghost_facts`, `ghost_experiences`, `ghost_tool_stats`.
+Ghost mémorise : faits, expériences, erreurs, corrections, règles, skills. Pas des hallucinations.
+
+Tables : `ghost_facts`, `ghost_experiences`, `ghost_tool_stats`, `ghost_transitions`.
 
 ## Skills
 
@@ -179,12 +234,11 @@ En plus des lectures (`list_products`, `list_neighbors`, `list_media`, `check_gr
 
 ## Vérificateur
 
-Avant d’envoyer la phrase :
+Claim → ensemble de preuves → règle → PASS / FAIL / UNKNOWN.
 
-- chaque chiffre € existe dans le coffre
-- pas de jargon moteur
-- pas d’ACT simulé (« je vous débloque », « vous êtes embauché »)
-- sinon : `verified-block` + phrase de repli
+Exemple : « Cette offre coûte 180 € » + `product.price = 180` → VERIFIED. 999 € dans un coffre à 180 → FAIL. Aucun prix observé → UNKNOWN (pas PASS).
+
+Garde-fous linguistiques inchangés : jargon, « je vous débloque », ACT simulé → `verified-block`.
 
 ## Règles dures (inchangées)
 
@@ -211,14 +265,18 @@ Le LLM reçoit le system prompt + JSON contexte + la réponse grounded à respec
 | Fichier | Rôle |
 | --- | --- |
 | `app/Support/Ghost.php` | Orchestrateur |
-| `app/Support/GhostMemory.php` | Faits + working memory |
+| `app/Support/GhostMemory.php` | Faits + working memory · world ≠ belief |
+| `app/Support/GhostActionContract.php` | Transition d’état vérifiable |
+| `app/Support/GhostProvenance.php` | produced_by / verified_by |
 | `app/Support/GhostPlanner.php` | But + skill + étapes |
 | `app/Support/GhostExecutor.php` | Multi-outils + plafond |
-| `app/Support/GhostVerifier.php` | Preuves |
+| `app/Support/GhostVerifier.php` | Claim → evidence → PASS/FAIL/UNKNOWN |
 | `app/Support/GhostSkills.php` | Catalogue |
 | `app/Llm/GhostTools.php` | Lectures + raisonnement |
 | `resources/views/partials/ghost-orb.blade.php` | UI |
 | `tests/Feature/GhostMindTest.php` | Cerveau |
+| `tests/Unit/GhostContractTest.php` | Contrat |
+| `tests/Feature/GhostProvenanceTest.php` | Provenance |
 | `tests/Feature/GhostTest.php` | Régression orbe |
 
 ```bash

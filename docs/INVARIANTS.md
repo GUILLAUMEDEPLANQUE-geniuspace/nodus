@@ -21,3 +21,16 @@ Le moteur ne grandit plus par ajout de mots. Il se durcit. Chaque règle a un te
 | I-CAP | Autonomie = **54** | `Invariants::AUTONOMY_CAP` |
 
 Pas dans le contrat (volontaire) : vector DB, auto-skills, ACT autonome hors volume/remise, Critic LLM.
+
+## Architecture (5 règles du pipeline)
+
+Pas un seizième concept produit. Elles rendent le contrat in-cassable (`Invariants::architecture()`, `GhostContractTest`, `GhostProvenanceTest`).
+
+| Id | Règle | Où ça casse |
+| --- | --- | --- |
+| I-TRUTH | World truth (Engine) ≠ agent belief (visitor). Jamais mélangés. | `GhostMemory::mixed` |
+| I-CONTRACT | Mutation = contrat autorisé. PLAN ≠ APPLY. | `GhostActionContract::authorize` |
+| I-PROVENANCE | STATE' ← produced_by ACTION ← verified_by VERIFICATION | `ghost_transitions` |
+| I-CLAIM | Claim → evidence → PASS/FAIL/UNKNOWN | `GhostVerifier::rule` |
+| I-CAPABILITY | DENY n’apparaît pas dans propose | `GhostManifest::gates` |
+

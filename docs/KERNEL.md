@@ -30,6 +30,13 @@ Quatre classes. Une flèche = une dépendance. **Pas de cycle.**
 
 `Acl` n’écrit plus `node_staff`. Le owner naît à la **création** du lieu (`CreateController`) ou par un owner (`WorldEditorController::staff`).
 
+GhostActionContract, GhostProvenance, GhostVerifier vivent **dans** Ghost. Pas un cinquième god object. Engine ne les connaît pas.
+
+```
+INTENT → PLAN → CONTRACT → AUTHORIZE → PREVIEW → APPLY → OBSERVE → VERIFY → STATE'
+```
+
 Les pages de sculpture (`/studio`, `/monde`, `/builder`, `/ghost/editor`, `/ghost/plan`, `/ghost/gym`) exigent un rôle. Le chat public (`POST /n/{slug}/ghost`) ne sculpte pas.
+
 
 Test : `tests/Unit/KernelBoundaryTest.php` lit le source. Un `Grantor` dans `Engine.php` fait échouer la suite.

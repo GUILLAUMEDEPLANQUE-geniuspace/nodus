@@ -49,6 +49,10 @@ class InvariantTest extends TestCase
         $this->assertCount(15, Invariants::rules());
         $this->assertSame(54, Invariants::AUTONOMY_CAP);
         $this->assertSame(Invariants::AUTONOMY_CAP, GhostMaturity::of()['autonomy']);
+        $this->assertCount(5, Invariants::architecture());
+        $this->assertArrayHasKey('I-TRUTH', Invariants::architecture());
+        $this->assertArrayHasKey('I-CONTRACT', Invariants::architecture());
+        $this->assertArrayHasKey('I-PROVENANCE', Invariants::architecture());
     }
 
     public function test_guest_cannot_write_studio_forum_drive_magazine_create(): void
