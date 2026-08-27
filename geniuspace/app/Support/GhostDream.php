@@ -100,8 +100,6 @@ class GhostDream
 
     private static function label(string $id): string
     {
-        $id = preg_replace('/^(tag|product|media|world|belief|mem):/', '', $id) ?? $id;
-
-        return str_replace('_', ' ', $id);
+        return GhostSynapse::label($id);
     }
 }

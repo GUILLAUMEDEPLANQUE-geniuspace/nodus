@@ -166,6 +166,14 @@ class GhostCortexTest extends TestCase
         $this->assertFalse($hi['growth']['updated'] ?? true);
         $this->assertNull($hi['growth']['error'] ?? null);
         $this->assertSame(0, (int) ($hi['belief']['supporting'] ?? -1));
+        $this->assertSame(0, (int) ($hi['belief']['unknown'] ?? -1));
+    }
+
+    public function test_synapse_labels_hide_internal_ids(): void
+    {
+        $this->assertSame('cristal', GhostSynapse::label('tag:cristal'));
+        $this->assertSame('ensemble', GhostSynapse::relationFr('CO_OCCURRENCE'));
+        $this->assertSame('rapprochement', GhostSynapse::relationFr('SERENDIPITY'));
     }
 
     public function test_brain_page_is_staff_only(): void
@@ -175,9 +183,13 @@ class GhostCortexTest extends TestCase
             ->get('/n/lumen/ghost/cerveau')
             ->assertOk()
             ->assertSee('Cerveau', false)
-            ->assertDontSee('vector DB', false);
+            ->assertSee('Monde tenu maintenant', false)
+            ->assertDontSee('vector DB', false)
+            ->assertDontSee('CO_OCCURRENCE', false)
+            ->assertDontSee('tag:', false);
         $this->post('/n/lumen/ghost/cerveau')
             ->assertOk()
-            ->assertSee('applied = false', false);
+            ->assertSee('rien n’est déployé', false)
+            ->assertDontSee('CO_OCCURRENCE', false);
     }
 }

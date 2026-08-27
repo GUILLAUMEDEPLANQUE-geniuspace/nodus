@@ -202,6 +202,9 @@ class GhostSynapse
                 'source' => $r->source,
                 'target' => $r->target,
                 'relation' => $r->relation,
+                'label_source' => self::label((string) $r->source),
+                'label_target' => self::label((string) $r->target),
+                'relation_fr' => self::relationFr((string) $r->relation),
                 'weight' => (float) $r->weight,
                 'effective' => GhostDecay::effective((float) $r->weight, (string) $r->relation, $r->last_reinforced_at),
             ])
@@ -214,5 +217,26 @@ class GhostSynapse
         $s = preg_replace('/[^a-z0-9:_-]+/u', '_', $s) ?? $s;
 
         return Str::limit($s, 120, '');
+    }
+
+    public static function label(string $id): string
+    {
+        $id = preg_replace('/^(tag|product|media|world|belief|mem|chk)[:_]/', '', $id) ?? $id;
+        $id = str_replace(['_', ':'], ' ', $id);
+
+        return trim($id);
+    }
+
+    public static function relationFr(string $rel): string
+    {
+        return match ($rel) {
+            'TAG' => 'mot',
+            'CO_OCCURRENCE' => 'ensemble',
+            'SERENDIPITY' => 'rapprochement',
+            'SUPPORT' => 'tient',
+            'CONTRADICTION' => 'contredit',
+            'MEMORY' => 'souvenir',
+            default => mb_strtolower($rel),
+        };
     }
 }

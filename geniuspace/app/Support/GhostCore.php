@@ -68,13 +68,13 @@ class GhostCore
         $polarity = 'unknown';
         if (is_array($trial) && ($trial['observed'] ?? null) !== null) {
             $polarity = ($out['verify']['valid'] ?? true) ? 'support' : 'contradict';
+            GhostBelief::observe(
+                $node,
+                'skill:'.($plan['skill'] ?? 'unknown'),
+                $polarity,
+                (string) ($sit['goal'] ?? '')
+            );
         }
-        GhostBelief::observe(
-            $node,
-            'skill:'.($plan['skill'] ?? 'unknown'),
-            $polarity,
-            (string) ($sit['goal'] ?? '')
-        );
         $rules = GhostLearn::generalize($node);
         GhostMemory::save($node, array_merge($bag, [
             'goal' => $plan['goal'] ?? null,

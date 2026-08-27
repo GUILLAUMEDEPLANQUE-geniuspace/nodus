@@ -8,6 +8,14 @@
   <h1 class="font-display" style="font-size:clamp(2rem,6vw,3.2rem);line-height:.95">Autonome sur la stratégie. Jamais sur l’autorité.</h1>
   <p class="lede">Ghost relie ce qu’il a vu, oublie ce qui n’est plus tenu, et se tait s’il n’a pas de preuve. Une consolidation n’écrit rien dans le monde.</p>
 
+  @if($world)
+    <section class="card" style="padding:1.1rem 1.3rem;margin:1.2rem 0">
+      <p class="kicker">Monde tenu maintenant</p>
+      <p>{{ (int) $world['visits'] }} visites · {{ (int) $world['grants'] }} preuves · {{ (int) $world['threads'] }} fils · {{ (int) $world['replies'] }} réponses</p>
+      <p class="muted">Comptages du lieu. Pas une expérience. Ghost n’invente pas le delta.</p>
+    </section>
+  @endif
+
   <form method="post" action="/n/{{ $node->slug }}/ghost/cerveau/ask" style="margin:1.2rem 0;display:flex;flex-wrap:wrap;gap:.5rem">
     @csrf
     <input name="q" value="{{ $ask['q'] ?? '' }}" maxlength="400" style="flex:1;min-width:16rem" placeholder="Combien coûte le print ?">
@@ -29,15 +37,15 @@
       @else
         <p><strong>{{ $t['refusal'] }}</strong></p>
       @endif
-      <p class="muted">Cohérence : {{ $c['status'] }} · recouvrement {{ number_format(($c['overlap'] ?? 0)*100, 0) }} %</p>
+      <p class="muted">Cohérence : {{ $c['status_fr'] ?? $c['status'] }} · recouvrement {{ number_format(($c['overlap'] ?? 0)*100, 0) }} %</p>
     </section>
   @endif
 
   @if($cycle)
     <section class="card" style="padding:1.2rem 1.3rem;margin:1rem 0">
-      <p class="kicker">Consolidation · applied = false</p>
+      <p class="kicker">Consolidation · rien n’est déployé</p>
       <p>{{ $cycle['indexed'] }} indexations · {{ $cycle['pruned'] }} liens oubliés · {{ count($cycle['dreams']) }} liaisons candidates</p>
-      <p class="muted">Rien n’est déployé. Ghost propose des rapprochements. L’autorité reste humaine.</p>
+      <p class="muted">Ghost propose des rapprochements. L’autorité reste humaine.</p>
     </section>
   @endif
 
@@ -56,7 +64,7 @@
     <p class="kicker">Liens</p>
     <ul>
       @foreach($synapses as $s)
-        <li>{{ $s['source'] }} → {{ $s['target'] }} · {{ $s['relation'] }} · {{ number_format($s['effective']*100, 0) }} %</li>
+        <li>{{ $s['label_source'] ?? $s['source'] }} → {{ $s['label_target'] ?? $s['target'] }} · {{ $s['relation_fr'] ?? $s['relation'] }} · {{ number_format($s['effective']*100, 0) }} %</li>
       @endforeach
     </ul>
   @endif

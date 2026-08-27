@@ -19,16 +19,16 @@ class GhostConsistency
     public const NEW = 'NEW';
 
     /**
-     * @return array{status:string, related:?string, snippet:?string, confidence:float, overlap:float}
+     * @return array{status:string, status_fr:string, related:?string, snippet:?string, confidence:float, overlap:float}
      */
     public static function check(GpNode $node, string $text): array
     {
         if (mb_strlen(trim($text)) < 12) {
-            return ['status' => self::NEW, 'related' => null, 'snippet' => null, 'confidence' => 1, 'overlap' => 0];
+            return ['status' => self::NEW, 'status_fr' => self::phrase(self::NEW), 'related' => null, 'snippet' => null, 'confidence' => 1, 'overlap' => 0];
         }
         $hits = GhostCortex::search($node, $text, 3, [GhostCortex::WORLD, GhostCortex::EVIDENCE]);
         if ($hits === [] || ($hits[0]['score'] ?? 0) < 0.4) {
-            return ['status' => self::NEW, 'related' => null, 'snippet' => null, 'confidence' => 0.8, 'overlap' => 0];
+            return ['status' => self::NEW, 'status_fr' => self::phrase(self::NEW), 'related' => null, 'snippet' => null, 'confidence' => 0.8, 'overlap' => 0];
         }
         $top = $hits[0];
         $overlap = self::jaccard($text, (string) $top['text']);
@@ -50,11 +50,23 @@ class GhostConsistency
 
         return [
             'status' => $status,
+            'status_fr' => self::phrase($status),
             'related' => $top['id'],
             'snippet' => \Illuminate\Support\Str::limit((string) $top['text'], 80),
             'confidence' => $conf,
             'overlap' => round($overlap, 4),
         ];
+    }
+
+    public static function phrase(string $status): string
+    {
+        return match ($status) {
+            self::SUPPORT => 'tient',
+            self::CONTRADICTION => 'contredit',
+            self::NEUTRAL => 'neutre',
+            self::NEW => 'nouveau',
+            default => mb_strtolower($status),
+        };
     }
 
     public static function jaccard(string $a, string $b): float

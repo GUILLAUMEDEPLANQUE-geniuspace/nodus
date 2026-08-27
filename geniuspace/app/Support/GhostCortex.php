@@ -234,10 +234,10 @@ class GhostCortex
             return $vec;
         }
         foreach ($tf as $tok => $count) {
-            $h = (int) sprintf('%u', crc32((string) $tok));
-            $idx = $h % self::DIMS;
-            $sign = ($h & 1) === 0 ? 1.0 : -1.0;
-            $vec[$idx] += $sign * sqrt((float) $count);
+            self::accumulate($vec, (string) $tok, sqrt((float) $count));
+            if (mb_strlen((string) $tok) >= 4) {
+                self::accumulate($vec, mb_substr((string) $tok, 0, 3), 0.35 * sqrt((float) $count));
+            }
         }
         $norm = 0.0;
         foreach ($vec as $v) {
@@ -249,6 +249,17 @@ class GhostCortex
         }
 
         return $vec;
+    }
+
+    /**
+     * @param  list<float>  $vec
+     */
+    private static function accumulate(array &$vec, string $tok, float $w): void
+    {
+        $h = (int) sprintf('%u', crc32($tok));
+        $idx = $h % self::DIMS;
+        $sign = ($h & 1) === 0 ? 1.0 : -1.0;
+        $vec[$idx] += $sign * $w;
     }
 
     /**

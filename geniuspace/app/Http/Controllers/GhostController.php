@@ -22,6 +22,7 @@ use App\Support\GhostSelfModel;
 use App\Support\GhostStrategy;
 use App\Support\GhostSynapse;
 use App\Support\GhostTribunal;
+use App\Support\GhostWorldObserver;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -234,6 +235,7 @@ class GhostController extends Controller
             'journal' => GhostDream::journal($node),
             'cycle' => null,
             'ask' => null,
+            'world' => GhostWorldObserver::of((string) $node->id),
         ]);
     }
 
@@ -249,6 +251,7 @@ class GhostController extends Controller
             'journal' => GhostDream::journal($node),
             'cycle' => $cycle,
             'ask' => null,
+            'world' => GhostWorldObserver::of((string) $node->id),
         ]);
     }
 
@@ -266,6 +269,7 @@ class GhostController extends Controller
             'journal' => GhostDream::journal($node),
             'cycle' => null,
             'ask' => ['q' => $q, 'tribunal' => $tri, 'consistency' => $cons],
+            'world' => GhostWorldObserver::of((string) $node->id),
         ]);
     }
 
