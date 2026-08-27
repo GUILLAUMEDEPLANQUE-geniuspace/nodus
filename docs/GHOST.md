@@ -51,33 +51,46 @@ PREPARE (produit) = PROPOSE (noyau).
 
 Pas dans V4 (volontaire) : vector DB, auto-ACT hors volume/remise, mélange world/belief, apply sans contrat.
 
-## V5 — Strategy Discovery
+## V6 — Hypothèse, expérience, observation
 
-Ghost n’exécute pas une stratégie. Il **cherche** dans l’espace des leviers, mute, recombine, simule, attaque, mémorise. Le déploiement reste ACT + confirmation.
+V5 estimait un « observed_gain » par formule (prior + jitter). **Ce n’était pas une expérience.** V6 sépare.
 
 ```
-OBJECTIF → leviers → génération combinatoire
-        → mutation / recombinaison
-        → simulation
-        → analyse causale
-        → plateau ? exploration : exploitation
-        → challenger (ATTACK-n)
-        → mémoire (tenues / ratées / partielles / dangereuses)
-        → PREPARE
-        → ACT (humain)
+OBJECTIF
+  → WORLD OBSERVER (Engine, preuves, salon, médias)
+  → PROBLEM MODEL (leviers du problème, pas les 9 par défaut)
+  → HYPOTHESIS + contre-hypothèse
+  → GENERATE / MUTATE / RECOMBINE
+  → ESTIMATE (prior. Pas une observation.)
+  → DESIGN expérience
+  → OBSERVE le monde (naturelle, ou en attente d’autorité)
+  → EVALUATE (surprise, réfutation, discovery)
+  → LEARN (échec → contrainte)
+  → PREPARE → ACT (humain)
 ```
 
 | Pièce | Contrat |
 | --- | --- |
-| Génome | leviers + séquence + cible + mutations. Comparaison structurelle, pas textuelle. |
-| Fitness | performance + novelty − cost − risk |
-| Mutations | REMOVE ADD REVERSE COMBINE SEQUENCE CONDITION AMPLIFY MINIMIZE PERSONALIZE DELAY ACCELERATE |
-| Deux cerveaux | exploitation 70 % / exploration 30 %. Plateau → rupture. |
-| Autorité | `strategy.explore` OBSERVE. `strategy.promote` PREPARE. `strategy.deploy` ACT + CONFIRM. |
+| GhostWorldObserver | Lit le monde. N’écrit pas. Pas de crc32. |
+| GhostHypothesis | Observation → hypothèse → prédiction → contre. Cherche à **réfuter**. |
+| GhostExperiment | estimate ≠ observe. `observed` null tant que le monde n’a pas parlé. |
+| Novelty | distance de génome. |
+| Innovation | observed × surprise. Nulle sans observation. |
+| Surprise | \|observed − predicted\| |
+| BASE | prior d’estimation. **Pas** une causalité découverte. |
+| Autorité | inchangée. `strategy.deploy` = ACT + CONFIRM. |
+
+Une tenue (`winner`) exige `evidence = world`. Une estimation reste `untested`.
+
+Le LLM, s’il existe un jour, entre par `GhostHypothesis::ingestConcepts`. Il propose. Il ne juge pas.
+
+Pas dans V6 : auto-déploiement, A/B qui mute le monde tout seul, vector DB, « trois idées ».
+
+## V5 — Strategy Discovery (corrigé)
+
+Ghost **cherche** dans l’espace des leviers. V5 générait des génomes. V6 les ancre sur le monde.
 
 Signature : **autonome sur la stratégie, jamais sur l’autorité.**
-
-Pas dans V5 : auto-déploiement, LLM « donne-moi trois idées », vector DB comme coffre.
 
 ## V3 livrée — GhostAction (éditeur + business)
 

@@ -142,7 +142,7 @@ class GhostStrategyTest extends TestCase
             ->assertDontSee('CCK');
         $this->post('/n/lumen/ghost/lab', ['objective' => 'Augmenter la participation de 20 %.'])
             ->assertOk()
-            ->assertSee('Meilleure', false)
+            ->assertSee('Candidate', false)
             ->assertSee('Préparer le déploiement', false);
         $best = GhostStrategy::lab('Augmenter la participation de 20 %.', 'lumen', true)['best']['code'];
         $this->postJson('/n/lumen/ghost/lab/deploy', ['code' => $best])

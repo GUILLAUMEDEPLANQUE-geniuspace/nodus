@@ -86,6 +86,58 @@ class GhostLearn
         self::maybeCandidate($skill, $ok);
     }
 
+    /**
+     * strategy → outcome → leçon → prochaine génération.
+     *
+     * @param  array<string, mixed>  $trial
+     */
+    public static function afterExperiment(string $nodeId, array $trial): void
+    {
+        $h = $trial['hypothesis'] ?? [];
+        $status = $h['status'] ?? '';
+        $node = \App\Models\GpNode::query()->find($nodeId);
+        if (! $node) {
+            return;
+        }
+        if ($status === \App\Support\GhostHypothesis::REFUTED) {
+            $cause = $h['levers'][0] ?? 'unknown';
+            self::fail(
+                $node,
+                (string) ($h['hypothesis'] ?? 'hypothèse'),
+                'discover_strategy',
+                'strategy_refuted',
+                'Ne plus proposer '.$cause.' comme cause unique dans ce contexte.'
+            );
+            self::rule('strategy:'.$cause, 'Écarter '.$cause.' tant que la réfutation tient.');
+        }
+        if (($trial['surprise'] ?? 0) >= 0.08 && ($trial['observed'] ?? null) !== null) {
+            self::rule(
+                'strategy:surprise',
+                'Écart prédiction/monde : relancer une hypothèse, ne pas amplifier la même.'
+            );
+        }
+    }
+
+    /**
+     * @return list<string>
+     */
+    public static function strategyBans(string $nodeId): array
+    {
+        if ($nodeId === '' || ! Schema::hasTable('ghost_rules')) {
+            return [];
+        }
+        $rows = DB::table('ghost_rules')->where('when_error', 'like', 'strategy:%')->get();
+        $out = [];
+        foreach ($rows as $r) {
+            $lever = substr((string) $r->when_error, strlen('strategy:'));
+            if ($lever !== '' && $lever !== 'surprise') {
+                $out[] = $lever;
+            }
+        }
+
+        return array_values(array_unique($out));
+    }
+
     public static function fail(GpNode $node, string $task, string $skill, string $error, string $correction): void
     {
         if (! Schema::hasTable('ghost_failures')) {

@@ -1,12 +1,12 @@
 @extends('layouts.app')
 @section('title', 'Laboratoire de stratégies — '.$node->title)
-@section('description', 'Ghost invente, mute et teste. Il ne déploie jamais tout seul.')
+@section('description', 'Ghost estime, observe, cherche à réfuter. Il ne déploie jamais tout seul.')
 @section('robots', 'noindex')
 @section('content')
 <main class="wrap" style="padding:2rem 1.25rem 8rem;max-width:58rem">
   <p class="kicker">Laboratoire · {{ $node->title }}</p>
   <h1 class="font-display" style="font-size:clamp(2rem,6vw,3.2rem);line-height:.95">Autonome sur la stratégie. Jamais sur l’autorité.</h1>
-  <p class="lede">Ghost cherche dans l’espace des leviers. Il mute, recombine, simule, attaque. Le déploiement reste une preview : vous confirmez.</p>
+  <p class="lede">Une prédiction n’est pas une observation. Ghost lit le monde, pose une hypothèse, tente de la réfuter. Le déploiement reste une preview.</p>
 
   <form method="post" action="/n/{{ $node->slug }}/ghost/lab" style="margin:1.2rem 0;display:flex;flex-wrap:wrap;gap:.5rem">
     @csrf
@@ -15,27 +15,43 @@
   </form>
 
   @if($board)
+    @php $w = $board['world'] ?? []; $h = $board['hypotheses'][0] ?? []; $best = $board['best'] ?? []; @endphp
+    <section class="card" style="padding:1.2rem 1.3rem;margin:1rem 0">
+      <p class="kicker">Monde observé</p>
+      <p class="muted">{{ $w['threads'] ?? 0 }} sujets · {{ $w['replies'] ?? 0 }} réponses · {{ $w['media'] ?? 0 }} médias · {{ $w['grants'] ?? 0 }} preuves</p>
+      <p>Participation {{ number_format(($w['participation'] ?? 0)*100, 2, ',', ' ') }} % · complétion {{ number_format(($w['completion'] ?? 0)*100, 2, ',', ' ') }} %</p>
+    </section>
+
+    @if($h)
+      <section class="card" style="padding:1.2rem 1.3rem;margin:1rem 0">
+        <p class="kicker">Hypothèse · {{ $h['code'] ?? '' }} · {{ $h['status'] ?? 'draft' }}</p>
+        <p>{{ $h['observation'] ?? '' }}</p>
+        <p><strong>{{ $h['hypothesis'] ?? '' }}</strong></p>
+        <p class="muted">Prédiction : {{ $h['prediction'] ?? '' }}</p>
+        <p class="muted">Contre-hypothèse : {{ $h['counter_hypothesis'] ?? '' }}</p>
+        @if(!empty($h['verdict']))<p>{{ $h['verdict'] }}</p>@endif
+      </section>
+    @endif
+
     <section class="card" style="padding:1.2rem 1.3rem;margin:1rem 0">
       <p class="kicker">Objectif</p>
       <p class="font-display" style="font-size:1.4rem;margin:.2rem 0 .8rem">{{ $board['objective'] }}</p>
       <div class="grid-2" style="gap:.5rem">
         <p><span class="muted">Stratégies explorées</span><br><strong>{{ $board['explored'] }}</strong></p>
-        <p><span class="muted">Expériences</span><br><strong>{{ $board['experiments'] }}</strong></p>
-        <p><span class="muted">Rejetées</span><br><strong>{{ $board['rejected'] }}</strong></p>
-        <p><span class="muted">Actives</span><br><strong>{{ $board['active'] }}</strong></p>
+        <p><span class="muted">Expériences dessinées</span><br><strong>{{ $board['experiments'] }}</strong></p>
+        <p><span class="muted">Observées dans le monde</span><br><strong>{{ $board['experiments_observed'] }}</strong></p>
         <p><span class="muted">Tenues</span><br><strong>{{ $board['winners'] }}</strong></p>
-        <p><span class="muted">Mode</span><br><strong>{{ $board['mode'] === 'explore' ? 'exploration' : 'exploitation' }}</strong></p>
+        <p><span class="muted">Mode</span><br><strong>{{ ($board['mode'] ?? '') === 'explore' ? 'exploration' : 'exploitation' }}</strong></p>
       </div>
+      <p class="muted" style="margin-top:.6rem">{{ $board['honesty'] ?? '' }}</p>
     </section>
 
-    @php $best = $board['best'] ?? []; @endphp
     @if($best)
       <section class="card" style="padding:1.2rem 1.3rem;margin:1rem 0">
-        <p class="kicker">Meilleure · {{ $best['code'] ?? '' }}</p>
+        <p class="kicker">Candidate · {{ $best['code'] ?? '' }} · {{ $best['status'] ?? 'untested' }}</p>
         <p>
-          Gain attendu {{ number_format(($best['expected_gain'] ?? 0)*100, 1, ',', ' ') }} %
-          · observé {{ number_format(($best['observed_gain'] ?? 0)*100, 1, ',', ' ') }} %
-          · confiance {{ number_format(($best['confidence'] ?? 0)*100, 0) }} %
+          Prédiction {{ number_format(($best['expected_gain'] ?? 0)*100, 1, ',', ' ') }} %
+          · observation {{ $best['observed_gain'] === null ? 'inconnue' : number_format($best['observed_gain']*100, 1, ',', ' ').' %' }}
           · nouveauté {{ number_format(($best['novelty'] ?? 0)*100, 0) }} %
           · risque {{ number_format(($best['risk'] ?? 0)*100, 0) }} %
         </p>
@@ -63,19 +79,20 @@
       </ul>
     @endif
 
-    <p class="kicker" style="margin-top:1.4rem">Famille</p>
+    <p class="kicker" style="margin-top:1.4rem">Famille (estimations)</p>
     <ol style="padding-left:1.1rem">
       @foreach($board['pool'] ?? [] as $s)
         <li style="margin:.35rem 0">
           {{ $s['code'] }} · {{ $s['status'] }}
-          · fit {{ $s['fitness'] }}
+          · pred {{ $s['expected_gain'] }}
+          · obs {{ $s['observed_gain'] === null ? '—' : $s['observed_gain'] }}
           · {{ implode(' + ', array_map(fn($m) => \App\Support\GhostStrategy::label($m), $s['genome']['mechanisms'] ?? [])) }}
         </li>
       @endforeach
     </ol>
     <p class="muted" style="margin-top:1rem">{{ $board['signature'] }}</p>
   @else
-    <p class="muted">Posez un objectif. Ghost explore l’espace — il ne demande pas trois idées à un modèle.</p>
+    <p class="muted">Posez un objectif. Ghost lit d’abord le monde. Il ne demande pas trois idées à un modèle.</p>
   @endif
 
   <p style="margin-top:2rem"><a href="/n/{{ $node->slug }}">Retour au lieu</a> · <a href="/n/{{ $node->slug }}/ghost/gym">Salle d’épreuve</a></p>

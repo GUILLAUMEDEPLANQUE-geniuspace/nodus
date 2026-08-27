@@ -2,6 +2,14 @@
 
 Format : ce qui est **dans le code**, pas la vision PDF.
 
+## 2026-08-27 — Découverte : hypothèse, monde, réfutation
+
+- **estimate ≠ observe.** Une formule n’écrit plus `observed_gain`.
+- **GhostHypothesis.** Observation, prédiction, contre-hypothèse. Cherche à réfuter.
+- **GhostWorldObserver.** Lit Engine / salon / preuves. N’écrit rien.
+- **GhostExperiment.** Dessin → observation (souvent nulle) → surprise / innovation.
+- Une tenue exige une évidence du monde. L’autorité ne bouge pas.
+
 ## 2026-08-27 — Strategy Lab
 
 - **GhostStrategy.** Leviers × mutations × recombinaison. Pas trois paraphrases.

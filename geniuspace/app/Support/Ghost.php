@@ -219,12 +219,17 @@ class Ghost
                 GhostManifest::of($node)
             );
             $best = $board['best'] ?? [];
-            $gain = number_format((float) (($best['observed_gain'] ?? 0) * 100), 1, ',', ' ');
-            $nov = number_format((float) (($best['novelty'] ?? 0) * 100), 0, ',', ' ');
+            $pred = number_format((float) (($best['expected_gain'] ?? 0) * 100), 1, ',', ' ');
+            $obs = $best['observed_gain'] ?? null;
+            $obsTxt = $obs === null
+                ? 'aucune observation du monde encore'
+                : number_format((float) $obs * 100, 1, ',', ' ').' % tenus';
+            $h = $board['hypotheses'][0]['hypothesis'] ?? 'hypothèse en cours';
+            $base = number_format((float) (($board['world']['participation'] ?? $board['world']['completion'] ?? 0) * 100), 1, ',', ' ');
             $out = [
-                'reply' => 'Objectif lu. '.$board['explored'].' stratégies explorées, '.$board['experiments'].' expériences, '.$board['rejected'].' rejetées. Meilleure : '.($best['code'] ?? '—').' (gain observé '.$gain.' %, nouveauté '.$nov.' %). Rien n’est déployé — confirmation humaine.',
+                'reply' => 'Objectif lu. Le monde montre une baseline de '.$base.' %. Hypothèse : '.$h.' Prédiction : +'.$pred.' %. Observation : '.$obsTxt.'. '.$board['experiments_observed'].' expérience(s) tenue(s) sur '.$board['experiments'].'. Rien n’est déployé — confirmation humaine.',
                 'citations' => [['label' => 'Laboratoire', 'url' => '/n/'.$node->slug.'/ghost/lab']],
-                'tools' => ['strategy.explore', 'strategy.simulate'],
+                'tools' => ['strategy.explore', 'strategy.simulate', 'strategy.observe'],
                 'actions' => [
                     ['label' => 'Ouvrir le laboratoire', 'href' => '/n/'.$node->slug.'/ghost/lab'],
                     ['label' => 'Préparer le déploiement', 'href' => '/n/'.$node->slug.'/ghost/lab'],

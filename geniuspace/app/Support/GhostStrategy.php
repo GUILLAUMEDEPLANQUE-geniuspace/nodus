@@ -7,10 +7,10 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 /**
- * Discovery de stratégies. Ghost invente, mute, recombine, simule.
+ * Discovery de stratégies. Ghost invente, mute, recombine, estime, observe.
  * Il n’applique jamais tout seul : autonome sur la stratégie, jamais sur l’autorité.
  *
- * Pas un LLM « donne-moi trois idées ». Une grammaire : leviers × mutations × mémoire.
+ * estimate() = prior. observe() = monde. Une formule n’est pas une expérience.
  */
 class GhostStrategy
 {
@@ -59,34 +59,30 @@ class GhostStrategy
     }
 
     /**
-     * @return array{objective:string, levers:list<string>, target:string}
+     * @param  array<string, mixed>  $world
+     * @return array{objective:string, key:string, metric:string, baseline:float, levers:list<string>, target:string, why:array<string,string>}
      */
-    public static function decompose(string $objective): array
+    public static function decompose(string $objective, array $world = []): array
     {
-        $m = mb_strtolower($objective);
-        $target = 'all';
-        if (preg_match('/nouveau|new.user|premi[eè]re/u', $m)) {
-            $target = 'new_users';
-        } elseif (preg_match('/avanc|fid[eè]l|r[eé]current/u', $m)) {
-            $target = 'advanced';
-        }
-
-        return [
-            'objective' => $objective,
-            'levers' => self::LEVERS,
-            'target' => $target,
-        ];
+        return GhostHypothesis::problem($objective, $world);
     }
 
     /**
-     * Combinatoire des leviers. Pas trois paraphrases.
+     * Combinatoire des leviers du problème. Pas trois paraphrases. Pas les 9 leviers par défaut.
      *
+     * @param  list<string>|null  $levers
+     * @param  list<string>  $banned
      * @return list<array<string, mixed>>
      */
-    public static function generate(string $objective, int $budget = 24): array
+    public static function generate(string $objective, int $budget = 24, ?array $levers = null, string $target = 'all', array $banned = []): array
     {
-        $levers = self::decompose($objective)['levers'];
-        $target = self::decompose($objective)['target'];
+        $problem = self::decompose($objective);
+        $levers = $levers ?? $problem['levers'];
+        $levers = array_values(array_filter($levers, fn ($l) => in_array($l, self::LEVERS, true) && ! in_array($l, $banned, true)));
+        if ($levers === []) {
+            $levers = $problem['levers'];
+        }
+        $target = $target === 'all' ? $problem['target'] : $target;
         $out = [];
         foreach ($levers as $l) {
             $out[] = self::make($objective, [$l], [$l], $target);
@@ -98,12 +94,8 @@ class GhostStrategy
                 $out[] = self::make($objective, $pair, $pair, $target);
             }
         }
-        if (isset($levers[0], $levers[2], $levers[4])) {
-            $triple = [$levers[0], $levers[2], $levers[4]];
-            $out[] = self::make($objective, $triple, $triple, $target);
-        }
-        if (isset($levers[1], $levers[5], $levers[8])) {
-            $triple = [$levers[1], $levers[5], $levers[8]];
+        if (isset($levers[0], $levers[2], $levers[min(4, $n - 1)])) {
+            $triple = array_values(array_unique([$levers[0], $levers[2], $levers[min(4, $n - 1)]]));
             $out[] = self::make($objective, $triple, $triple, $target);
         }
 
@@ -279,9 +271,10 @@ class GhostStrategy
                 }
                 break;
             case 'ADD':
-                if ($unused) {
-                    $me[] = $unused[0];
-                    $seq[] = $unused[0];
+                $pick = self::pickUnused($unused, $g);
+                if ($pick) {
+                    $me[] = $pick;
+                    $seq[] = $pick;
                 }
                 break;
             case 'REVERSE':
@@ -296,8 +289,11 @@ class GhostStrategy
                         }
                     }
                 } elseif ($unused) {
-                    $me[] = $unused[0];
-                    $seq[] = $unused[0];
+                    $pick = self::pickUnused($unused, $g);
+                    if ($pick) {
+                        $me[] = $pick;
+                        $seq[] = $pick;
+                    }
                 }
                 break;
             case 'SEQUENCE':
@@ -345,22 +341,34 @@ class GhostStrategy
     }
 
     /**
+     * Prior. Ce n’est PAS une observation du monde.
+     *
+     * @param  array<string, mixed>  $s
+     * @param  list<array<string, mixed>>  $memory
+     * @return array<string, mixed>
+     */
+    public static function estimate(array $s, array $memory = []): array
+    {
+        $sc = self::score($s, $memory);
+        $s = array_merge($s, $sc);
+        $s['expected_gain'] = $sc['performance'];
+        $s['predicted_gain'] = $sc['performance'];
+        $s['observed_gain'] = null;
+        $s['kind'] = 'estimate';
+        $s['status'] = 'untested';
+
+        return $s;
+    }
+
+    /**
+     * Alias historique. N’observe pas. Ne pas lire observed_gain ici.
+     *
      * @param  array<string, mixed>  $s
      * @return array<string, mixed>
      */
     public static function simulate(array $s, array $memory = []): array
     {
-        $sc = self::score($s, $memory);
-        $s = array_merge($s, $sc);
-        $sig = abs(crc32(implode(',', $s['genome']['mechanisms'] ?? [])));
-        $jitter = (($sig % 21) - 10) / 1000;
-        $observed = max(0.0, $sc['performance'] * (1 - $sc['risk'] * 0.4) + $jitter);
-        $s['expected_gain'] = $sc['performance'];
-        $s['observed_gain'] = round($observed, 4);
-        $s['confidence'] = round(max(0.4, min(0.97, 1 - $sc['risk'])), 4);
-        $s['status'] = self::classify($s);
-
-        return $s;
+        return self::estimate($s, $memory);
     }
 
     /**
@@ -450,12 +458,16 @@ class GhostStrategy
      */
     public static function lab(string $objective, string $nodeId = '', bool $persist = false): array
     {
+        $world = GhostWorldObserver::of($nodeId);
+        $problem = self::decompose($objective, $world);
+        $hyps = GhostHypothesis::raise($problem, $world);
         $memory = $nodeId !== '' ? self::memory($nodeId) : [];
-        $pool = self::generate($objective, 24);
+        $banned = GhostLearn::strategyBans($nodeId);
+        $pool = self::generate($objective, 24, $problem['levers'], $problem['target'], $banned);
         $history = [];
         foreach ($pool as $i => $s) {
-            $pool[$i] = self::simulate($s, $memory);
-            $history[] = $pool[$i]['observed_gain'];
+            $pool[$i] = self::estimate($s, $memory);
+            $history[] = (float) $pool[$i]['expected_gain'];
         }
         usort($pool, fn ($a, $b) => ($b['fitness'] <=> $a['fitness']));
         $mode = self::mode($history);
@@ -465,18 +477,14 @@ class GhostStrategy
         $top = array_slice($pool, 0, 3);
         foreach ($top as $t) {
             foreach ($ops as $op) {
-                $child = self::simulate(self::mutate($t, $op, $top[1] ?? null), $memory);
+                $child = self::estimate(self::mutate($t, $op, $top[1] ?? null), $memory);
                 $pool[] = $child;
-                $history[] = $child['observed_gain'];
+                $history[] = (float) $child['expected_gain'];
             }
         }
         if (isset($top[0], $top[1])) {
-            $pool[] = self::simulate(self::recombine($top[0], $top[1]), $memory);
+            $pool[] = self::estimate(self::recombine($top[0], $top[1]), $memory);
         }
-        if (isset($top[0], $top[2])) {
-            $pool[] = self::simulate(self::recombine($top[0], $top[2]), $memory);
-        }
-        usort($pool, fn ($a, $b) => ($b['fitness'] <=> $a['fitness']));
         $seen = [];
         $uniq = [];
         foreach ($pool as $s) {
@@ -488,25 +496,65 @@ class GhostStrategy
             $uniq[] = $s;
         }
         $pool = $uniq;
+        usort($pool, fn ($a, $b) => ($b['fitness'] <=> $a['fitness']));
+
+        $trials = [];
+        $hyp = $hyps[0] ?? GhostHypothesis::raise($problem, $world)[0];
+        foreach (array_slice($pool, 0, 6) as $s) {
+            $trial = GhostExperiment::evaluate(
+                GhostExperiment::observe(
+                    GhostExperiment::design($s, $hyp, $world, $nodeId),
+                    $world
+                )
+            );
+            $trials[] = $trial;
+            if (($trial['strategy']['observed_gain'] ?? null) !== null) {
+                foreach ($pool as $i => $row) {
+                    if ($row['code'] === $s['code']) {
+                        $pool[$i] = $trial['strategy'];
+                    }
+                }
+            }
+            if ($persist) {
+                GhostExperiment::store($trial);
+                GhostLearn::afterExperiment($nodeId, $trial);
+            }
+        }
+
+        $hyps[0] = $trials[0]['hypothesis'] ?? $hyp;
+        usort($pool, function ($a, $b) {
+            $ae = $a['observed_gain'] === null ? -1 : 1;
+            $be = $b['observed_gain'] === null ? -1 : 1;
+            if ($ae !== $be) {
+                return $be <=> $ae;
+            }
+            $ad = $a['discovery_score'] ?? $a['fitness'];
+            $bd = $b['discovery_score'] ?? $b['fitness'];
+
+            return $bd <=> $ad;
+        });
         $best = $pool[0];
         $attacks = self::challenge($best);
-        $hardened = self::simulate(self::harden($best, $attacks), $memory);
-        $pool[] = $hardened;
-        usort($pool, fn ($a, $b) => ($b['fitness'] <=> $a['fitness']));
-        $best = $pool[0];
         $by = fn (string $st) => array_values(array_filter($pool, fn ($s) => $s['status'] === $st));
         $rejected = array_merge($by('loser'), $by('invalid'), $by('dangerous'));
+        $observedTrials = array_values(array_filter($trials, fn ($t) => $t['status'] === GhostExperiment::OBSERVED));
         $board = [
             'objective' => $objective,
+            'problem' => $problem,
+            'world' => $world,
+            'hypotheses' => $hyps,
             'mode' => self::mode($history),
             'explored' => count($pool) + count($memory),
-            'experiments' => count($pool),
+            'experiments' => count($trials),
+            'experiments_observed' => count($observedTrials),
             'rejected' => count($rejected),
             'active' => count($by('untested')) + count($by('partial')) + count($by('active')),
             'winners' => count($by('winner')),
             'best' => $best,
             'attacks' => $attacks,
+            'trials' => $trials,
             'pool' => array_slice($pool, 0, 12),
+            'honesty' => 'La prédiction n’est pas une observation. Une tenue exige le monde.',
             'signature' => 'Autonome sur la stratégie. Jamais sur l’autorité.',
             'deploy' => self::deploy($best),
         ];
@@ -580,6 +628,8 @@ class GhostStrategy
     }
 
     /**
+     * Une tenue exige une observation. Une estimation n’est jamais un winner.
+     *
      * @param  array<string, mixed>  $s
      */
     public static function classify(array $s): string
@@ -587,11 +637,15 @@ class GhostStrategy
         if (($s['risk'] ?? 0) > 0.35) {
             return 'dangerous';
         }
-        if (($s['observed_gain'] ?? 0) >= 0.18 && ($s['risk'] ?? 1) < 0.22) {
-            return 'winner';
+        if (! array_key_exists('observed_gain', $s) || $s['observed_gain'] === null) {
+            return 'untested';
         }
-        if (($s['observed_gain'] ?? 0) < 0.06) {
+        $obs = (float) $s['observed_gain'];
+        if ($obs < 0) {
             return 'loser';
+        }
+        if ($obs >= 0.05 && ($s['risk'] ?? 1) < 0.22 && ($s['evidence'] ?? '') === 'world') {
+            return 'winner';
         }
         if (($s['genome']['target'] ?? 'all') !== 'all') {
             return 'context_dependent';
@@ -646,6 +700,30 @@ class GhostStrategy
                 ]
             );
         }
+        if (Schema::hasColumn('ghost_strategies', 'evidence')) {
+            foreach ($board['pool'] ?? [] as $s) {
+                DB::table('ghost_strategies')->where('node_id', $nodeId)->where('code', $s['code'])->update([
+                    'evidence' => $s['evidence'] ?? '',
+                    'hypothesis_code' => $board['hypotheses'][0]['code'] ?? '',
+                    'surprise' => $s['surprise'] ?? null,
+                    'innovation' => $s['innovation'] ?? null,
+                ]);
+            }
+        }
+    }
+
+    /**
+     * @param  list<string>  $unused
+     * @param  array<string, mixed>  $genome
+     */
+    private static function pickUnused(array $unused, array $genome): ?string
+    {
+        if ($unused === []) {
+            return null;
+        }
+        $sig = abs(crc32(implode(',', $genome['mechanisms'] ?? []).'|'.implode(',', $genome['mutations'] ?? [])));
+
+        return $unused[$sig % count($unused)];
     }
 
     private static function objectiveKey(string $objective): string
