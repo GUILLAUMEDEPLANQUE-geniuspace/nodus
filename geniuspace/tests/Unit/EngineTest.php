@@ -57,6 +57,14 @@ class EngineTest extends TestCase
         $this->assertNull($r['next']);
     }
 
+    public function test_align_without_proofs_names_missing(): void
+    {
+        $r = Engine::alignment([], ['caces', 'gmao']);
+        $this->assertSame('faible', $r['level']);
+        $this->assertContains('caces', $r['missing']);
+        $this->assertStringContainsString('CACES', $r['plain']);
+    }
+
     public function test_vocab_never_exposes_internal_words(): void
     {
         $this->assertSame('Maison', Vocab::kind('company'));

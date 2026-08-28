@@ -73,5 +73,8 @@
     </div>
   </footer>
 </div>
+@isset($node)
+  @include('partials.ghost-orb')
+@endisset
 </body>
 </html>

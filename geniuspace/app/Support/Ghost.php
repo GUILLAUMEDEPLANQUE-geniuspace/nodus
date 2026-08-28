@@ -383,7 +383,7 @@ class Ghost
         if (preg_match('/d[eé]bloqu|unlock|paywall|suite|teaser|making/u', $m)) {
             return 'unlock';
         }
-        if (preg_match('/[eé]preuve|test m[eé]tier|mission|offre d.emploi|candidat|cv|recrut/u', $m)) {
+        if (preg_match('/[eé]preuve|test m[eé]tier|mission|offre d.emploi|candidat|cv|recrut|align|embauche/u', $m)) {
             return 'jobs';
         }
         if (preg_match('/carnet|preuv|badge|inventaire|relique/u', $m)) {
@@ -428,8 +428,14 @@ class Ghost
             $name = self::hostName($node);
             $wake = Flagships::of($node)['ghost']['wake'] ?? 'Je réponds uniquement avec ce qui est dans ce lieu.';
 
+            $hint = match (self::profile($node)) {
+                'marchand' => 'prix, certificat, épreuve',
+                'rh' => 'mission, épreuve, délai, carnet',
+                default => 'salles, fiches, carnet',
+            };
+
             return [
-                'reply' => "{$name} · {$node->title}. {$wake} Essayez « prix », « certificat », « épreuve » ou « {$cta} ».",
+                'reply' => "{$name} · {$node->title}. {$wake} Essayez « {$hint} » ou « {$cta} ».",
                 'citations' => [['label' => $node->title, 'url' => $ctx['lieu']['url']]],
                 'actions' => $ctx['actions'],
             ];
@@ -498,6 +504,36 @@ class Ghost
         if ($intent === 'jobs') {
             $offres = collect($ctx['liens']['contient'] ?? [])->filter(fn ($l) => ($l['nature'] ?? '') === 'Offre' || str_contains(mb_strtolower($l['titre'] ?? ''), 'mission'));
             $epreuve = collect($ctx['salles'] ?? [])->first(fn ($s) => in_array($s['key'], ['epreuve', 'offres'], true));
+            $msg = mb_strtolower($message);
+            $picked = $offres->first(function ($o) use ($msg) {
+                $t = mb_strtolower((string) ($o['titre'] ?? ''));
+
+                return $t !== '' && (str_contains($msg, $t) || str_contains($t, $msg));
+            });
+            if (! $picked) {
+                $picked = $offres->first(function ($o) use ($msg) {
+                    $t = mb_strtolower((string) ($o['titre'] ?? ''));
+
+                    return (bool) preg_match('/rel[eè]ve|technicien|designer|maintenance|product/u', $msg)
+                        && (bool) preg_match('/rel[eè]ve|technicien|designer|maintenance|product/u', $t);
+                });
+            }
+            if ($picked) {
+                $slug = basename(parse_url((string) ($picked['url'] ?? ''), PHP_URL_PATH) ?: '');
+                $jobNode = $slug !== '' ? GpNode::query()->where('slug', $slug)->first() : null;
+                if ($jobNode && $jobNode->kind === 'job') {
+                    $al = Engine::align(Grantor::carnetId(), $jobNode->id);
+
+                    return [
+                        'reply' => $jobNode->title.'. '.$al['plain'].' Je ne valide pas un CV : l’épreuve tranche.',
+                        'citations' => [['label' => $jobNode->title, 'url' => $picked['url'] ?? Engine::href($jobNode)]],
+                        'actions' => [
+                            ['label' => $jobNode->title, 'href' => $picked['url'] ?? Engine::href($jobNode)],
+                            ['label' => 'Épreuve', 'href' => '/n/'.$node->slug.'/preuve'],
+                        ],
+                    ];
+                }
+            }
             $lines = $offres->take(5)->map(fn ($o) => '· '.$o['titre'])->all();
             $reply = $lines
                 ? "Missions / liens utiles :\n".implode("\n", $lines)."\nJe ne valide pas un CV : l'épreuve tranche."

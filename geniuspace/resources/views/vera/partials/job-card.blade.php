@@ -19,6 +19,9 @@
           <span class="badge {{ $j['honorTone'] }}">{{ $j['honorCaption'] }} · {{ $co['slaDays'] }} j</span>
         @endif
         <span class="badge">Ghost {{ $j['ghostRisk'] }}</span>
+        @if(!empty($align['word']))
+          <span class="badge {{ ($align['level'] ?? '')==='fort'?'good':(($align['level'] ?? '')==='faible'?'bad':'') }}">{{ $align['word'] }}</span>
+        @endif
       </div>
       <p style="font-size:.75rem;color:var(--subtle);margin:.45rem 0 0">{{ $j['processHours'] }} h de process publié · il y a {{ $j['daysAgo'] }} j</p>
       <div class="chips" style="margin-top:.55rem">

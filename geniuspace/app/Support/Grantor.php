@@ -458,8 +458,8 @@ class Grantor
     /** Fin d’épreuve → arête validated vers l’offre liée (si elle existe). */
     private static function validateFromDoors(Media $media): void
     {
-        $from = 'carnet-karim';
-        if (Auth::id()) {
+        $from = self::carnetId() ?: 'carnet-karim';
+        if ($from === 'carnet-karim' && Auth::id()) {
             $from = 'carnet-'.Auth::id();
         }
         if (! GpNode::query()->where('id', $from)->exists()) {
@@ -479,6 +479,19 @@ class Grantor
                 Edge::query()->insert(['from_id' => $from, 'to_id' => $job->id, 'kind' => 'validated', 'label' => 'Épreuve validée']);
             }
         }
+    }
+
+    /**
+     * Carnet du visiteur connecté, sinon le carnet de démo Karim s’il existe.
+     */
+    public static function carnetId(): string
+    {
+        $uid = Auth::id();
+        if ($uid && GpNode::query()->where('id', 'carnet-'.$uid)->exists()) {
+            return 'carnet-'.$uid;
+        }
+
+        return GpNode::query()->where('id', 'carnet-karim')->exists() ? 'carnet-karim' : '';
     }
 
     /**

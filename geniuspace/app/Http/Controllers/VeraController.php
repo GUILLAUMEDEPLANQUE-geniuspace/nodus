@@ -53,7 +53,7 @@ class VeraController extends Controller
         $jobNode = GpNode::query()->where('slug', $slug)->first();
         $trail = $jobNode ? Engine::trail($jobNode) : [];
         $also = $jobNode ? Engine::alsoInWorld($jobNode, 3) : [];
-        $align = $jobNode ? Engine::align('carnet-karim', $jobNode->id) : null;
+        $align = $jobNode ? Engine::align(\App\Support\Grantor::carnetId(), $jobNode->id) : null;
         $heritage = $jobNode ? Engine::inherit($jobNode) : [];
         $details = $jobNode ? Engine::fields($jobNode->id) : [];
         return view('vera.job', compact('job', 'node', 'jobNode', 'trail', 'also', 'align', 'heritage', 'details') + ['tab' => 'offres']);

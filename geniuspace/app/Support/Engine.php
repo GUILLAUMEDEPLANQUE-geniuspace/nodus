@@ -275,7 +275,38 @@ class Engine
 
     public static function align(string $carnetId, string $jobId): array
     {
+        if ($carnetId === '') {
+            $a = self::alignment([], self::tokens($jobId));
+            $a['plain'] = 'Pas de carnet encore. Tenez une épreuve, ensuite on aligne.';
+            $a['next'] = $a['plain'];
+
+            return $a;
+        }
+
         return self::alignment(self::proofTokens($carnetId), self::tokens($jobId));
+    }
+
+    /**
+     * Alignement d’un carnet sur N offres. Un aller champs.
+     *
+     * @param  list<string>  $jobIds
+     * @return array<string, array<string, mixed>>
+     */
+    public static function alignMany(string $carnetId, array $jobIds): array
+    {
+        $proofs = $carnetId !== '' ? self::proofTokens($carnetId) : [];
+        $bag = self::fieldsFor($jobIds);
+        $out = [];
+        foreach ($jobIds as $id) {
+            $al = self::alignment($proofs, self::tokensFrom($bag[$id] ?? []));
+            if ($carnetId === '') {
+                $al['plain'] = 'Pas de carnet encore. Tenez une épreuve, ensuite on aligne.';
+                $al['next'] = $al['plain'];
+            }
+            $out[$id] = $al;
+        }
+
+        return $out;
     }
 
     /** « Aussi dans cet univers » — co-validation, puis compétences, puis fratrie. */
@@ -388,9 +419,17 @@ class Engine
     /** @return list<string> */
     public static function tokens(string $nodeId): array
     {
-        $f = self::fields($nodeId);
+        return self::tokensFrom(self::fields($nodeId));
+    }
+
+    /**
+     * @param  array<string, object>  $f
+     * @return list<string>
+     */
+    public static function tokensFrom(array $f): array
+    {
         $blob = mb_strtolower(implode(' ', array_map(
-            fn ($k) => $f[$k]->value ?? '',
+            fn ($k) => isset($f[$k]) ? (string) ($f[$k]->value ?? '') : '',
             ['stack', 'habilitation', 'caces', 'trois_huit', 'geste', 'metier', 'visa']
         )));
         $parts = preg_split('/[,\s\/·]+/u', $blob) ?: [];

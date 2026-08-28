@@ -6,6 +6,15 @@
   $cols = $C::json('collections');
   $viviers = $C::json('viviers');
   $col = collect($cols)->firstWhere('slug', $q['collection'] ?? '');
+  $slugs = array_column($jobs, 'slug');
+  $jobNodes = $slugs ? \App\Models\GpNode::query()->whereIn('slug', $slugs)->get() : collect();
+  $alignBySlug = [];
+  if ($jobNodes->isNotEmpty()) {
+      $bag = \App\Support\Engine::alignMany(\App\Support\Grantor::carnetId(), $jobNodes->pluck('id')->all());
+      foreach ($jobNodes as $jn) {
+          $alignBySlug[$jn->slug] = $bag[$jn->id] ?? null;
+      }
+  }
 @endphp
 @section('title', $col ? $col['label'].' — offres d’emploi 2026 | Vera' : 'Offres d’emploi à salaire publié | Vera')
 @section('description', $col ? $col['blurb'].' Salaire publié, délai de réponse, grille publique.' : 'Toutes les offres Vera : salaire publié, délai de réponse, Schema JobPosting. Classées par adéquation, jamais par budget pub.')
@@ -53,7 +62,7 @@
   <p style="font-size:.8rem;color:var(--muted)">{{ count($jobs) }} offres · salaires publiés</p>
   <div class="vera-grid" style="margin-top:1rem;gap:.9rem">
     @foreach($jobs as $job)
-      @include('vera.partials.job-card', ['job' => $job])
+      @include('vera.partials.job-card', ['job' => $job, 'align' => $alignBySlug[$job['slug'] ?? ''] ?? null])
     @endforeach
   </div>
 </div>
