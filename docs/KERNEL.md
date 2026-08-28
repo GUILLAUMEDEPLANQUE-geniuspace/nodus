@@ -30,7 +30,7 @@ Quatre classes. Une flèche = une dépendance. **Pas de cycle.**
 
 `Acl` n’écrit plus `node_staff`. Le owner naît à la **création** du lieu (`CreateController`) ou par un owner (`WorldEditorController::staff`).
 
-GhostActionContract, GhostProvenance, GhostVerifier, GhostStrategy, GhostHypothesis, GhostExperiment, GhostWorldObserver, GhostCore, GhostSituation, GhostCritic, GhostSimulator, GhostReflector, GhostBelief, GhostSelfModel, GhostWorkingMemory, GhostCortex, GhostSynapse, GhostDecay, GhostDream, GhostTribunal, GhostConsistency, GhostChunk, GhostGrowth vivent **dans** Ghost. Pas un cinquième god object. Engine ne les connaît pas. Cortex lit Engine (vérité) et les chunks (preuves). Il ne mélange pas la croyance.
+`alignment()` nomme les preuves manquantes (« Il vous manque la preuve CACES »). Diff d’ensembles, pas du ML. Les citations Ghost publiques passent par `Ghost::publicCitations` : world/evidence, jamais belief, jamais `/ghost/lab`.
 
 ```
 INTENT → PLAN → CONTRACT → AUTHORIZE → PREVIEW → APPLY → OBSERVE → VERIFY → STATE'

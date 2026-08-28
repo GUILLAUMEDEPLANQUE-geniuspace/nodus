@@ -50,6 +50,7 @@ class GhostController extends Controller
         $out = Ghost::reply($node, $data['message'], $data['history'] ?? [], [
             'editor_context' => $data['editor_context'] ?? [],
         ]);
+        $out['citations'] = Ghost::publicCitations($out['citations'] ?? [], $node);
         $out['lieu'] = ['titre' => $node->title, 'slug' => $node->slug];
 
         return response()->json($out);
@@ -70,8 +71,10 @@ class GhostController extends Controller
     public function hello(string $slug): JsonResponse
     {
         $node = GpNode::query()->where('slug', $slug)->firstOrFail();
+        $out = Ghost::reply($node, 'bonjour');
+        $out['citations'] = Ghost::publicCitations($out['citations'] ?? [], $node);
 
-        return response()->json(Ghost::reply($node, 'bonjour'));
+        return response()->json($out);
     }
 
     public function gym(string $slug): View

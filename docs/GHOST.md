@@ -34,7 +34,7 @@ WORLD (Engine) ──► CORTEX (TF-IDF-like + hashing-trick, pas BM25, pas Mini
 | Chunk | `GhostChunk.php` | 600 / 150. ID `sha1` stable. |
 | Synapse | `GhostSynapse.php` | Hebbian. Pas une arête métier. |
 | Decay | `GhostDecay.php` | Demi-vie par relation. SERENDIPITY = 14 j. |
-| Tribunal | `GhostTribunal.php` | Réponse extraite + citations, ou refus. Jamais belief. |
+| Tribunal | `GhostTribunal.php` | Réponse extraite + citations, ou refus. Jamais belief. Citations publiques cliquables (pas de page staff). |
 | Consistency | `GhostConsistency.php` | SUPPORT / CONTRADICTION / NEUTRAL / NEW. Jaccard + négation. Pas un T5. |
 | Dream | `GhostDream.php` | Consolidation. `applied = false`. |
 | Growth | `GhostGrowth.php` | Sans `observed`, pas de mise à jour. |

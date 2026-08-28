@@ -220,7 +220,7 @@ class Engine
      *
      * @param  list<string>  $proofs
      * @param  list<string>  $wanted
-     * @return array{level: string, word: string, plain: string, hits: list<string>}
+     * @return array{level: string, word: string, plain: string, hits: list<string>, missing: list<string>, next: ?string}
      */
     public static function alignment(array $proofs, array $wanted): array
     {
@@ -231,7 +231,14 @@ class Engine
         $p = $norm($proofs);
         $w = $norm($wanted);
         if (! $w) {
-            return ['level' => 'moyen', 'word' => 'Alignement moyen', 'plain' => 'Pas assez de critères pour trancher. Le test le dira.', 'hits' => []];
+            return [
+                'level' => 'moyen',
+                'word' => 'Alignement moyen',
+                'plain' => 'Pas assez de critères pour trancher. Le test le dira.',
+                'hits' => [],
+                'missing' => [],
+                'next' => null,
+            ];
         }
         $hits = [];
         foreach ($w as $need) {
@@ -243,6 +250,7 @@ class Engine
             }
         }
         $hits = array_values(array_unique($hits));
+        $missing = array_values(array_diff($w, $hits));
         $ratio = count($hits) / max(1, count($w));
         $level = $ratio >= 0.55 ? 'fort' : ($ratio >= 0.25 ? 'moyen' : 'faible');
         $plain = match ($level) {
@@ -250,8 +258,19 @@ class Engine
             'moyen' => 'Quelques preuves collent, d’autres manquent. Le test tranche.',
             default => 'Le carnet et le poste parlent deux métiers. Lisez le difficile avant de postuler.',
         };
+        $next = self::missingSentence($level, $missing);
+        if ($next) {
+            $plain = $next;
+        }
 
-        return ['level' => $level, 'word' => 'Alignement '.$level, 'plain' => $plain, 'hits' => $hits];
+        return [
+            'level' => $level,
+            'word' => 'Alignement '.$level,
+            'plain' => $plain,
+            'hits' => $hits,
+            'missing' => $missing,
+            'next' => $next,
+        ];
     }
 
     public static function align(string $carnetId, string $jobId): array
@@ -408,6 +427,56 @@ class Engine
         }
 
         return $n;
+    }
+
+    /**
+     * @param  list<string>  $missing
+     */
+    private static function missingSentence(string $level, array $missing): ?string
+    {
+        if ($missing === []) {
+            return null;
+        }
+        $need = self::proofList($missing);
+        if (count($missing) === 1) {
+            return $level === 'fort'
+                ? 'Presque tout colle. Il vous manque encore la preuve « '.$need.' ».'
+                : 'Il vous manque la preuve « '.$need.' » pour viser un alignement fort.';
+        }
+
+        return 'Il vous manque : '.$need.'.';
+    }
+
+    /**
+     * @param  list<string>  $tokens
+     */
+    private static function proofList(array $tokens): string
+    {
+        $pretty = array_map(fn ($t) => self::proofLabel($t), array_slice($tokens, 0, 4));
+        if (count($pretty) === 1) {
+            return $pretty[0];
+        }
+        $last = array_pop($pretty);
+
+        return implode(', ', $pretty).' et '.$last;
+    }
+
+    private static function proofLabel(string $token): string
+    {
+        $k = mb_strtolower(trim($token));
+        $known = [
+            'caces' => 'CACES',
+            'gmao' => 'GMAO',
+            'cac' => 'CAC',
+            'figma' => 'Figma',
+            'react' => 'React',
+            'typescript' => 'TypeScript',
+        ];
+        if (isset($known[$k])) {
+            return $known[$k];
+        }
+
+        return mb_convert_case(str_replace('_', ' ', $k), MB_CASE_TITLE, 'UTF-8');
     }
 
     /** Carnet visiteur : preuves graphe (si maison). Les déblocages mérités vivent dans le coffre à preuves. */

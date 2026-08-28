@@ -52,6 +52,9 @@
       </div>
       @if(!empty($align))
         <p style="font-size:.9rem;color:var(--muted);max-width:40rem">{{ $align['plain'] }}</p>
+        @if(!empty($align['missing']))
+          <p style="font-size:.85rem;max-width:40rem">Chaque critère manquant est une preuve à tenir — pas un badge de couleur.</p>
+        @endif
       @endif
 
       <p style="font-size:1.05rem;max-width:42rem">{{ $j['description'] }}</p>

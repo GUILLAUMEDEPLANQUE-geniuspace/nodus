@@ -778,6 +778,45 @@ class Ghost
         }
     }
 
+    /**
+     * Citations publiques. World/evidence seulement. Pas de page staff.
+     *
+     * @param  list<array<string, mixed>>  $raw
+     * @return list<array{label: string, url: string}>
+     */
+    public static function publicCitations(array $raw, GpNode $node): array
+    {
+        $out = [];
+        $seen = [];
+        foreach ($raw as $c) {
+            if (! is_array($c)) {
+                continue;
+            }
+            if (($c['layer'] ?? '') === GhostCortex::BELIEF) {
+                continue;
+            }
+            $label = trim((string) ($c['label'] ?? $c['title'] ?? ''));
+            if ($label === '' && ! empty($c['text'])) {
+                $label = trim(Str::limit(strip_tags((string) $c['text']), 48, ''));
+            }
+            $label = trim(preg_replace('/\s+/', ' ', $label) ?? $label);
+            if ($label === '' || isset($seen[mb_strtolower($label)])) {
+                continue;
+            }
+            $url = (string) ($c['url'] ?? '');
+            if ($url === '' || preg_match('#/(ghost|studio|builder|monde|radar)(/|$)#', $url)) {
+                $url = '/n/'.$node->slug;
+            }
+            $seen[mb_strtolower($label)] = true;
+            $out[] = ['label' => $label, 'url' => $url];
+            if (count($out) >= 4) {
+                break;
+            }
+        }
+
+        return $out;
+    }
+
     public static function logTurn(GpNode $node, string $message, string $reply, array $tools, string $mode): void
     {
         if (! Schema::hasTable('ghost_logs')) {

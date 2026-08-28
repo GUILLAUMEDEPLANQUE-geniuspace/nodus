@@ -36,6 +36,14 @@
               </template>
             </div>
           </template>
+          <template x-if="m.citations && m.citations.length">
+            <div class="ghost-cites">
+              <p class="muted" style="margin:.35rem 0 .15rem;font-size:.72rem">Preuves du coffre</p>
+              <template x-for="(c, j) in m.citations" :key="j">
+                <a class="chip" :href="c.url" x-text="c.label"></a>
+              </template>
+            </div>
+          </template>
         </div>
       </template>
       <p class="muted" x-show="loading">…</p>
@@ -63,7 +71,7 @@
   .ghost-log{flex:1;overflow:auto;padding:.75rem 1rem;display:flex;flex-direction:column;gap:.65rem;min-height:8rem}
   .ghost-msg{font-size:.9rem;line-height:1.4;white-space:pre-wrap}
   .ghost-msg.user{opacity:.85;text-align:right}
-  .ghost-actions{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.35rem}
+  .ghost-actions,.ghost-cites{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.35rem}
   .ghost-form{display:flex;gap:.4rem;padding:.65rem;border-top:1px solid var(--border,#2a2c38)}
   .ghost-form input{flex:1;background:transparent;border:1px solid var(--border,#2a2c38);border-radius:.5rem;color:inherit;padding:.5rem .65rem}
   .ghost-mic,.ghost-tts{width:2.2rem;height:2.2rem;border-radius:.5rem;border:1px solid var(--border,#2a2c38);background:transparent;color:inherit;padding:0;font-size:.85rem}
@@ -102,7 +110,7 @@ function ghostOrb(slug){
         this.profile = j.profile || '';
         this.trace = { skill: j.skill || '', tools: j.tools || [], valid: j.verify ? j.verify.valid : true };
         this.memory = j.memory || [];
-        this.messages.push({role:'assistant', content:j.reply, actions:j.actions||[]});
+        this.messages.push({role:'assistant', content:j.reply, actions:j.actions||[], citations:j.citations||[]});
         this.speak(j.reply);
       }catch(e){ this.messages.push({role:'assistant', content:'Ghost indisponible un instant.'}); }
     },
@@ -119,7 +127,7 @@ function ghostOrb(slug){
           body: JSON.stringify({message:text, history:hist})
         });
         const j = await r.json();
-        this.messages.push({role:'assistant', content:j.reply||'…', actions:j.actions||[]});
+        this.messages.push({role:'assistant', content:j.reply||'…', actions:j.actions||[], citations:j.citations||[]});
         this.profile = j.profile || this.profile;
         this.trace = { skill: j.skill || this.trace.skill, tools: j.tools || [], valid: j.verify ? j.verify.valid : true };
         this.memory = j.memory || this.memory;

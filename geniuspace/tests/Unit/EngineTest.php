@@ -26,6 +26,35 @@ class EngineTest extends TestCase
         $r = Engine::alignment(['consignation'], ['figma', 'react', 'typescript']);
         $this->assertSame('faible', $r['level']);
         $this->assertSame('Alignement faible', $r['word']);
+        $this->assertContains('figma', $r['missing']);
+        $this->assertStringContainsString('Figma', $r['plain']);
+        $this->assertStringContainsString('manque', mb_strtolower($r['plain']));
+        $this->assertStringNotContainsString('token', json_encode($r));
+        $this->assertStringNotContainsString('hop', json_encode($r));
+    }
+
+    public function test_alignment_names_the_single_missing_proof(): void
+    {
+        $r = Engine::alignment(
+            ['mécanique', 'hydraulique', 'consignation', 'gmao'],
+            ['mécanique', 'hydraulique', 'consignation', 'gmao', 'caces']
+        );
+        $this->assertContains('caces', $r['missing']);
+        $this->assertSame(['caces'], $r['missing']);
+        $this->assertStringContainsString('CACES', $r['plain']);
+        $this->assertStringContainsString('manque', mb_strtolower($r['plain']));
+        $this->assertStringNotContainsString('CCK', $r['plain']);
+    }
+
+    public function test_alignment_fort_has_empty_missing(): void
+    {
+        $r = Engine::alignment(
+            ['consignation', 'mécanique', 'hydraulique', 'gmao'],
+            ['mécanique', 'hydraulique', 'consignation', 'gmao']
+        );
+        $this->assertSame('fort', $r['level']);
+        $this->assertSame([], $r['missing']);
+        $this->assertNull($r['next']);
     }
 
     public function test_vocab_never_exposes_internal_words(): void
