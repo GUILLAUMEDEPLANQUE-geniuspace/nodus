@@ -136,7 +136,7 @@ OBJECTIF
   → GENERATE / MUTATE / RECOMBINE
   → ESTIMATE (prior. Pas une observation.)
   → DESIGN expérience
-  → OBSERVE le monde (naturelle, ou en attente d’autorité)
+  → OBSERVE le monde (événements datés APRÈS un APPLY humain, sinon null)
   → EVALUATE (surprise, réfutation, discovery)
   → LEARN (échec → contrainte)
   → PREPARE → ACT (humain)
@@ -144,14 +144,15 @@ OBJECTIF
 
 | Pièce | Contrat |
 | --- | --- |
-| GhostWorldObserver | Lit le monde. N’écrit pas. Pas de crc32. |
-| GhostHypothesis | Observation → hypothèse → prédiction → contre. Cherche à **réfuter**. |
-| GhostExperiment | estimate ≠ observe. `observed` null tant que le monde n’a pas parlé. |
+| GhostWorldObserver | Lit le graphe. Trou (gap) par levier du lieu. Contraste = `catalog_contrast`, **jamais** `natural_experiment`. Pas de crc32. |
+| GhostHypothesis | Observation du trou → hypothèse → prédiction → contre. Cherche à **réfuter**. |
+| GhostExperiment | estimate ≠ observe. `observed` null sans intervention appliquée et n < 4. Pas de causalité établie (before/after non randomisé). |
+| Leviers | RH : délai, honneur, salaire, épreuve, preuves. Marchand : plancher, fourchette, teaser, certificat, rareté. Guide : rideau, fiches, portes, carnet, salon. **Pas** acquisition/reward. |
+| Fitness | taille du trou + nouveauté − coût − risque. **Pas** une table BASE. |
 | Novelty | distance de génome. |
 | Innovation | observed × surprise. Nulle sans observation. |
 | Surprise | \|observed − predicted\| |
-| BASE | prior d’estimation. **Pas** une causalité découverte. |
-| Autorité | inchangée. `strategy.deploy` = ACT + CONFIRM. |
+| Autorité | inchangée. `strategy.deploy` = ACT + CONFIRM. Preview ≠ intervention. |
 
 Une tenue (`winner`) exige `evidence = world`. Une estimation reste `untested`.
 

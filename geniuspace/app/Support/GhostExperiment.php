@@ -8,9 +8,10 @@ use Illuminate\Support\Facades\Schema;
 /**
  * ESTIMATE → DESIGN → OBSERVE → EVALUATE.
  *
- * estimate = prior (formule). Ce n’est pas une observation.
- * observe  = monde (Engine / cohortes). Peut renvoyer null.
- * evaluate = surprise, réfutation, discovery. Jamais un winner sans évidence.
+ * estimate = prior. Ce n’est pas une observation.
+ * observe  = événements du monde APRÈS une intervention. Sinon null.
+ * Un contraste de catalogue n’est jamais un observed_gain.
+ * evaluate = surprise, réfutation. Winner seulement si evidence=world et n >= MIN.
  */
 class GhostExperiment
 {
@@ -33,9 +34,15 @@ class GhostExperiment
     public static function design(array $strategy, array $hypothesis, array $world, string $nodeId = ''): array
     {
         $pred = (float) ($strategy['expected_gain'] ?? $strategy['performance'] ?? 0);
-        $c = $world['cohorts'] ?? [];
-        $controlN = (int) ($c['threads_cold'] ?? 0) + (int) ($c['media_gated'] ?? 0);
-        $treatN = (int) ($c['threads_hot'] ?? 0) + (int) ($c['media_free'] ?? 0);
+        $metric = $hypothesis['metric'] ?? 'preuves_tenues';
+        $baseline = (float) ($hypothesis['baseline'] ?? $world[$metric] ?? 0);
+        $gaps = $world['gaps'] ?? [];
+        $confounders = ['saison', 'taille_du_lieu', 'trafic_externe'];
+        foreach ($gaps as $lever => $g) {
+            if (($g['size'] ?? 0) > 0.15) {
+                $confounders[] = $lever;
+            }
+        }
 
         return [
             'id' => null,
@@ -43,12 +50,12 @@ class GhostExperiment
             'hypothesis_code' => $hypothesis['code'] ?? '',
             'objective' => $strategy['objective'] ?? '',
             'node_id' => $nodeId !== '' ? $nodeId : ($world['node_id'] ?? ''),
-            'kind' => 'natural',
-            'population' => 'lieu',
-            'control_group' => 'cohorte froide / gated',
-            'treatment_group' => 'cohorte chaude / libre',
-            'metric' => $hypothesis['metric'] ?? 'participation',
-            'baseline' => (float) ($hypothesis['baseline'] ?? $world['participation'] ?? 0),
+            'kind' => 'intervention',
+            'population' => 'visiteurs du lieu, après déploiement',
+            'control_group' => 'avant intervention (baseline)',
+            'treatment_group' => 'après APPLY humain de strategy.deploy',
+            'metric' => $metric,
+            'baseline' => $baseline,
             'prediction' => $pred,
             'observed' => null,
             'delta' => null,
@@ -56,21 +63,23 @@ class GhostExperiment
             'innovation' => null,
             'discovery_score' => null,
             'confidence' => null,
-            'n_control' => $controlN,
-            'n_treatment' => $treatN,
-            'sample_size' => $controlN + $treatN,
-            'confounders' => ['taille_du_lieu', 'saison'],
-            'causal_method' => 'natural_experiment',
+            'n_control' => (int) ($world[$metric] ?? 0),
+            'n_treatment' => 0,
+            'sample_size' => 0,
+            'confounders' => array_values(array_unique($confounders)),
+            'causal_method' => '',
+            'causal_claim' => false,
             'stopping_reason' => null,
             'status' => self::PLANNED,
             'evidence' => null,
             'strategy' => $strategy,
             'hypothesis' => $hypothesis,
+            'started_at' => now()->toDateTimeString(),
         ];
     }
 
     /**
-     * Observation du monde. Pas de jitter. Pas de formule déguisée.
+     * Observation du monde. Pas de jitter. Pas de ratio de catalogue.
      *
      * @param  array<string, mixed>  $trial
      * @param  array<string, mixed>  $world
@@ -78,51 +87,53 @@ class GhostExperiment
      */
     public static function observe(array $trial, array $world): array
     {
-        $assoc = GhostWorldObserver::associations($world);
-        $levers = $trial['hypothesis']['levers'] ?? $trial['strategy']['genome']['mechanisms'] ?? [];
-        $hit = null;
-        foreach ($assoc as $a) {
-            if (in_array($a['cause'], $levers, true) && ! ($a['underpowered'] ?? true)) {
-                $hit = $a;
-                break;
-            }
-        }
-        if ($hit === null) {
-            foreach ($assoc as $a) {
-                if (in_array($a['cause'], $levers, true)) {
-                    $hit = $a;
-                    break;
-                }
-            }
-        }
-        $n = (int) ($trial['sample_size'] ?? 0);
-        if ($hit === null || $n < 2) {
-            $trial['status'] = $n < 2 ? self::UNDERPOWERED : self::AWAITING;
+        $nodeId = (string) ($trial['node_id'] ?? $world['node_id'] ?? '');
+        $code = (string) ($trial['strategy_code'] ?? '');
+        $at = GhostWorldObserver::intervenedAt($nodeId, $code);
+        $events = GhostWorldObserver::events($nodeId, $at);
+        $n = (int) $events['n'];
+        $trial['n_treatment'] = $n;
+        $trial['sample_size'] = $n + (int) ($trial['n_control'] ?? 0);
+
+        if ($at === null) {
+            $trial['status'] = self::AWAITING;
             $trial['observed'] = null;
             $trial['delta'] = null;
-            $trial['stopping_reason'] = $n < 2
-                ? 'Pas de cohorte témoin dans le monde. L’autorité n’a pas déployé.'
-                : 'Association trop faible. Expérience planifiée, pas encore tenue.';
             $trial['evidence'] = 'none';
+            $trial['causal_claim'] = false;
+            $trial['causal_method'] = '';
+            $trial['stopping_reason'] = $n >= GhostWorldObserver::MIN_N
+                ? 'Des événements existent. Pas d’intervention déployée. Pas de causalité.'
+                : 'Pas d’intervention. Ghost n’a pas le droit d’en inventer une.';
 
             return $trial;
         }
-        if ($hit['underpowered'] ?? false) {
+        if ($n < GhostWorldObserver::MIN_N) {
             $trial['status'] = self::UNDERPOWERED;
-            $trial['observed'] = (float) $hit['delta'];
-            $trial['delta'] = (float) $hit['delta'];
-            $trial['n_treatment'] = (int) ($hit['n'] ?? $n);
-            $trial['stopping_reason'] = 'Échantillon trop petit. Delta noté, pas une tenue.';
-            $trial['evidence'] = 'weak';
+            $trial['observed'] = null;
+            $trial['delta'] = null;
+            $trial['evidence'] = 'none';
+            $trial['causal_claim'] = false;
+            $trial['causal_method'] = 'interrupted_time_series';
+            $trial['stopping_reason'] = 'Intervention tenue, échantillon trop petit (n < '.GhostWorldObserver::MIN_N.'). Delta non publié.';
 
             return $trial;
         }
+        $metric = (string) ($trial['metric'] ?? 'preuves_tenues');
+        $after = match ($metric) {
+            'participation' => $events['replies'],
+            'visits' => $events['visits'],
+            default => $events['grants'],
+        };
+        $before = (float) ($trial['baseline'] ?? 0);
+        $obs = $before > 0 ? round(($after - $before) / max($before, 1), 4) : round($after / max($n, 1), 4);
         $trial['status'] = self::OBSERVED;
-        $trial['observed'] = (float) $hit['delta'];
-        $trial['delta'] = (float) $hit['delta'];
-        $trial['causal_method'] = $hit['method'];
+        $trial['observed'] = $obs;
+        $trial['delta'] = $obs;
         $trial['evidence'] = 'world';
-        $trial['stopping_reason'] = 'Expérience naturelle. Pas une intervention Ghost.';
+        $trial['causal_method'] = 'interrupted_time_series';
+        $trial['causal_claim'] = false;
+        $trial['stopping_reason'] = 'Avant/après sur événements datés. Contrôle non randomisé : pas une causalité établie.';
 
         return $trial;
     }
@@ -141,7 +152,7 @@ class GhostExperiment
         $h = GhostHypothesis::falsify($trial['hypothesis'] ?? [], [
             'observed' => $obs,
             'prediction' => $pred,
-            'n' => (int) ($trial['sample_size'] ?? 0),
+            'n' => (int) ($trial['n_treatment'] ?? $trial['sample_size'] ?? 0),
         ]);
         $trial['hypothesis'] = $h;
         if ($obs === null) {
@@ -159,7 +170,7 @@ class GhostExperiment
         $trial['surprise'] = round($surprise, 4);
         $trial['innovation'] = $innovation;
         $trial['discovery_score'] = round($obs + $novelty + $surprise - $cost - $risk, 4);
-        $trial['confidence'] = round(min(0.9, 0.4 + 0.1 * (int) ($trial['sample_size'] ?? 0)), 4);
+        $trial['confidence'] = round(min(0.9, 0.35 + 0.05 * (int) ($trial['n_treatment'] ?? 0)), 4);
         $trial['verdict'] = $h['verdict'];
         $s = $trial['strategy'] ?? [];
         $s['observed_gain'] = $obs;
@@ -167,7 +178,7 @@ class GhostExperiment
         $s['surprise'] = $trial['surprise'];
         $s['innovation'] = $innovation;
         $s['evidence'] = $trial['evidence'];
-        $s['status'] = self::strategyStatus($h, $obs, $risk);
+        $s['status'] = self::strategyStatus($h, $obs, $risk, $trial);
         $trial['strategy'] = $s;
 
         return $trial;
@@ -175,11 +186,15 @@ class GhostExperiment
 
     /**
      * @param  array<string, mixed>  $h
+     * @param  array<string, mixed>  $trial
      */
-    public static function strategyStatus(array $h, float $obs, float $risk): string
+    public static function strategyStatus(array $h, float $obs, float $risk, array $trial = []): string
     {
         if ($risk > 0.35) {
             return 'dangerous';
+        }
+        if (($trial['evidence'] ?? '') !== 'world' || ($trial['observed'] ?? null) === null) {
+            return 'untested';
         }
         if (($h['status'] ?? '') === GhostHypothesis::REFUTED) {
             return 'loser';

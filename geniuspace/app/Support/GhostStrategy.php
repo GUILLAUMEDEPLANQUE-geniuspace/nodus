@@ -14,9 +14,19 @@ use Illuminate\Support\Facades\Schema;
 class GhostStrategy
 {
     /** @var list<string> */
+    public const LEVERS_RH = ['delai', 'honneur', 'clarte_salaire', 'epreuve', 'preuves'];
+
+    /** @var list<string> */
+    public const LEVERS_SHOP = ['plancher', 'certificat', 'fourchette', 'teaser', 'rarete'];
+
+    /** @var list<string> */
+    public const LEVERS_GUIDE = ['rideau', 'fiches', 'portes', 'carnet', 'salon'];
+
+    /** @var list<string> */
     public const LEVERS = [
-        'acquisition', 'activation', 'motivation', 'friction',
-        'reward', 'social', 'timing', 'content', 'retention',
+        'delai', 'honneur', 'clarte_salaire', 'epreuve', 'preuves',
+        'plancher', 'certificat', 'fourchette', 'teaser', 'rarete',
+        'rideau', 'fiches', 'portes', 'carnet', 'salon',
     ];
 
     /** @var list<string> */
@@ -34,25 +44,24 @@ class GhostStrategy
 
     public const EXPLORE_RATIO = 0.30;
 
-    /** perf, cost, risk — base par levier. */
-    private const BASE = [
-        'acquisition' => [0.12, 0.18, 0.08],
-        'activation' => [0.15, 0.10, 0.06],
-        'motivation' => [0.14, 0.08, 0.07],
-        'friction' => [0.18, 0.06, 0.05],
-        'reward' => [0.16, 0.22, 0.12],
-        'social' => [0.13, 0.09, 0.10],
-        'timing' => [0.10, 0.05, 0.08],
-        'content' => [0.11, 0.12, 0.04],
-        'retention' => [0.17, 0.10, 0.06],
-    ];
+    /**
+     * @return list<string>
+     */
+    public static function family(?string $profile): array
+    {
+        return match ($profile) {
+            'rh' => self::LEVERS_RH,
+            'marchand' => self::LEVERS_SHOP,
+            default => self::LEVERS_GUIDE,
+        };
+    }
 
     public static function looksLike(string $message): bool
     {
         $m = mb_strtolower($message);
 
         return (bool) preg_match(
-            '/strat[eé]g|participation|compl[eé]tion|taux d.activation|d[eé]couverte de strat|laboratoire de strat|ventes|conversion|sans augmenter le budget|chiffre d.affaires/u',
+            '/strat[eé]g|participation|compl[eé]tion|d[eé]couverte de strat|laboratoire de strat|ventes|conversion|sans augmenter le budget|chiffre d.affaires|[eé]preuve|d[eé]lai|alignement|rideau|preuves manqu/u',
             $m
         );
     }
@@ -135,7 +144,7 @@ class GhostStrategy
     {
         $mechs = array_values(array_intersect(self::LEVERS, $g['mechanisms'] ?? []));
         if ($mechs === []) {
-            $mechs = ['activation'];
+            $mechs = ['salon'];
         }
         $seq = $g['sequence'] ?? $mechs;
         $seq = array_values(array_filter($seq, fn ($x) => in_array($x, self::LEVERS, true)));
@@ -159,69 +168,49 @@ class GhostStrategy
      * @param  list<array<string, mixed>>  $memory
      * @return array{performance:float, novelty:float, cost:float, risk:float, fitness:float}
      */
-    public static function score(array $s, array $memory = []): array
+    public static function score(array $s, array $memory = [], array $world = []): array
     {
         $g = $s['genome'] ?? self::genome([]);
-        $perf = 0.0;
-        $cost = 0.0;
-        $risk = 0.0;
+        $gaps = $world['gaps'] ?? [];
+        $gapHit = 0.0;
         foreach ($g['mechanisms'] as $m) {
-            $b = self::BASE[$m] ?? [0.1, 0.1, 0.1];
-            $perf += $b[0];
-            $cost += $b[1];
-            $risk += $b[2];
+            $gapHit += (float) (($gaps[$m]['size'] ?? 0));
         }
-        $set = $g['mechanisms'];
-        if (in_array('reward', $set, true) && in_array('social', $set, true)) {
-            $perf += 0.07;
-        }
-        if (in_array('friction', $set, true) && in_array('activation', $set, true)) {
-            $perf += 0.08;
-        }
-        if (in_array('timing', $set, true) && in_array('content', $set, true)) {
-            $perf += 0.04;
-        }
-        if (in_array('acquisition', $set, true) && in_array('retention', $set, true) && ! in_array('activation', $set, true)) {
-            $perf -= 0.05;
-            $risk += 0.04;
+        $n = max(1, count($g['mechanisms']));
+        $perf = $gaps === []
+            ? round(0.04 * $n, 4)
+            : round(min(0.85, $gapHit / $n), 4);
+        $cost = min(0.9, 0.05 * $n);
+        $risk = 0.04 * $n;
+        if (array_intersect($g['mechanisms'], ['epreuve', 'plancher', 'rideau'])) {
+            $risk += 0.06;
         }
         $ops = $g['mutations'] ?? [];
         if (in_array('AMPLIFY', $ops, true)) {
-            $perf += 0.05;
+            $perf = min(0.9, $perf + 0.04);
             $cost += 0.04;
             $risk += 0.03;
         }
         if (in_array('MINIMIZE', $ops, true)) {
-            $cost = max(0.01, $cost - 0.06);
-            $perf -= 0.01;
+            $cost = max(0.01, $cost - 0.04);
         }
         if (in_array('DELAY', $ops, true)) {
-            $perf -= 0.02;
-            $risk += 0.05;
-        }
-        if (in_array('ACCELERATE', $ops, true)) {
-            $perf += 0.03;
-            $cost += 0.05;
-        }
-        if (in_array('PERSONALIZE', $ops, true)) {
-            $perf += 0.04;
-            $cost += 0.03;
+            $risk += 0.04;
         }
         if (in_array('CONDITION', $ops, true)) {
-            $risk = max(0.02, $risk - 0.04);
+            $risk = max(0.02, $risk - 0.03);
         }
-        $n = max(1, count($set));
-        $perf = $perf / sqrt($n);
-        $cost = min(0.9, $cost);
-        $risk = min(0.9, $risk);
         $novelty = self::novelty($g, $memory);
+        if (is_numeric($s['observed_gain'] ?? null)) {
+            $perf = (float) $s['observed_gain'];
+        }
         $fitness = round($perf + $novelty - $cost - $risk, 4);
 
         return [
             'performance' => round($perf, 4),
             'novelty' => round($novelty, 4),
             'cost' => round($cost, 4),
-            'risk' => round($risk, 4),
+            'risk' => round(min(0.9, $risk), 4),
             'fitness' => $fitness,
         ];
     }
@@ -260,7 +249,7 @@ class GhostStrategy
         $g = $s['genome'] ?? self::genome([]);
         $me = $g['mechanisms'];
         $seq = $g['sequence'];
-        $unused = array_values(array_diff(self::LEVERS, $me));
+        $unused = array_values(array_diff(self::familyOf($me), $me));
         $target = $g['target'];
         switch ($op) {
             case 'REMOVE':
@@ -305,9 +294,10 @@ class GhostStrategy
                 $target = $target === 'all' ? 'new_users' : $target;
                 break;
             case 'PERSONALIZE':
-                if (! in_array('activation', $me, true)) {
-                    $me[] = 'activation';
-                    $seq[] = 'activation';
+                $pick = self::pickUnused($unused, $g);
+                if ($pick) {
+                    $me[] = $pick;
+                    $seq[] = $pick;
                 }
                 break;
             case 'DELAY':
@@ -346,9 +336,9 @@ class GhostStrategy
      * @param  list<array<string, mixed>>  $memory
      * @return array<string, mixed>
      */
-    public static function estimate(array $s, array $memory = []): array
+    public static function estimate(array $s, array $memory = [], array $world = []): array
     {
-        $sc = self::score($s, $memory);
+        $sc = self::score($s, $memory, $world);
         $s = array_merge($s, $sc);
         $s['expected_gain'] = $sc['performance'];
         $s['predicted_gain'] = $sc['performance'];
@@ -399,25 +389,33 @@ class GhostStrategy
     {
         $g = $s['genome'] ?? self::genome([]);
         $attacks = [];
-        if (in_array('reward', $g['mechanisms'] ?? [], true) && ! in_array('retention', $g['mechanisms'] ?? [], true)) {
+        $me = $g['mechanisms'] ?? [];
+        if (in_array('fourchette', $me, true) && ! in_array('plancher', $me, true)) {
             $attacks[] = [
                 'id' => 'ATTACK-1',
-                'attack' => 'La récompense attire. Sans rétention, ça s’évapore chez les avancés.',
+                'attack' => 'Négocier sans plancher : le lieu lâche le prix tenu.',
+                'mode' => 'dangerous',
+            ];
+        }
+        if (in_array('epreuve', $me, true) && ! in_array('preuves', $me, true)) {
+            $attacks[] = [
+                'id' => 'ATTACK-2',
+                'attack' => 'L’épreuve sans carnet : on teste, rien n’est tenu.',
                 'mode' => 'context_dependent',
+            ];
+        }
+        if (in_array('salon', $me, true) && ! in_array('fiches', $me, true)) {
+            $attacks[] = [
+                'id' => 'ATTACK-3',
+                'attack' => 'Parler sans fiche : le salon tourne à vide.',
+                'mode' => 'loser',
             ];
         }
         if (($s['cost'] ?? 0) > 0.28) {
             $attacks[] = [
-                'id' => 'ATTACK-2',
-                'attack' => 'Le coût dépasse le seuil. La maison refuse le budget.',
+                'id' => 'ATTACK-4',
+                'attack' => 'Trop de leviers d’un coup. La maison refuse la charge.',
                 'mode' => 'dangerous',
-            ];
-        }
-        if (in_array('social', $g['mechanisms'] ?? [], true) && ! in_array('friction', $g['mechanisms'] ?? [], true)) {
-            $attacks[] = [
-                'id' => 'ATTACK-3',
-                'attack' => 'Boucle sociale sans friction réduite : abandon au premier pas.',
-                'mode' => 'loser',
             ];
         }
         if ($attacks === []) {
@@ -465,7 +463,7 @@ class GhostStrategy
         $pool = self::generate($objective, 24, $problem['levers'], $problem['target'], $banned);
         $history = [];
         foreach ($pool as $i => $s) {
-            $pool[$i] = self::estimate($s, $memory);
+            $pool[$i] = self::estimate($s, $memory, $world);
             $history[] = (float) $pool[$i]['expected_gain'];
         }
         usort($pool, fn ($a, $b) => ($b['fitness'] <=> $a['fitness']));
@@ -476,13 +474,13 @@ class GhostStrategy
         $top = array_slice($pool, 0, 3);
         foreach ($top as $t) {
             foreach ($ops as $op) {
-                $child = self::estimate(self::mutate($t, $op, $top[1] ?? null), $memory);
+                $child = self::estimate(self::mutate($t, $op, $top[1] ?? null), $memory, $world);
                 $pool[] = $child;
                 $history[] = (float) $child['expected_gain'];
             }
         }
         if (isset($top[0], $top[1])) {
-            $pool[] = self::estimate(self::recombine($top[0], $top[1]), $memory);
+            $pool[] = self::estimate(self::recombine($top[0], $top[1]), $memory, $world);
         }
         $seen = [];
         $uniq = [];
@@ -619,7 +617,9 @@ class GhostStrategy
                 'status' => $r->status,
                 'genome' => $g,
                 'fitness' => (float) $r->fitness,
-                'observed_gain' => (float) $r->observed_gain,
+                'observed_gain' => Schema::hasColumn('ghost_strategies', 'observed_null') && $r->observed_null
+                    ? null
+                    : (isset($r->observed_gain) && ($r->evidence ?? '') === '' ? null : (isset($r->observed_gain) ? (float) $r->observed_gain : null)),
             ];
         }
 
@@ -656,15 +656,21 @@ class GhostStrategy
     public static function label(string $lever): string
     {
         return match ($lever) {
-            'acquisition' => 'acquisition',
-            'activation' => 'activation',
-            'motivation' => 'motivation',
-            'friction' => 'friction',
-            'reward' => 'récompense',
-            'social' => 'social',
-            'timing' => 'timing',
-            'content' => 'contenu',
-            'retention' => 'rétention',
+            'delai' => 'délai publié',
+            'honneur' => 'fiabilité héritée',
+            'clarte_salaire' => 'salaire publié',
+            'epreuve' => 'épreuve',
+            'preuves' => 'preuves du carnet',
+            'plancher' => 'plancher',
+            'certificat' => 'certificat',
+            'fourchette' => 'fourchette',
+            'teaser' => 'teaser',
+            'rarete' => 'rareté tenue',
+            'rideau' => 'rideau',
+            'fiches' => 'fiches',
+            'portes' => 'portes',
+            'carnet' => 'carnet',
+            'salon' => 'salon',
             default => $lever,
         };
     }
@@ -699,6 +705,13 @@ class GhostStrategy
                 ]
             );
         }
+        if (Schema::hasColumn('ghost_strategies', 'observed_null')) {
+            foreach ($board['pool'] ?? [] as $s) {
+                DB::table('ghost_strategies')->where('node_id', $nodeId)->where('code', $s['code'])->update([
+                    'observed_null' => $s['observed_gain'] === null,
+                ]);
+            }
+        }
         if (Schema::hasColumn('ghost_strategies', 'evidence')) {
             foreach ($board['pool'] ?? [] as $s) {
                 DB::table('ghost_strategies')->where('node_id', $nodeId)->where('code', $s['code'])->update([
@@ -709,6 +722,21 @@ class GhostStrategy
                 ]);
             }
         }
+    }
+
+    /**
+     * @param  list<string>  $me
+     * @return list<string>
+     */
+    private static function familyOf(array $me): array
+    {
+        foreach ([self::LEVERS_RH, self::LEVERS_SHOP, self::LEVERS_GUIDE] as $set) {
+            if (array_intersect($me, $set) !== []) {
+                return $set;
+            }
+        }
+
+        return self::LEVERS_GUIDE;
     }
 
     /**

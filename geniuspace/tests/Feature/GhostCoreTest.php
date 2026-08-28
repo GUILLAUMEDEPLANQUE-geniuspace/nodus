@@ -128,8 +128,8 @@ class GhostCoreTest extends TestCase
     public function test_rivals_and_distinguish_seek_refutation(): void
     {
         $rivals = GhostHypothesis::rivals('la baisse vient du prix');
-        $this->assertCount(7, $rivals);
-        $this->assertSame('prix', $rivals[0]['cause']);
+        $this->assertCount(5, $rivals);
+        $this->assertSame('plancher', $rivals[0]['cause']);
         $this->assertStringContainsString('réfuterait', $rivals[0]['falsify']);
         $d = GhostCritic::distinguish([['levers' => ['prix']], ['levers' => ['ux']]]);
         $this->assertNotEmpty($d);

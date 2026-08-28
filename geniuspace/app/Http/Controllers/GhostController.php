@@ -194,7 +194,11 @@ class GhostController extends Controller
         return view('ghost-lab', [
             'node' => $node,
             'board' => null,
-            'objective' => 'Augmenter la participation de 20 %.',
+            'objective' => match (Ghost::profile($node)) {
+                'rh' => 'Tenir plus d’épreuves et publier les délais.',
+                'marchand' => 'Tenir plus de preuves d’achat sans baisser le plancher.',
+                default => 'Ouvrir les fiches tenues, sans spoiler.',
+            },
         ]);
     }
 

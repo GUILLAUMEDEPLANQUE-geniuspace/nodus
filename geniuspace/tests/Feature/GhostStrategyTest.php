@@ -39,7 +39,7 @@ class GhostStrategyTest extends TestCase
 
     public function test_fitness_is_performance_plus_novelty_minus_cost_risk(): void
     {
-        $s = GhostStrategy::make('x', ['reward'], ['reward']);
+        $s = GhostStrategy::make('x', ['fourchette'], ['fourchette']);
         $sc = GhostStrategy::score($s);
         $this->assertEqualsWithDelta(
             $sc['performance'] + $sc['novelty'] - $sc['cost'] - $sc['risk'],
@@ -50,19 +50,19 @@ class GhostStrategyTest extends TestCase
 
     public function test_recombine_keeps_both_parents(): void
     {
-        $a = GhostStrategy::make('x', ['reward'], ['reward']);
-        $b = GhostStrategy::make('x', ['social'], ['social']);
+        $a = GhostStrategy::make('x', ['fourchette'], ['fourchette']);
+        $b = GhostStrategy::make('x', ['salon'], ['salon']);
         $d = GhostStrategy::recombine($a, $b);
-        $this->assertContains('reward', $d['genome']['mechanisms']);
-        $this->assertContains('social', $d['genome']['mechanisms']);
+        $this->assertContains('fourchette', $d['genome']['mechanisms']);
+        $this->assertContains('salon', $d['genome']['mechanisms']);
         $this->assertContains('COMBINE', $d['genome']['mutations']);
     }
 
     public function test_mutations_change_the_genome(): void
     {
-        $s = GhostStrategy::make('x', ['reward', 'social'], ['reward', 'social']);
+        $s = GhostStrategy::make('x', ['fourchette', 'salon'], ['fourchette', 'salon']);
         $rev = GhostStrategy::mutate($s, 'REVERSE');
-        $this->assertSame(['social', 'reward'], $rev['genome']['sequence']);
+        $this->assertSame(['salon', 'fourchette'], $rev['genome']['sequence']);
         $delay = GhostStrategy::mutate($s, 'DELAY');
         $this->assertContains('DELAY', $delay['genome']['mutations']);
         $add = GhostStrategy::mutate($s, 'ADD');
@@ -79,7 +79,7 @@ class GhostStrategyTest extends TestCase
 
     public function test_challenge_hardens_the_winner(): void
     {
-        $s = GhostStrategy::make('x', ['reward'], ['reward']);
+        $s = GhostStrategy::make('x', ['fourchette'], ['fourchette']);
         $attacks = GhostStrategy::challenge($s);
         $this->assertNotEmpty($attacks);
         $this->assertStringStartsWith('ATTACK', $attacks[0]['id']);
@@ -89,7 +89,7 @@ class GhostStrategyTest extends TestCase
 
     public function test_deploy_is_act_confirm_preview(): void
     {
-        $s = GhostStrategy::make('x', ['friction', 'activation'], ['friction', 'activation']);
+        $s = GhostStrategy::make('x', ['teaser', 'portes'], ['teaser', 'portes']);
         $d = GhostStrategy::deploy($s);
         $this->assertSame(GhostAction::ACT, $d['level']);
         $this->assertSame(GhostAction::CONFIRM, $d['autonomy']);

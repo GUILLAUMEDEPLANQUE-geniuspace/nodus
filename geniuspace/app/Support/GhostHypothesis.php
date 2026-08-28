@@ -24,21 +24,26 @@ class GhostHypothesis
      * @var array<string, string> concept → levier
      */
     public const CONCEPTS = [
-        'réputation' => 'social',
-        'progression' => 'activation',
-        'responsabilité' => 'motivation',
-        'rareté' => 'timing',
-        'statut' => 'social',
-        'coopération' => 'social',
-        'défi' => 'motivation',
-        'personnalisation' => 'activation',
-        'reconnaissance' => 'social',
-        'réciprocité' => 'social',
-        'friction' => 'friction',
-        'contenu' => 'content',
-        'rétention' => 'retention',
-        'acquisition' => 'acquisition',
-        'récompense' => 'reward',
+        'réputation' => 'honneur',
+        'progression' => 'epreuve',
+        'responsabilité' => 'honneur',
+        'rareté' => 'rarete',
+        'statut' => 'honneur',
+        'coopération' => 'salon',
+        'défi' => 'epreuve',
+        'personnalisation' => 'fiches',
+        'reconnaissance' => 'salon',
+        'réciprocité' => 'salon',
+        'friction' => 'teaser',
+        'contenu' => 'fiches',
+        'carnet' => 'carnet',
+        'rideau' => 'rideau',
+        'salaire' => 'clarte_salaire',
+        'délai' => 'delai',
+        'épreuve' => 'epreuve',
+        'certificat' => 'certificat',
+        'plancher' => 'plancher',
+        'fourchette' => 'fourchette',
     ];
 
     /**
@@ -55,68 +60,57 @@ class GhostHypothesis
             $target = 'advanced';
         }
 
-        if (preg_match('/particip|forum|salon|r[eé]pons/u', $m)) {
+        $profile = (string) ($world['profile'] ?? '');
+        $family = GhostStrategy::family($profile !== '' ? $profile : null);
+
+        if (preg_match('/salaire|d[eé]lai|[eé]preuve|recrut|mission|align/u', $m) || $profile === 'rh') {
+            return [
+                'objective' => $objective,
+                'key' => 'increase_preuves',
+                'metric' => 'preuves_tenues',
+                'baseline' => (float) ($world['preuves_tenues'] ?? $world['grants'] ?? 0),
+                'levers' => GhostStrategy::LEVERS_RH,
+                'target' => $target,
+                'why' => [
+                    'delai' => 'Un délai écrit change qui postule.',
+                    'honneur' => 'La fiabilité de la maison se lit sur l’offre.',
+                    'clarte_salaire' => 'Sans salaire publié, le signal est mort.',
+                    'epreuve' => 'L’épreuve tranche. Le CV non.',
+                    'preuves' => 'Le carnet dit ce qui manque.',
+                ],
+            ];
+        }
+        if (preg_match('/particip|forum|salon|r[eé]pons|rideau|fiche/u', $m) || $profile === 'guide') {
             return [
                 'objective' => $objective,
                 'key' => 'increase_participation',
                 'metric' => 'participation',
                 'baseline' => (float) ($world['participation'] ?? 0),
-                'levers' => ['social', 'friction', 'content', 'timing', 'motivation'],
+                'levers' => GhostStrategy::LEVERS_GUIDE,
                 'target' => $target,
                 'why' => [
-                    'social' => 'Le salon est le lieu de la participation.',
-                    'friction' => 'Un paywall avant le premier mot coupe la prise de parole.',
-                    'content' => 'Sans matière à discuter, pas de réponse.',
-                    'timing' => 'Le moment de la question change le taux.',
-                    'motivation' => 'La raison de parler n’est pas toujours une récompense.',
+                    'salon' => 'Le salon est le lieu de la prise de parole.',
+                    'fiches' => 'Sans matière, pas de réponse.',
+                    'rideau' => 'Ce qui est caché ne se discute pas.',
+                    'portes' => 'Une porte média ouvre un lieu, pas un timecode.',
+                    'carnet' => 'Tenir une preuve donne une raison de revenir.',
                 ],
             ];
         }
-        if (preg_match('/r[eé]tent|reviens|fid[eé]l/u', $m)) {
-            return [
-                'objective' => $objective,
-                'key' => 'increase_retention',
-                'metric' => 'completion',
-                'baseline' => (float) ($world['completion'] ?? 0),
-                'levers' => ['retention', 'social', 'content', 'timing'],
-                'target' => $target,
-                'why' => [
-                    'retention' => 'Revenir n’est pas arriver.',
-                    'social' => 'Une boucle sociale retient sans payer.',
-                    'content' => 'La suite manque.',
-                    'timing' => 'Trop tôt ou trop tard, ça lâche.',
-                ],
-            ];
-        }
-        if (preg_match('/acquisi|trafic|visite/u', $m)) {
-            return [
-                'objective' => $objective,
-                'key' => 'increase_acquisition',
-                'metric' => 'visits',
-                'baseline' => (float) ($world['visits'] ?? 0),
-                'levers' => ['acquisition', 'content', 'social'],
-                'target' => $target,
-                'why' => [
-                    'acquisition' => 'Faire venir.',
-                    'content' => 'Une raison de cliquer.',
-                    'social' => 'Une raison d’inviter.',
-                ],
-            ];
-        }
-        if (preg_match('/ventes|conversion|chiffre/u', $m)) {
+        if (preg_match('/ventes|conversion|chiffre|prix|plancher|certificat/u', $m) || $profile === 'marchand') {
             return [
                 'objective' => $objective,
                 'key' => 'increase_sales',
-                'metric' => 'conversion',
-                'baseline' => (float) ($world['conversion'] ?? $world['completion'] ?? 0),
-                'levers' => ['friction', 'motivation', 'content', 'timing', 'reward'],
+                'metric' => 'completion',
+                'baseline' => (float) ($world['completion'] ?? 0),
+                'levers' => GhostStrategy::LEVERS_SHOP,
                 'target' => $target,
                 'why' => [
-                    'friction' => 'Un parcours lent coupe la conversion.',
-                    'motivation' => 'Le prix perçu n’est pas le prix affiché.',
-                    'content' => 'Le message ne parle pas au bon segment.',
-                    'timing' => 'Trop tôt après le dernier contact.',
-                    'reward' => 'Une réduction n’est pas une cause.',
+                    'plancher' => 'Le plancher tient. Ghost ne le lâche pas.',
+                    'fourchette' => 'La négociation vit dans min/max, pas dans un rabais inventé.',
+                    'teaser' => 'Le teaser public, la suite au coffre.',
+                    'certificat' => 'La relique sans certificat n’est pas une preuve.',
+                    'rarete' => 'La rareté se lit au stock tenu, pas à un badge.',
                 ],
             ];
         }
@@ -126,14 +120,9 @@ class GhostHypothesis
             'key' => 'increase_completion',
             'metric' => 'completion',
             'baseline' => (float) ($world['completion'] ?? 0),
-            'levers' => ['friction', 'activation', 'content', 'motivation'],
+            'levers' => $family,
             'target' => $target,
-            'why' => [
-                'friction' => 'Moins d’étapes, plus de tenues.',
-                'activation' => 'Le premier geste décide.',
-                'content' => 'On termine ce qu’on comprend.',
-                'motivation' => 'Sans enjeu, on part.',
-            ],
+            'why' => array_combine($family, array_map(fn ($l) => GhostStrategy::label($l), $family)) ?: [],
         ];
     }
 
@@ -147,35 +136,39 @@ class GhostHypothesis
     {
         $metric = $problem['metric'];
         $baseline = (float) ($problem['baseline'] ?? 0);
-        $assoc = GhostWorldObserver::associations($world);
+        $gaps = $world['gaps'] ?? [];
+        uasort($gaps, fn ($a, $b) => (($b['size'] ?? 0) <=> ($a['size'] ?? 0)));
+        $topLever = array_key_first($gaps) ?: ($problem['levers'][0] ?? 'fiches');
+        $top = $gaps[$topLever] ?? ['size' => 0, 'label' => $topLever];
         $out = [];
 
-        $primaryCause = $assoc[0]['cause'] ?? ($problem['levers'][0] ?? 'friction');
         $out[] = self::make(
             $world,
             $problem,
             sprintf(
-                'Les nouveaux quittent après la première interaction (baseline %s).',
+                'Le monde montre un trou « %s » (%.0f %% manquant). Baseline %s.',
+                $top['label'] ?? GhostStrategy::label((string) $topLever),
+                ((float) ($top['size'] ?? 0)) * 100,
                 self::pct($baseline)
             ),
-            sprintf('La cause principale est %s.', GhostStrategy::label($primaryCause)),
-            sprintf('Agir sur %s devrait bouger %s de 8 à 15 %% (prior).', GhostStrategy::label($primaryCause), $metric),
-            0.62,
-            'Le problème pourrait être le manque de motivation, pas '.$primaryCause.'.',
-            [$primaryCause],
-            $assoc[0] ?? null
+            sprintf('Agir sur %s fermera ce trou.', GhostStrategy::label((string) $topLever)),
+            sprintf('Prior : %s bouge de 5 à 12 %% si le trou se ferme. Pas une observation.', $metric),
+            0.55,
+            sprintf('Le trou pourrait venir d’ailleurs que %s.', GhostStrategy::label((string) $topLever)),
+            [(string) $topLever],
+            $world['contrasts'][0] ?? null
         );
 
-        $counterLever = in_array('motivation', $problem['levers'], true) ? 'motivation' : ($problem['levers'][1] ?? 'content');
+        $counter = $problem['levers'][1] ?? (array_keys($gaps)[1] ?? 'fiches');
         $out[] = self::make(
             $world,
             $problem,
-            sprintf('Même observation : baseline %s.', self::pct($baseline)),
-            sprintf('Contre-hypothèse : %s, pas %s.', GhostStrategy::label($counterLever), GhostStrategy::label($primaryCause)),
-            'Si on mute la première et que rien ne bouge, la contre-hypothèse gagne.',
-            0.48,
+            sprintf('Même lecture de monde. Baseline %s.', self::pct($baseline)),
+            sprintf('Contre-hypothèse : %s, pas %s.', GhostStrategy::label((string) $counter), GhostStrategy::label((string) $topLever)),
+            'Si on mute le premier levier et que rien ne bouge, la contre-hypothèse gagne.',
+            0.45,
             'La première hypothèse pourrait quand même être vraie.',
-            [$counterLever],
+            [(string) $counter],
             null
         );
 
@@ -310,15 +303,17 @@ class GhostHypothesis
      */
     public static function rivals(string $claim): array
     {
-        $causes = [
-            'prix' => 'La baisse vient du prix.',
-            'ux' => 'Le parcours a ralenti le checkout.',
-            'trafic' => 'La qualité du trafic a chuté.',
-            'saisonnalité' => 'Un effet de saison, pas un levier interne.',
-            'concurrence' => 'Un concurrent a bougé.',
-            'stock' => 'Une rupture ou un délai d’expédition.',
-            'tracking' => 'Le tracking sous-estime la conversion réelle.',
-        ];
+        $m = mb_strtolower($claim);
+        $family = GhostStrategy::LEVERS_GUIDE;
+        if (preg_match('/prix|plancher|vente|fourchette|certificat/u', $m)) {
+            $family = GhostStrategy::LEVERS_SHOP;
+        } elseif (preg_match('/salaire|[eé]preuve|d[eé]lai|recrut|align/u', $m)) {
+            $family = GhostStrategy::LEVERS_RH;
+        }
+        $causes = [];
+        foreach ($family as $lever) {
+            $causes[$lever] = 'Le trou vient de '.GhostStrategy::label($lever).'.';
+        }
         $keys = array_keys($causes);
         $out = [];
         $i = 0;

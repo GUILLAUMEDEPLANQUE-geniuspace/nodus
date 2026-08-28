@@ -19,7 +19,15 @@
     <section class="card" style="padding:1.2rem 1.3rem;margin:1rem 0">
       <p class="kicker">Monde observé</p>
       <p class="muted">{{ $w['threads'] ?? 0 }} sujets · {{ $w['replies'] ?? 0 }} réponses · {{ $w['media'] ?? 0 }} médias · {{ $w['grants'] ?? 0 }} preuves</p>
-      <p>Participation {{ number_format(($w['participation'] ?? 0)*100, 2, ',', ' ') }} % · complétion {{ number_format(($w['completion'] ?? 0)*100, 2, ',', ' ') }} %</p>
+      <p>Profil {{ $w['profile'] ?? 'guide' }} · participation {{ number_format(($w['participation'] ?? 0)*100, 2, ',', ' ') }} % · preuves tenues {{ $w['preuves_tenues'] ?? 0 }}</p>
+      @if(!empty($w['gaps']))
+        <p class="kicker" style="margin-top:.8rem">Trous du monde</p>
+        @foreach($w['gaps'] as $lever => $g)
+          @if(($g['size'] ?? 0) > 0)
+            <p>{{ \App\Support\GhostStrategy::label($lever) }} — {{ $g['label'] ?? '' }} ({{ number_format(($g['size']??0)*100, 0) }} %)</p>
+          @endif
+        @endforeach
+      @endif
     </section>
 
     @if($h)
