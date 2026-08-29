@@ -19,6 +19,8 @@ class DoorTest extends TestCase
             ->assertSee('L’hôte n’en sort pas', false)
             ->assertSee('Vera', false)
             ->assertSee('Lumen', false)
+            ->assertSee('Hub manga', false)
+            ->assertSee('RH / missions', false)
             ->assertDontSee('CCK')
             ->assertDontSee('parent_of')
             ->assertDontSee('GpNode');

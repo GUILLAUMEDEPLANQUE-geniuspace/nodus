@@ -9,14 +9,14 @@ Quatre classes. Une flèche = une dépendance. **Pas de cycle.**
                  │
         ┌────────┴────────┐
         │                 │
-   ┌────┴────┐       ┌────┴────┐
+   ┌───┴────┐       ┌───┴────┐
    │ Chrome  │       │ Grantor │
    │ habillage│       │ preuves │
-   └────▲────┘       └────▲────┘
+   └───▲────┘       └───▲────┘
         │                 │
         └────────┬────────┘
                  │
-            ┌────┴────┐
+            ┌───┴────┐
             │  Ghost  │  orchestre. Propose. N’écrit pas un grant.
             └─────────┘
 ```
@@ -32,11 +32,12 @@ Quatre classes. Une flèche = une dépendance. **Pas de cycle.**
 
 `alignment()` nomme les preuves manquantes (« Il vous manque la preuve CACES »). Diff d’ensembles, pas du ML. Les citations Ghost publiques passent par `Ghost::publicCitations` : world/evidence, jamais belief, jamais `/ghost/lab`.
 
+Le chat public (`GET|POST /n/{slug}/ghost`) passe par `GhostHost::publicSurface`. `Ghost::reply` reste entier. La télémétrie (growth, belief, critic, simulations) ne sort pas de l’orbe.
+
 ```
 INTENT → PLAN → CONTRACT → AUTHORIZE → PREVIEW → APPLY → OBSERVE → VERIFY → STATE'
 ```
 
-Les pages de sculpture (`/studio`, `/monde`, `/builder`, `/ghost/editor`, `/ghost/plan`, `/ghost/gym`, `/ghost/lab`, `/ghost/cerveau`) exigent un rôle. Le chat public (`POST /n/{slug}/ghost`) ne sculpte pas. Une question factuelle passe par le tribunal : preuve ou refus. La consolidation (rêve) n’écrit pas le monde.
+Les pages de sculpture (`/studio`, `/monde`, `/builder`, `/ghost/editor`, `/ghost/plan`, `/ghost/gym`, `/ghost/lab`, `/ghost/cerveau`, `/ghost/maturity`) exigent un rôle. Le chat public ne sculpte pas. Une question factuelle passe par le tribunal : preuve ou refus. La consolidation (rêve) n’écrit pas le monde.
 
-
-Test : `tests/Unit/KernelBoundaryTest.php` lit le source. Un `Grantor` dans `Engine.php` fait échouer la suite.
+Test : `tests/Unit/KernelBoundaryTest.php` lit le source. Un `Grantor` dans `Engine.php` fait échouer la suite. `KernelHostTest` vérifie que l’hôte ne connaît pas Dream et que le contrôleur appelle `publicSurface`.
