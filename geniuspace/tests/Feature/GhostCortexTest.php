@@ -15,6 +15,7 @@ use App\Support\GhostSynapse;
 use App\Support\GhostTribunal;
 use Database\Seeders\DualWorldsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Tests\TestCase;
 
 class GhostCortexTest extends TestCase
@@ -184,6 +185,7 @@ class GhostCortexTest extends TestCase
             ->assertOk()
             ->assertSee('Cerveau', false)
             ->assertSee('Monde tenu maintenant', false)
+            ->assertSee('Pas d’OCR', false)
             ->assertDontSee('vector DB', false)
             ->assertDontSee('CO_OCCURRENCE', false)
             ->assertDontSee('tag:', false);
@@ -191,5 +193,21 @@ class GhostCortexTest extends TestCase
             ->assertOk()
             ->assertSee('rien n’est déployé', false)
             ->assertDontSee('CO_OCCURRENCE', false);
+    }
+
+    public function test_pack_text_ingests_and_pdf_is_refused(): void
+    {
+        $node = GpNode::query()->where('slug', 'lumen')->firstOrFail();
+        $txt = UploadedFile::fake()->createWithContent('pack-naruto.txt', str_repeat('Naruto Uzumaki. Village de Konoha. ', 30));
+        $ok = GhostChunk::fromUpload($node, $txt);
+        $this->assertTrue($ok['ok']);
+        $this->assertFalse($ok['applied']);
+        $this->assertGreaterThan(0, count($ok['chunks']));
+
+        $pdf = UploadedFile::fake()->create('scan.pdf', 40, 'application/pdf');
+        $no = GhostChunk::fromUpload($node, $pdf);
+        $this->assertFalse($no['ok']);
+        $this->assertFalse($no['applied']);
+        $this->assertStringContainsString('OCR', $no['reason']);
     }
 }
