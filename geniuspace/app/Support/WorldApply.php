@@ -49,9 +49,10 @@ class WorldApply
 
     public static function enableEntities(GpNode $node, array $ids): void
     {
+        $catalog = FieldTemplates::all();
         foreach ($ids as $id) {
             $meta = ElementCatalog::entities()[$id] ?? null;
-            if (! $meta || empty($meta['template'])) {
+            if (! $meta || empty($meta['template']) || ! isset($catalog[$meta['template']])) {
                 continue;
             }
             FieldTemplates::apply($node->id, $meta['template']);
