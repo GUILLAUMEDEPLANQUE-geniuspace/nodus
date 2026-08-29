@@ -89,4 +89,28 @@ class GhostTest extends TestCase
         $res->assertOk()->assertJsonPath('profile', 'marchand');
         $this->assertStringContainsString('hôte', mb_strtolower($res->json('reply')));
     }
+
+    public function test_public_chat_strips_core_telemetry(): void
+    {
+        $res = $this->postJson('/n/lumen/ghost', ['message' => 'bonjour']);
+        $res->assertOk()
+            ->assertJsonPath('profile', 'marchand')
+            ->assertJsonMissingPath('growth')
+            ->assertJsonMissingPath('belief')
+            ->assertJsonMissingPath('situation')
+            ->assertJsonMissingPath('critic')
+            ->assertJsonMissingPath('simulations')
+            ->assertJsonMissingPath('maturity')
+            ->assertJsonMissingPath('permission');
+        $this->assertNotEmpty($res->json('reply'));
+        $this->assertNotEmpty($res->json('host'));
+        $this->assertSame('lumen', $res->json('lieu.slug'));
+
+        $full = Ghost::reply(
+            \App\Models\GpNode::query()->where('slug', 'lumen')->firstOrFail(),
+            'bonjour'
+        );
+        $this->assertArrayHasKey('growth', $full);
+        $this->assertArrayHasKey('belief', $full);
+    }
 }

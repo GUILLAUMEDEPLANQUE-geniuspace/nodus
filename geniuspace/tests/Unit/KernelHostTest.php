@@ -24,5 +24,16 @@ class KernelHostTest extends TestCase
         $host = file_get_contents(app_path('Support/GhostHost.php'));
         $this->assertStringContainsString('publicSurface', $host);
         $this->assertStringNotContainsString('GhostDream', $host);
+        foreach (['growth', 'belief', 'situation', 'critic', 'simulations'] as $ban) {
+            $this->assertStringNotContainsString("'{$ban}'", $host, $ban);
+        }
+    }
+
+    public function test_public_chat_uses_the_surface(): void
+    {
+        $ctrl = file_get_contents(app_path('Http/Controllers/GhostController.php'));
+        $this->assertStringContainsString('GhostHost::publicSurface', $ctrl);
+        $this->assertStringContainsString('Ghost::reply', $ctrl);
+        $this->assertGreaterThanOrEqual(2, substr_count($ctrl, 'GhostHost::publicSurface'));
     }
 }

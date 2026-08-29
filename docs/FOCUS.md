@@ -12,13 +12,13 @@ Home = cette porte + cinq germes + Vera / Lumen en **témoins**. Pas le produit.
 
 ## Hôte public
 
-`POST /n/{slug}/ghost` renvoie `GhostHost::publicSurface` : reply, citations, actions, profil, mode, plan, mémoire publique.
+`GET|POST /n/{slug}/ghost` renvoie `GhostHost::publicSurface` : reply, citations, actions, profil, mode, skill, plan, mémoire publique, host, lieu.
 
-`Ghost::reply` / `GhostCore::think` restent **entiers** (critic, simulate, lab, tribunal, growth). Staff : `/ghost/lab`, `/gym`, `/cerveau`, `/editor`. Rien n’est éteint.
+`Ghost::reply` / `GhostCore::think` restent **entiers** (critic, simulate, lab, tribunal, growth, belief). Staff : `/ghost/lab`, `/gym`, `/cerveau`, `/editor`, `/maturity`. Rien n’est éteint.
 
 ## Interdit de casser
 
 - Aucun flagship retiré
 - Aucune classe Ghost* effacée
-- Engine ↛ Ghost / Grantor / Chrome
+- Engine ⇏ Ghost / Grantor / Chrome
 - I-NO-ACT, rideau, plancher, tribunal factuel
