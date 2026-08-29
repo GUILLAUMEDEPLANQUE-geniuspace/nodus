@@ -6,7 +6,7 @@
 <main class="wrap" style="padding:2rem 1.25rem 8rem;max-width:58rem">
   <p class="kicker">Cerveau · {{ $node->title }}</p>
   <h1 class="font-display" style="font-size:clamp(2rem,6vw,3.2rem);line-height:.95">Autonome sur la stratégie. Jamais sur l’autorité.</h1>
-  <p class="lede">Ghost relie ce qu’il a vu, oublie ce qui n’est plus tenu, et se tait s’il n’a pas de preuve. Une consolidation n’écrit rien dans le monde.</p>
+  <p class="lede">Ghost relie ce qu’il a vu, oublie ce qui n’est plus tenu, et se tait s’il n’a pas de preuve. Une consolidation n’écrit rien dans le monde. Un fichier n’entre que s’il est du texte du pack — pas d’OCR, pas de PDF, pas de wiki.</p>
 
   @if($world)
     <section class="card" style="padding:1.1rem 1.3rem;margin:1.2rem 0">
@@ -27,6 +27,13 @@
     <button class="btn" type="submit">Consolider (hors interaction)</button>
   </form>
 
+  <form method="post" action="/n/{{ $node->slug }}/ghost/cerveau/ingest" enctype="multipart/form-data" style="margin:0 0 1.6rem;display:flex;flex-wrap:wrap;gap:.5rem;align-items:center">
+    @csrf
+    <input type="file" name="file" accept=".txt,.md,.csv,.json,.html" required>
+    <button class="btn-line" type="submit">Poser dans le coffre</button>
+    <p class="muted" style="flex-basis:100%">.txt / .md du lieu. Ça nourrit le tribunal. Ça ne crée ni fiche, ni perso, ni page Google.</p>
+  </form>
+
   @if($ask)
     @php $t = $ask['tribunal']; $c = $ask['consistency']; @endphp
     <section class="card" style="padding:1.2rem 1.3rem;margin:1rem 0">
@@ -45,7 +52,7 @@
     <section class="card" style="padding:1.2rem 1.3rem;margin:1rem 0">
       <p class="kicker">Consolidation · rien n’est déployé</p>
       <p>{{ $cycle['indexed'] }} indexations · {{ $cycle['pruned'] }} liens oubliés · {{ count($cycle['dreams']) }} liaisons candidates</p>
-      <p class="muted">Ghost propose des rapprochements. L’autorité reste humaine.</p>
+      <p class="muted">Ghost propose des rapprochements. L’autorité reste humaine. applied = false.</p>
     </section>
   @endif
 
