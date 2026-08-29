@@ -11,7 +11,6 @@ use App\Support\GhostBiz;
 use App\Support\GhostChunk;
 use App\Support\GhostConsistency;
 use App\Support\GhostCore;
-use App\Support\GhostCortex;
 use App\Support\GhostDream;
 use App\Support\GhostEdit;
 use App\Support\GhostGym;
@@ -25,6 +24,7 @@ use App\Support\GhostSynapse;
 use App\Support\GhostTribunal;
 use App\Support\GhostWorldObserver;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -281,10 +281,28 @@ class GhostController extends Controller
         ]);
     }
 
-    public function brainIngest(Request $request, string $slug): JsonResponse
+    public function brainIngest(Request $request, string $slug): JsonResponse|RedirectResponse
     {
         $node = GpNode::query()->where('slug', $slug)->firstOrFail();
         Acl::guard($node->id, 'admin');
+
+        if ($request->hasFile('file')) {
+            $file = $request->validate([
+                'file' => 'required|file|max:400',
+            ])['file'];
+            $done = GhostChunk::fromUpload($node, $file);
+            $sample = $done['chunks'][0]['text'] ?? '';
+            $cons = ($done['ok'] && $sample !== '') ? GhostConsistency::check($node, $sample) : null;
+            $payload = $done + ['consistency' => $cons, 'applied' => false];
+            if ($request->expectsJson()) {
+                return response()->json($payload, $done['ok'] ? 200 : 422);
+            }
+
+            return back()->with('ok', $done['ok']
+                ? count($done['chunks']).' extraits posés dans le coffre. Rien n’est écrit dans le monde.'
+                : $done['reason']);
+        }
+
         $text = $request->validate(['text' => 'required|string|max:8000'])['text'];
         $chunks = GhostChunk::ingest($node, $text, 'note-'.now()->timestamp, 'note');
         $cons = GhostConsistency::check($node, $text);
