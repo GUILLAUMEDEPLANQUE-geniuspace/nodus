@@ -1,6 +1,25 @@
 # Cluster d’entités
 
-1 intention = 1 URL. Kakashi est une intention. Une salle boutique vide n’en est pas une.
+1 intention = 1 URL. Kakashi est une intention. Un bien à Reims aussi. Une salle boutique vide n’en est pas une.
+
+## Catalogue
+
+`ElementCatalog` n’est pas un hub manga. 24 kinds, 11 familles (Fandom, Jeux, Collection, Emploi, Formation, Commerce, Pays, Business, Création, Finance, Flagship).
+
+Le pack pose des **kinds**. L’URL naît à la publication + `EntityFloor`.
+
+| Famille | Germes | Kinds typiques |
+| --- | --- | --- |
+| Fandom / Atelier | manga-hub, atelier-anime | personnage, organisation, lieu, jutsu, arc |
+| Emploi / Maison | vera-tech, maison-rh | offre, personnage, competence |
+| Formation / Labo | bts-com, chef-secteur, labo | cours, competence, playbook |
+| Commerce / Coffre | esoterique, vault | relique, rituel, produit |
+| Business | b2b-sales, cabinet, retail-gms | compte, playbook, livrable |
+| Finance | crypto-onchain, immo-agence, banque-fintech, cabinet-droit | actif, protocole, bien, mandat, dossier, acte, jurisprudence |
+| Collection | club-auto, montres | vehicule, produit |
+| Pays / Territoire | japon, territoire | lieu, evenement |
+
+Partage = `components`. Le lore d’un monde ne voyage pas.
 
 ## Naissance d’une URL
 
