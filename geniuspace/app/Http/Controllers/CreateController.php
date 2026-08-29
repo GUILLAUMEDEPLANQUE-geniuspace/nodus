@@ -6,6 +6,7 @@ use App\Models\GpNode;
 use App\Support\ElementCatalog;
 use App\Support\RoomCatalog;
 use App\Support\WorldGerms;
+use App\Support\WorldGermsFinance;
 use App\Support\WorldTemplates;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -18,8 +19,8 @@ class CreateController extends Controller
 {
     public function form(): View
     {
-        $groups = WorldTemplates::groups();
-        $count = count(WorldTemplates::all());
+        $groups = WorldGermsFinance::groupsWith(WorldTemplates::groups());
+        $count = count(WorldTemplates::all()) + count(WorldGermsFinance::asTemplates());
         $germs = WorldGerms::all();
         $library = [
             'rooms' => RoomCatalog::all(),
@@ -46,7 +47,7 @@ class CreateController extends Controller
             'entities.*' => 'string|max:40',
         ]);
         $tpl = $data['template'] ?? '';
-        $t = $tpl ? WorldTemplates::get($tpl) : null;
+        $t = $tpl ? (WorldTemplates::get($tpl) ?? WorldGermsFinance::template($tpl)) : null;
         $base = Str::slug($data['title']) ?: 'club';
         $slug = $base;
         $n = 2;
@@ -71,8 +72,45 @@ class CreateController extends Controller
             'rooms' => $data['rooms'] ?? null,
             'entities' => $data['entities'] ?? null,
         ];
-        if ($t) {
+        if ($t && WorldTemplates::get($tpl)) {
             WorldTemplates::apply($node, $tpl);
+            \App\Support\WorldApply::shape($node, $opts);
+        } elseif ($t) {
+            WorldTemplates::apply($node, $tpl);
+            $node->template = $tpl;
+            $node->kind = $t['kind'];
+            $node->skin = $t['skin'];
+            $node->hero = $t['hero'];
+            $node->subtitle = $t['pitch'];
+            $node->save();
+            DB::table('node_tabs')->where('node_id', $node->id)->delete();
+            $rooms = $t['rooms'];
+            if (! in_array('carnet', $rooms, true)) {
+                $rooms[] = 'carnet';
+            }
+            foreach ($rooms as $i => $key) {
+                $meta = RoomCatalog::all()[$key] ?? ['label' => $key];
+                DB::table('node_tabs')->insert([
+                    'node_id' => $node->id,
+                    'key' => $key,
+                    'label' => $meta['label'] ?? $key,
+                    'icon' => 'spark',
+                    'sort' => $i,
+                    'color' => $t['primary'] ?? '#334155',
+                    'enabled' => 1,
+                ]);
+            }
+            $pack = match ($tpl) {
+                'crypto-onchain' => 'protocole',
+                'immo-agence' => 'bien',
+                'banque-fintech' => 'actif',
+                'cabinet-droit' => 'dossier',
+                default => null,
+            };
+            if ($pack) {
+                \App\Support\FieldTemplates::apply($node->id, $pack);
+            }
+            \App\Support\Chrome::applyPreset($node, \App\Support\Chrome::presetFromTemplate($tpl) ?? 'living');
             \App\Support\WorldApply::shape($node, $opts);
         } else {
             $tabs = [['vivre', 'Accueil'], ['forum', 'Forum'], ['journal', 'Magazine'], ['personnages', 'Fiches'], ['videos', 'Vidéos']];
