@@ -1,38 +1,63 @@
 @extends('layouts.app')
-@section('title', 'Vera & Lumen — Geniuspace')
-@section('description', 'Deux univers : Vera, des offres d’emploi à salaire publié avec un test métier. Lumen, une galerie où chaque œuvre a une fiche et un making-of.')
+@section('title', 'Nodus — crée un univers. L’hôte n’en sort pas.')
+@section('description', 'Tu crées un univers. Tu poses les lieux et les preuves. Un hôte n’en sort pas. Vera et Lumen sont des mondes déjà habités, pas le produit.')
 @section('canonical', url('/'))
 @section('content')
-<section class="hero" style="min-height:70dvh">
-    <img class="bg" src="/offer/releve-atelier.jpg" alt="Vera">
+<section class="hero" style="min-height:72dvh">
+    <img class="bg" src="/realms/sea-hero.jpg" alt="">
     <div class="veil"></div>
     <div class="copy wrap">
-        <p class="kicker">Geniuspace · deux mondes</p>
-        <h1>L’emploi, lisible.<br>L’œuvre, hologramme.</h1>
-        <p class="muted" style="max-width:36rem">Vera : le salaire est écrit, le délai de réponse est public, on passe un test de 6 min avant le CV. Lumen : chaque œuvre a une fiche, un certificat, une vidéo. Pas une grille d’annonces. Pas une boutique générique.</p>
+        <p class="kicker">Nodus · OS de micro-univers</p>
+        <h1>Tu crées un univers.<br>L’hôte n’en sort pas.</h1>
+        <p class="muted" style="max-width:36rem">Tu poses les lieux et les preuves. Un hôte lit seulement ce coffre — pas le web, pas le spoiler, pas une embauche inventée. Vera et Lumen sont des mondes déjà habillés, pas la porte.</p>
         <div style="margin-top:1.5rem;display:flex;gap:0.6rem;flex-wrap:wrap">
-            <a class="btn" href="/n/vera">Voir les offres Vera</a>
-            <a class="btn-line" href="/n/lumen">Entrer dans Lumen</a>
-            <a class="btn-ghost" href="/create">Créer un univers</a>
+            <a class="btn" href="/create">Créer un univers</a>
+            <a class="btn-line" href="/n/atelier-clamp">Voir un atelier</a>
+            <a class="btn-ghost" href="/explore">Explorer</a>
         </div>
     </div>
 </section>
 <main class="wrap" style="padding:2rem 1.25rem 6rem">
+  <p class="kicker">Cinq germes · le catalogue reste ouvert</p>
+  <div class="grid-3">
+    <a class="card" href="/create">
+      <div class="pad">
+        <p class="kicker">Atelier</p>
+        <h2 class="font-display">Anime / manga</h2>
+        <p class="muted">Rideau d’arc. Le perso est un lieu. Ce que tu n’as pas vu n’existe pas encore.</p>
+      </div>
+    </a>
+    <a class="card" href="/create">
+      <div class="pad">
+        <p class="kicker">Terrain</p>
+        <h2 class="font-display">Jeu vidéo</h2>
+        <p class="muted">Le patch est un curseur. Le build est une épreuve. Le loot est une relique.</p>
+      </div>
+    </a>
+    <a class="card" href="/create">
+      <div class="pad">
+        <p class="kicker">Coffre</p>
+        <h2 class="font-display">Relique</h2>
+        <p class="muted">L’hôte négocie dans le plancher. Le certificat s’ouvre au paiement.</p>
+      </div>
+    </a>
+  </div>
+  <p class="muted" style="margin:2rem 0 1rem">Mondes témoins — déjà habités</p>
   <div class="grid-3">
     <a class="card card-film" href="/n/vera">
       <img src="/offer/releve-atelier.jpg" alt="Vera">
       <div class="pad">
-        <p class="kicker">Offres d’emploi</p>
+        <p class="kicker">Maison</p>
         <h2 class="font-display">Vera</h2>
-        <p class="muted">35 postes, salaire publié, test métier, fiches, Europe. Indeed vend du volume. Ici on lit le poste.</p>
+        <p class="muted">Salaire écrit, délai public, test de 6 min. Un monde RH, pas la home.</p>
       </div>
     </a>
     <a class="card card-film" href="/n/lumen">
       <img src="/realms/actor-hero.jpg" alt="Lumen">
       <div class="pad">
-        <p class="kicker">Galerie</p>
+        <p class="kicker">Coffre</p>
         <h2 class="font-display">Lumen</h2>
-        <p class="muted">Œuvres, certificat, making-of, partage du prix entre auteurs.</p>
+        <p class="muted">Œuvre, certificat, making-of. Même moteur, autre peau.</p>
       </div>
     </a>
   </div>
