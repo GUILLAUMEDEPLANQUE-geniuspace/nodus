@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\GpNode;
+use App\Support\WorldGerms;
 use App\Support\WorldTemplates;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -17,7 +18,9 @@ class CreateController extends Controller
     {
         $groups = WorldTemplates::groups();
         $count = count(WorldTemplates::all());
-        return view('create', compact('groups', 'count'));
+        $germs = WorldGerms::all();
+
+        return view('create', compact('groups', 'count', 'germs'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -64,6 +67,7 @@ class CreateController extends Controller
         if (Auth::id()) {
             DB::table('node_staff')->insert(['node_id' => $id, 'user_id' => Auth::id(), 'role' => 'owner']);
         }
-        return redirect('/n/'.$slug.'/monde')->with('ok', $t ? ('Template « '.$t['label'].' » posé. Habillage ouvert.') : 'Le lieu est né. Habillage ouvert.');
+
+        return redirect('/n/'.$slug.'/monde')->with('ok', $t ? ('Template « '.$t['label'].' » posé. Habillage ouvert. L’hôte lira seulement ce coffre.') : 'Le lieu est né. Habillage ouvert.');
     }
 }
