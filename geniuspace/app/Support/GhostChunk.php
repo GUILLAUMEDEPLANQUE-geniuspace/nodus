@@ -3,17 +3,25 @@
 namespace App\Support;
 
 use App\Models\GpNode;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 
 /**
- * Preuves découpées. 600 / 150. ID stable. Pas d’OCR, pas de PDF.
+ * Preuves découpées. 600 / 150. ID stable.
+ * Texte du pack seulement. Pas d’OCR, pas de PDF, pas de crawl.
  */
 class GhostChunk
 {
     public const SIZE = 600;
 
     public const OVERLAP = 150;
+
+    public const MAX_BYTES = 400000;
+
+    /** @var list<string> */
+    public const ALLOWED_EXT = ['txt', 'md', 'csv', 'json', 'html', 'htm'];
 
     /**
      * @return list<array{id:string, text:string, asset_id:string}>
@@ -73,5 +81,60 @@ class GhostChunk
         }
 
         return $chunks;
+    }
+
+    /**
+     * Fichier du pack. Refuse image / PDF (pas d’OCR). N’écrit pas Engine / grant.
+     *
+     * @return array{ok:bool, reason:string, chunks:list<array>, applied:false, asset_id?:string}
+     */
+    public static function fromUpload(GpNode $node, UploadedFile $file): array
+    {
+        $ext = strtolower($file->getClientOriginalExtension() ?: '');
+        $mime = strtolower((string) $file->getMimeType());
+        $blocked = str_contains($mime, 'pdf')
+            || str_starts_with($mime, 'image/')
+            || in_array($ext, ['pdf', 'png', 'jpg', 'jpeg', 'webp', 'gif', 'doc', 'docx'], true);
+        if ($blocked || ! in_array($ext, self::ALLOWED_EXT, true)) {
+            return [
+                'ok' => false,
+                'reason' => 'Pas d’OCR, pas de PDF. Dépose un .txt ou .md du pack de ce lieu.',
+                'chunks' => [],
+                'applied' => false,
+            ];
+        }
+        if ($file->getSize() > self::MAX_BYTES) {
+            return [
+                'ok' => false,
+                'reason' => 'Fichier trop lourd pour un extrait de coffre.',
+                'chunks' => [],
+                'applied' => false,
+            ];
+        }
+        $path = $file->getRealPath();
+        $raw = $path ? (string) file_get_contents($path) : '';
+        if ($raw !== '' && ! mb_check_encoding($raw, 'UTF-8')) {
+            $raw = (string) mb_convert_encoding($raw, 'UTF-8', 'UTF-8,ISO-8859-1,Windows-1252');
+        }
+        $text = trim(html_entity_decode(strip_tags($raw), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+        if (mb_strlen($text) < 20) {
+            return [
+                'ok' => false,
+                'reason' => 'Pas assez de texte tenu dans ce fichier.',
+                'chunks' => [],
+                'applied' => false,
+            ];
+        }
+        $base = Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) ?: 'pack';
+        $asset = 'pack-'.$base.'-'.substr(sha1($text), 0, 8);
+        $chunks = self::ingest($node, Str::limit($text, 20000, ''), $asset, 'pack');
+
+        return [
+            'ok' => true,
+            'reason' => '',
+            'chunks' => $chunks,
+            'applied' => false,
+            'asset_id' => $asset,
+        ];
     }
 }
