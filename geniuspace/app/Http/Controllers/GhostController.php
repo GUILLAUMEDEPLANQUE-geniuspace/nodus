@@ -15,6 +15,7 @@ use App\Support\GhostCortex;
 use App\Support\GhostDream;
 use App\Support\GhostEdit;
 use App\Support\GhostGym;
+use App\Support\GhostHost;
 use App\Support\GhostLearn;
 use App\Support\GhostManifest;
 use App\Support\GhostMaturity;
@@ -51,9 +52,8 @@ class GhostController extends Controller
             'editor_context' => $data['editor_context'] ?? [],
         ]);
         $out['citations'] = Ghost::publicCitations($out['citations'] ?? [], $node);
-        $out['lieu'] = ['titre' => $node->title, 'slug' => $node->slug];
 
-        return response()->json($out);
+        return response()->json(GhostHost::publicSurface($out, $node));
     }
 
     public function context(string $slug): JsonResponse
@@ -74,7 +74,7 @@ class GhostController extends Controller
         $out = Ghost::reply($node, 'bonjour');
         $out['citations'] = Ghost::publicCitations($out['citations'] ?? [], $node);
 
-        return response()->json($out);
+        return response()->json(GhostHost::publicSurface($out, $node));
     }
 
     public function gym(string $slug): View
@@ -107,6 +107,7 @@ class GhostController extends Controller
     public function maturity(string $slug): JsonResponse
     {
         $node = GpNode::query()->where('slug', $slug)->firstOrFail();
+        Acl::guard($node->id, 'admin');
 
         return response()->json(GhostMaturity::of($node) + [
             'matrix' => GhostMaturity::matrix($node),

@@ -11,7 +11,8 @@ use App\Models\GpNode;
 class GhostHost
 {
     /**
-     * Payload visiteur. Le Core reste entier dans Ghost::reply().
+     * Payload visiteur. Ghost::reply() / GhostCore::think() restent entiers.
+     * growth, belief, situation, critic, simulations : staff seulement.
      *
      * @param  array<string, mixed>  $out
      * @return array<string, mixed>
@@ -20,7 +21,7 @@ class GhostHost
     {
         $keep = [
             'reply', 'citations', 'tools', 'actions', 'profile', 'mode',
-            'goal', 'skill', 'plan', 'verify', 'memory', 'permission', 'maturity',
+            'skill', 'plan', 'verify', 'memory',
         ];
         $surface = [];
         foreach ($keep as $k) {
@@ -30,6 +31,30 @@ class GhostHost
         }
         $surface['host'] = Ghost::hostName($node);
         $surface['lieu'] = ['titre' => $node->title, 'slug' => $node->slug];
+
+        if (isset($surface['memory']) && is_array($surface['memory'])) {
+            $surface['memory'] = array_values(array_filter(array_map(function ($f) {
+                if (! is_array($f)) {
+                    return null;
+                }
+                $label = trim((string) ($f['label'] ?? ''));
+                if ($label === '') {
+                    return null;
+                }
+
+                return [
+                    'label' => $label,
+                    'value' => (string) ($f['value'] ?? ''),
+                ];
+            }, $surface['memory'])));
+        }
+
+        if (isset($surface['verify']) && is_array($surface['verify'])) {
+            $surface['verify'] = [
+                'valid' => (bool) ($surface['verify']['valid'] ?? true),
+                'status' => (string) ($surface['verify']['status'] ?? 'known'),
+            ];
+        }
 
         return $surface;
     }
