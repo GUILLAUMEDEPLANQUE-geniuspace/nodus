@@ -12,7 +12,7 @@ class FieldTemplates
 {
     public static function all(): array
     {
-        return [
+        $core = [
             'offre-tech' => [
                 'label' => 'Offre tech',
                 'for' => 'job',
@@ -77,6 +77,13 @@ class FieldTemplates
                 ],
             ],
         ];
+
+        return $core + FieldPacks::all();
+    }
+
+    public static function has(string $id): bool
+    {
+        return isset(self::all()[$id]);
     }
 
     public static function get(string $id): array
