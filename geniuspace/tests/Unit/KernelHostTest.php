@@ -28,13 +28,22 @@ class KernelHostTest extends TestCase
             $this->assertStringNotContainsString("'{$ban}'", $host, $ban);
         }
         $this->assertStringContainsString('ghost|studio|builder|monde|radar', $host);
+        $lite = file_get_contents(app_path('Support/GhostLite.php'));
+        $this->assertStringContainsString('GhostTribunal', $lite);
+        $this->assertStringContainsString("'mode' => 'lite'", $lite);
     }
 
     public function test_public_chat_uses_the_surface(): void
     {
-        $ctrl = file_get_contents(app_path('Http/Controllers/GhostController.php'));
+        $ctrl = file_get_contents(app_path('Http/Controllers/GhostLiteController.php'));
+        $this->assertStringContainsString('GhostLite::reply', $ctrl);
         $this->assertStringContainsString('GhostHost::publicSurface', $ctrl);
-        $this->assertStringContainsString('Ghost::reply', $ctrl);
-        $this->assertGreaterThanOrEqual(2, substr_count($ctrl, 'GhostHost::publicSurface'));
+        $this->assertGreaterThanOrEqual(2, substr_count($ctrl, 'GhostLite::reply'));
+        $boot = file_get_contents(base_path('bootstrap/app.php'));
+        $this->assertStringContainsString('routes/public.php', $boot);
+        $pub = file_get_contents(base_path('routes/public.php'));
+        $this->assertStringContainsString('GhostLiteController', $pub);
+        $this->assertStringContainsString('SeoCompiler::sitemapXml', $pub);
+        $this->assertStringContainsString('SeoCompiler::llmsTxt', $pub);
     }
 }
