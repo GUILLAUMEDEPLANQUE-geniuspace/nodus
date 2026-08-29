@@ -31,6 +31,7 @@ class GhostHost
         }
         $surface['host'] = Ghost::hostName($node);
         $surface['lieu'] = ['titre' => $node->title, 'slug' => $node->slug];
+        $home = '/n/'.$node->slug;
 
         if (isset($surface['memory']) && is_array($surface['memory'])) {
             $surface['memory'] = array_values(array_filter(array_map(function ($f) {
@@ -54,6 +55,38 @@ class GhostHost
                 'valid' => (bool) ($surface['verify']['valid'] ?? true),
                 'status' => (string) ($surface['verify']['status'] ?? 'known'),
             ];
+        }
+
+        if (isset($surface['actions']) && is_array($surface['actions'])) {
+            $surface['actions'] = array_values(array_filter(array_map(function ($a) use ($home) {
+                if (! is_array($a)) {
+                    return null;
+                }
+                $label = trim((string) ($a['label'] ?? ''));
+                if ($label === '') {
+                    return null;
+                }
+                $href = (string) ($a['href'] ?? '');
+                if ($href === '' || preg_match('#/(ghost|studio|builder|monde|radar)(/|$)#', $href)) {
+                    $href = $home;
+                }
+
+                return ['label' => $label, 'href' => $href];
+            }, $surface['actions'])));
+        }
+
+        if (isset($surface['plan']) && is_array($surface['plan'])) {
+            $surface['plan'] = array_values(array_filter(array_map(function ($step) {
+                if (is_string($step) && $step !== '') {
+                    return $step;
+                }
+                if (! is_array($step)) {
+                    return null;
+                }
+                $name = (string) ($step['tool'] ?? $step['op'] ?? '');
+
+                return $name !== '' ? $name : null;
+            }, $surface['plan'])));
         }
 
         return $surface;

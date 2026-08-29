@@ -27,6 +27,7 @@ class KernelHostTest extends TestCase
         foreach (['growth', 'belief', 'situation', 'critic', 'simulations'] as $ban) {
             $this->assertStringNotContainsString("'{$ban}'", $host, $ban);
         }
+        $this->assertStringContainsString('ghost|studio|builder|monde|radar', $host);
     }
 
     public function test_public_chat_uses_the_surface(): void
