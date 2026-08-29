@@ -10,11 +10,17 @@ Home = cette porte + cinq germes + Vera / Lumen en **témoins**. Pas le produit.
 
 `/create` ouvre sur les germes (`atelier-anime`, `terrain`, `vault`, `maison-rh`, `manga-hub`). Les 10 flagships et ~50 démarrages restent dans les onglets Tous / Flagship / Fandom / …
 
+Bibliothèque : salles + types de fiches à cocher. Pack = preset. Une fiche Kakashi n’existe que publiée et unique.
+
 ## Hôte public
 
-`GET|POST /n/{slug}/ghost` renvoie `GhostHost::publicSurface` : reply, citations, actions, profil, mode, skill, plan, mémoire publique, host, lieu.
+`GET|POST /n/{slug}/ghost` : `GhostLite::reply` + `GhostHost::publicSurface` (branchage Lite à finaliser sur le contrôleur). `Ghost::reply` / `GhostCore::think` restent entiers. Staff : lab, gym, cerveau, editor, maturity.
 
-`Ghost::reply` / `GhostCore::think` restent **entiers** (critic, simulate, lab, tribunal, growth, belief). Staff : `/ghost/lab`, `/gym`, `/cerveau`, `/editor`, `/maturity`. Rien n’est éteint.
+## Cluster SEO
+
+`SeoCompiler` n’émet sitemap / llms.txt / schema que pour le hub + salles avec contenu + fiches qui tiennent `EntityFloor` (copie ≥ 80, Jaccard sœur < 0.72).
+
+Partage inter-mondes = composants (`city-3d`, champs, blocs), jamais le lore.
 
 ## Interdit de casser
 
@@ -22,3 +28,4 @@ Home = cette porte + cinq germes + Vera / Lumen en **témoins**. Pas le produit.
 - Aucune classe Ghost* effacée
 - Engine ⇏ Ghost / Grantor / Chrome
 - I-NO-ACT, rideau, plancher, tribunal factuel
+- GhostDream `applied = false`
