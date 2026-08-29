@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@yield('title', 'Geniuspace')</title>
-    <meta name="description" content="@yield('description', 'Univers interconnectés — offres lisibles, galeries, fiches liées.')">
+    <title>@yield('title', 'Nodus')</title>
+    <meta name="description" content="@yield('description', 'Crée un univers. Pose les lieux et les preuves. Un hôte n’en sort pas.')">
     <meta name="robots" content="@yield('robots', 'index,follow,max-image-preview:large')">
     @isset($node)
       @php $gsc = \Illuminate\Support\Facades\DB::table('node_seo')->where('node_id', $node->id)->value('gsc'); @endphp
@@ -67,13 +67,13 @@
         <input name="q" placeholder="Dans le club…">
       </form>
     @else
-    <a href="/" class="brand">Geniuspace</a>
+    <a href="/" class="brand">Nodus</a>
     <form action="/explore" class="nav" style="flex:1;max-width:20rem">
         <input name="q" placeholder="205 GTI, joint culasse, Luffy…" style="width:100%">
     </form>
     <nav class="nav">
+        <a class="btn" href="/create">Créer</a>
         <a class="btn-ghost" href="/explore">Explorer</a>
-        <a class="btn-ghost" href="/create">Créer</a>
         <a class="btn-ghost" href="/drive">Drive</a>
         <a class="btn-ghost" href="/panier">Panier</a>
         @auth
@@ -96,7 +96,7 @@
   @include('partials.ghost-orb')
 @endisset
 <footer class="wrap muted" style="padding:2rem 1.25rem 6rem;font-size:.8rem">
-  <a href="/n/vera">Vera</a> · <a href="/n/lumen">Lumen</a> · <a href="/create">Créer</a> · <a href="/llms.txt">llms.txt</a>
+  <a href="/create">Créer</a> · <a href="/n/vera">Vera</a> · <a href="/n/lumen">Lumen</a> · <a href="/llms.txt">llms.txt</a>
 </footer>
 </body>
 </html>

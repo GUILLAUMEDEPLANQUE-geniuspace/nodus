@@ -41,6 +41,20 @@
         <p class="muted">L’hôte négocie dans le plancher. Le certificat s’ouvre au paiement.</p>
       </div>
     </a>
+    <a class="card" href="/create">
+      <div class="pad">
+        <p class="kicker">Maison</p>
+        <h2 class="font-display">RH / missions</h2>
+        <p class="muted">Salaire écrit. Délai public. L’épreuve tranche, pas le CV.</p>
+      </div>
+    </a>
+    <a class="card" href="/create">
+      <div class="pad">
+        <p class="kicker">Hub manga</p>
+        <h2 class="font-display">Fandom tenu</h2>
+        <p class="muted">Salles, fiches, passages. L’hôte reste dans le pack du lieu.</p>
+      </div>
+    </a>
   </div>
   <p class="muted" style="margin:2rem 0 1rem">Mondes témoins — déjà habités</p>
   <div class="grid-3">
